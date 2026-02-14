@@ -1,6 +1,6 @@
 %% 模板类文件
 \NeedsTeXFormat{LaTeX2e}[1995/12/01]
-\ProvidesClass{njuthesis.cls}
+\ProvidesClass{njuthesis}
  [2015/7/16 v1.1.18 Document Class for the Degree Papers of Nanjing University]
 \newif\ifnjut@adobefonts\njut@adobefontstrue
 \newif\ifnjut@winfonts\njut@winfontsfalse
@@ -43,7 +43,6 @@
 \RequireXeTeX
 \RequirePackage{lastpage}
 \RequirePackage{geometry}
-\RequirePackage{titlesec}
 \RequirePackage{graphicx}
 \DeclareGraphicsExtensions{.pdf,.eps,.jpg,.png}
 \RequirePackage{caption}
@@ -84,7 +83,7 @@
 \RequirePackage[hyphens]{url}
 \RequirePackage{hyperref}
 \hypersetup{%
-    unicode=false,
+    unicode=true,    % 原来是false，被我修改了
     hyperfootnotes=true,
     hyperindex=true,
     pageanchor=true,
@@ -843,10 +842,12 @@
       & \njutunderline[310pt]{\njut@value@titleb}\\
       \bfseries\makebox[5em][s]{\njut@cap@cover@author}
       & \njutunderline[310pt]{\njut@value@author}\\
+      \bfseries\makebox[5em][s]{\njut@cap@cover@department}
+      & \njutunderline[310pt]{\njut@value@department}\\
       \bfseries\makebox[5em][s]{\njut@cap@cover@major}
       & \njutunderline[310pt]{\njut@value@major}\\
-      \bfseries\makebox[5em][s]{\njut@cap@cover@researchfield}
-      & \njutunderline[310pt]{\njut@value@researchfield}\\
+      % \bfseries\makebox[5em][s]{\njut@cap@cover@researchfield}
+      % & \njutunderline[310pt]{\njut@value@researchfield}\\
       \bfseries\makebox[5em][s]{\njut@cap@cover@supervisor}
       & \njutunderline[310pt]{\njut@value@supervisor}\\
   \end{tabular}
