@@ -124,7 +124,7 @@
     </mxGraphModel>
   </diagram>
   <diagram id="Y-pKrmEtedBr9vJ5BKz_" name="ES架构图">
-    <mxGraphModel dx="1358" dy="866" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="1562" dy="996" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -143,14 +143,14 @@
         <mxCell id="3Ve_65Sho60L0BQGN1Ho-5" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Bulk Indexer" vertex="1">
           <mxGeometry height="40" width="170" x="150" y="805" as="geometry" />
         </mxCell>
-        <mxCell id="3Ve_65Sho60L0BQGN1Ho-6" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontStyle=1;strokeWidth=1;" value="Elasticsearch Cluster" vertex="1">
-          <mxGeometry height="630" width="820" x="465" y="620" as="geometry" />
+        <mxCell id="3Ve_65Sho60L0BQGN1Ho-6" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontStyle=1;strokeWidth=1;" value="Elasticsearch Cluster" vertex="1">
+          <mxGeometry height="940" width="885" x="433.5" y="620" as="geometry" />
         </mxCell>
         <mxCell id="3Ve_65Sho60L0BQGN1Ho-7" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontStyle=1;strokeWidth=1;" value="Coordinating Node&#xa;(Routing, Fan-out, Reduce)" vertex="1">
           <mxGeometry height="90" width="260" x="505" y="670" as="geometry" />
         </mxCell>
         <mxCell id="3Ve_65Sho60L0BQGN1Ho-8" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontStyle=1;strokeWidth=1;verticalAlign=top;" value="Master-eligible Nodes&#xa;(Cluster State, Shard Allocation)" vertex="1">
-          <mxGeometry height="120" width="450" x="795" y="650" as="geometry" />
+          <mxGeometry height="120" width="485" x="810" y="650" as="geometry" />
         </mxCell>
         <mxCell id="3Ve_65Sho60L0BQGN1Ho-9" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Master #1" vertex="1">
           <mxGeometry height="45" width="130" x="820" y="695" as="geometry" />
@@ -162,7 +162,7 @@
           <mxGeometry height="45" width="130" x="1120" y="695" as="geometry" />
         </mxCell>
         <mxCell id="3Ve_65Sho60L0BQGN1Ho-12" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontStyle=1;strokeWidth=1;" value="Ingest / Pipeline Nodes&#xa;(Parse, Enrich, Normalize)" vertex="1">
-          <mxGeometry height="90" width="260" x="505" y="790" as="geometry" />
+          <mxGeometry height="90" width="260" x="510" y="780" as="geometry" />
         </mxCell>
         <mxCell id="3Ve_65Sho60L0BQGN1Ho-13" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontStyle=1;strokeWidth=1;" value="Data Nodes&#xa;(Store Shards, Execute Query)" vertex="1">
           <mxGeometry height="300" width="740" x="505" y="900" as="geometry" />
@@ -195,10 +195,10 @@
           <mxGeometry height="55" width="170" x="1030" y="1065" as="geometry" />
         </mxCell>
         <mxCell id="3Ve_65Sho60L0BQGN1Ho-23" parent="1" style="shape=note;whiteSpace=wrap;html=1;size=18;" value="Query Flow: Client → Coordinating → Fan-out to Shards → Reduce/Aggregate → Response" vertex="1">
-          <mxGeometry height="55" width="740" x="505" y="1210" as="geometry" />
+          <mxGeometry height="55" width="740" x="495" y="1440" as="geometry" />
         </mxCell>
         <mxCell id="3Ve_65Sho60L0BQGN1Ho-24" parent="1" style="shape=note;whiteSpace=wrap;html=1;size=18;" value="Write Flow: Client → (Ingest Pipeline) → Primary Shard → Replicas" vertex="1">
-          <mxGeometry height="55" width="740" x="505" y="1145" as="geometry" />
+          <mxGeometry height="55" width="740" x="495" y="1350" as="geometry" />
         </mxCell>
         <mxCell id="3Ve_65Sho60L0BQGN1Ho-25" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;strokeWidth=1;exitX=1.011;exitY=0.283;exitDx=0;exitDy=0;exitPerimeter=0;" value="HTTP / REST / Transport">
           <mxGeometry relative="1" x="-0.0014" as="geometry">
@@ -233,7 +233,7 @@
         </mxCell>
         <mxCell id="3Ve_65Sho60L0BQGN1Ho-30" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;strokeWidth=1;" value="Index / Bulk">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="425" y="810" as="sourcePoint" />
+            <mxPoint x="350" y="720" as="sourcePoint" />
             <mxPoint x="505" y="835" as="targetPoint" />
           </mxGeometry>
         </mxCell>
@@ -262,91 +262,91 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="3Ve_65Sho60L0BQGN1Ho-35" parent="1" style="text;html=1;align=center;verticalAlign=middle;fontSize=16;fontStyle=1;" value="Elasticsearch (Classic Simplified View)" vertex="1">
-          <mxGeometry height="30" width="900" x="261" y="1420" as="geometry" />
+          <mxGeometry height="30" width="900" x="300" y="1730" as="geometry" />
         </mxCell>
         <mxCell id="3Ve_65Sho60L0BQGN1Ho-36" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontStyle=1;strokeWidth=1;" value="Client&#xa;(Search / Index Requests)" vertex="1">
-          <mxGeometry height="80" width="200" x="201" y="1570" as="geometry" />
+          <mxGeometry height="80" width="200" x="240" y="1880" as="geometry" />
         </mxCell>
         <mxCell id="3Ve_65Sho60L0BQGN1Ho-37" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontStyle=1;strokeWidth=1;" value="Elasticsearch Cluster" vertex="1">
-          <mxGeometry height="560" width="800" x="441" y="1490" as="geometry" />
+          <mxGeometry height="560" width="800" x="480" y="1800" as="geometry" />
         </mxCell>
         <mxCell id="3Ve_65Sho60L0BQGN1Ho-38" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontStyle=1;strokeWidth=1;" value="Node A&#xa;(Master eligible + Data)" vertex="1">
-          <mxGeometry height="210" width="220" x="481" y="1550" as="geometry" />
+          <mxGeometry height="210" width="220" x="520" y="1860" as="geometry" />
         </mxCell>
         <mxCell id="3Ve_65Sho60L0BQGN1Ho-39" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontStyle=1;strokeWidth=1;" value="Node B&#xa;(Master eligible + Data)" vertex="1">
-          <mxGeometry height="210" width="220" x="731" y="1550" as="geometry" />
+          <mxGeometry height="210" width="220" x="770" y="1860" as="geometry" />
         </mxCell>
         <mxCell id="3Ve_65Sho60L0BQGN1Ho-40" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontStyle=1;strokeWidth=1;" value="Node C&#xa;(Master eligible + Data)" vertex="1">
-          <mxGeometry height="210" width="220" x="981" y="1550" as="geometry" />
+          <mxGeometry height="210" width="220" x="1020" y="1860" as="geometry" />
         </mxCell>
         <mxCell id="3Ve_65Sho60L0BQGN1Ho-41" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Index X&#xa;Primary P0" vertex="1">
-          <mxGeometry height="55" width="170" x="506" y="1610" as="geometry" />
+          <mxGeometry height="55" width="170" x="545" y="1920" as="geometry" />
         </mxCell>
         <mxCell id="3Ve_65Sho60L0BQGN1Ho-42" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Index X&#xa;Replica R1" vertex="1">
-          <mxGeometry height="55" width="170" x="506" y="1680" as="geometry" />
+          <mxGeometry height="55" width="170" x="545" y="1990" as="geometry" />
         </mxCell>
         <mxCell id="3Ve_65Sho60L0BQGN1Ho-43" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Index X&#xa;Primary P1" vertex="1">
-          <mxGeometry height="55" width="170" x="756" y="1610" as="geometry" />
+          <mxGeometry height="55" width="170" x="795" y="1920" as="geometry" />
         </mxCell>
         <mxCell id="3Ve_65Sho60L0BQGN1Ho-44" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Index X&#xa;Replica R0" vertex="1">
-          <mxGeometry height="55" width="170" x="756" y="1680" as="geometry" />
+          <mxGeometry height="55" width="170" x="795" y="1990" as="geometry" />
         </mxCell>
         <mxCell id="3Ve_65Sho60L0BQGN1Ho-45" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Index X&#xa;Primary P2" vertex="1">
-          <mxGeometry height="55" width="170" x="1006" y="1610" as="geometry" />
+          <mxGeometry height="55" width="170" x="1045" y="1920" as="geometry" />
         </mxCell>
         <mxCell id="3Ve_65Sho60L0BQGN1Ho-46" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Index X&#xa;Replica R2" vertex="1">
-          <mxGeometry height="55" width="170" x="1006" y="1680" as="geometry" />
+          <mxGeometry height="55" width="170" x="1045" y="1990" as="geometry" />
         </mxCell>
         <mxCell id="3Ve_65Sho60L0BQGN1Ho-47" parent="1" style="shape=note;whiteSpace=wrap;html=1;size=18;" value="One node is elected as Master&#xa;to manage Cluster State and Shard Allocation." vertex="1">
-          <mxGeometry height="70" width="720" x="481" y="1780" as="geometry" />
+          <mxGeometry height="70" width="720" x="520" y="2090" as="geometry" />
         </mxCell>
         <mxCell id="3Ve_65Sho60L0BQGN1Ho-48" parent="1" style="shape=note;whiteSpace=wrap;html=1;size=18;" value="Search: fan-out to shards → each shard executes query → coordinating node reduces/merges results" vertex="1">
-          <mxGeometry height="60" width="720" x="481" y="1870" as="geometry" />
+          <mxGeometry height="60" width="720" x="520" y="2180" as="geometry" />
         </mxCell>
         <mxCell id="3Ve_65Sho60L0BQGN1Ho-49" parent="1" style="shape=note;whiteSpace=wrap;html=1;size=18;" value="Index: route to Primary shard → replicate to Replica shards (for high availability)" vertex="1">
-          <mxGeometry height="60" width="720" x="481" y="1940" as="geometry" />
+          <mxGeometry height="60" width="720" x="520" y="2250" as="geometry" />
         </mxCell>
         <mxCell id="3Ve_65Sho60L0BQGN1Ho-50" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;strokeWidth=1;" value="REST/HTTP">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="401" y="1610" as="sourcePoint" />
-            <mxPoint x="481" y="1610" as="targetPoint" />
+            <mxPoint x="440" y="1920" as="sourcePoint" />
+            <mxPoint x="520" y="1920" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="3Ve_65Sho60L0BQGN1Ho-51" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;dashed=1;dashPattern=6 3;strokeWidth=1;" value="search fan-out">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="591" y="1585" as="sourcePoint" />
-            <mxPoint x="841" y="1585" as="targetPoint" />
+            <mxPoint x="630" y="1895" as="sourcePoint" />
+            <mxPoint x="880" y="1895" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="3Ve_65Sho60L0BQGN1Ho-52" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;dashed=1;dashPattern=6 3;strokeWidth=1;" value="">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="591" y="1595" as="sourcePoint" />
-            <mxPoint x="1091" y="1595" as="targetPoint" />
+            <mxPoint x="630" y="1905" as="sourcePoint" />
+            <mxPoint x="1130" y="1905" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="3Ve_65Sho60L0BQGN1Ho-53" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;dashed=1;dashPattern=3 3;strokeWidth=1;" value="replicate">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="676" y="1638" as="sourcePoint" />
-            <mxPoint x="756" y="1708" as="targetPoint" />
+            <mxPoint x="715" y="1948" as="sourcePoint" />
+            <mxPoint x="795" y="2018" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="3Ve_65Sho60L0BQGN1Ho-54" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;dashed=1;dashPattern=3 3;strokeWidth=1;" value="replicate">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="926" y="1638" as="sourcePoint" />
-            <mxPoint x="506" y="1708" as="targetPoint" />
+            <mxPoint x="965" y="1948" as="sourcePoint" />
+            <mxPoint x="545" y="2018" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="3Ve_65Sho60L0BQGN1Ho-55" edge="1" parent="1" style="endArrow=block;html=1;rounded=0;dashed=1;dashPattern=3 3;strokeWidth=1;" value="replicate">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="926" y="1708" as="sourcePoint" />
-            <mxPoint x="1006" y="1708" as="targetPoint" />
+            <mxPoint x="965" y="2018" as="sourcePoint" />
+            <mxPoint x="1045" y="2018" as="targetPoint" />
           </mxGeometry>
         </mxCell>
       </root>
     </mxGraphModel>
   </diagram>
   <diagram name="系统架构图" id="qZCs69j2ADP10X2ySxMX">
-    <mxGraphModel dx="1488" dy="949" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="1562" dy="996" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
