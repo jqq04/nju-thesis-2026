@@ -36,4 +36,13 @@
         }
     ],
     "latex-workshop.view.pdf.viewer": "tab"
+    ,
+    "[latex]": {
+        "editor.wordWrap": "on",
+        "editor.wordWrapColumn": 0
+    },
+    "[tex]": {
+        "editor.wordWrap": "on",
+        "editor.wordWrapColumn": 0
+    }
 }
