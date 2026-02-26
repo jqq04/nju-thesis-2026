@@ -958,46 +958,46 @@
       </root>
     </mxGraphModel>
   </diagram>
-  <diagram id="cR-wuHWwp00HnsKyxWYW" name="内容管理示例图">
-    <mxGraphModel dx="1562" dy="996" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+  <diagram id="cViVeEhNCjhVK9l8kVqu" name="内容管理用例图">
+    <mxGraphModel dx="1838" dy="1172" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-        <mxCell id="sn9F91HrwEHeSR6w_rfg-1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;" value="内容管理" vertex="1">
-          <mxGeometry height="850" width="660" x="440" y="455" as="geometry" />
+        <mxCell id="ErldKgArMulId_wdX0j1-2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;" value="内容管理" vertex="1">
+          <mxGeometry height="850" width="660" x="320" y="520" as="geometry" />
         </mxCell>
-        <mxCell id="sn9F91HrwEHeSR6w_rfg-2" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="平台负责人" vertex="1">
-          <mxGeometry height="60" width="30" x="330" y="515" as="geometry" />
+        <mxCell id="ErldKgArMulId_wdX0j1-3" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="平台负责人" vertex="1">
+          <mxGeometry height="60" width="30" x="210" y="580" as="geometry" />
         </mxCell>
-        <mxCell id="sn9F91HrwEHeSR6w_rfg-3" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="业务负责人" vertex="1">
-          <mxGeometry height="60" width="30" x="330" y="615" as="geometry" />
+        <mxCell id="ErldKgArMulId_wdX0j1-4" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="业务负责人" vertex="1">
+          <mxGeometry height="60" width="30" x="210" y="680" as="geometry" />
         </mxCell>
-        <mxCell id="sn9F91HrwEHeSR6w_rfg-4" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="业务运营" vertex="1">
-          <mxGeometry height="60" width="30" x="330" y="725" as="geometry" />
+        <mxCell id="ErldKgArMulId_wdX0j1-5" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="业务运营" vertex="1">
+          <mxGeometry height="60" width="30" x="210" y="790" as="geometry" />
         </mxCell>
-        <mxCell id="sn9F91HrwEHeSR6w_rfg-5" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="空间与应用管理" vertex="1">
-          <mxGeometry height="80" width="120" x="500" y="480" as="geometry" />
+        <mxCell id="ErldKgArMulId_wdX0j1-9" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="空间与应用管理" vertex="1">
+          <mxGeometry height="80" width="120" x="380" y="545" as="geometry" />
         </mxCell>
-        <mxCell id="sn9F91HrwEHeSR6w_rfg-6" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="多形态内容管理" vertex="1">
-          <mxGeometry height="80" width="120" x="500" y="595" as="geometry" />
+        <mxCell id="ErldKgArMulId_wdX0j1-10" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="多形态内容管理" vertex="1">
+          <mxGeometry height="80" width="120" x="380" y="660" as="geometry" />
         </mxCell>
-        <mxCell id="sn9F91HrwEHeSR6w_rfg-7" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="权限管理" vertex="1">
-          <mxGeometry height="80" width="120" x="500" y="715" as="geometry" />
+        <mxCell id="ErldKgArMulId_wdX0j1-11" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="权限管理" vertex="1">
+          <mxGeometry height="80" width="120" x="380" y="780" as="geometry" />
         </mxCell>
-        <mxCell id="sn9F91HrwEHeSR6w_rfg-8" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="其他" vertex="1">
-          <mxGeometry height="80" width="120" x="500" y="835" as="geometry" />
+        <mxCell id="ErldKgArMulId_wdX0j1-12" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="其他" vertex="1">
+          <mxGeometry height="80" width="120" x="380" y="900" as="geometry" />
         </mxCell>
-        <mxCell id="sn9F91HrwEHeSR6w_rfg-9" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="创建空间" vertex="1">
-          <mxGeometry height="80" width="120" x="820" y="400" as="geometry" />
+        <mxCell id="ErldKgArMulId_wdX0j1-13" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="创建空间" vertex="1">
+          <mxGeometry height="80" width="120" x="700" y="465" as="geometry" />
         </mxCell>
-        <mxCell id="sn9F91HrwEHeSR6w_rfg-10" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="创建应用" vertex="1">
-          <mxGeometry height="80" width="120" x="820" y="495" as="geometry" />
+        <mxCell id="ErldKgArMulId_wdX0j1-14" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="创建应用" vertex="1">
+          <mxGeometry height="80" width="120" x="700" y="560" as="geometry" />
         </mxCell>
-        <mxCell id="sn9F91HrwEHeSR6w_rfg-11" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="创建内容" vertex="1">
-          <mxGeometry height="80" width="120" x="820" y="595" as="geometry" />
+        <mxCell id="ErldKgArMulId_wdX0j1-15" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="创建内容" vertex="1">
+          <mxGeometry height="80" width="120" x="700" y="660" as="geometry" />
         </mxCell>
-        <mxCell id="sn9F91HrwEHeSR6w_rfg-12" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="编辑内容" vertex="1">
-          <mxGeometry height="80" width="120" x="720" y="685" as="geometry" />
+        <mxCell id="ErldKgArMulId_wdX0j1-16" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="编辑内容" vertex="1">
+          <mxGeometry height="80" width="120" x="600" y="750" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
