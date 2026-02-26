@@ -22,13 +22,13 @@
 
 \subsection{用户角色}
 
-本平台的用户角色如表 3-1 所示，主要分为四种，分别是：平台负责人、业务负责人、业务运营和客户。平台负责人负责整个平台层面的配置与运维管理；业务负责人负责某一业务空间下内容体系的整体管理与维护；业务运营是平台内容生产和日常运营的主要执行角色；客户主要作为内容的消费方，通过页面或智能服务获取平台提供的内容支持。
+本平台的用户角色如表\ref{tab:user_role}所示，主要分为四种，分别是：平台负责人、业务负责人、业务运营和客户。平台负责人负责整个平台层面的配置与运维管理；业务负责人负责某一业务空间下内容体系的整体管理与维护；业务运营是平台内容生产和日常运营的主要执行角色；客户主要作为内容的消费方，通过页面或智能服务获取平台提供的内容支持。
 
 \begin{table}[htbp]
   \centering
   \caption{用户角色表}
   \label{tab:user_role}
-  \begin{tabular}{|c|p{10cm}|}
+  \begin{tabular}{c|p{10cm}}
     \hline
     用户角色 & 描述 \\ \hline
     平台负责人 & 平台的最高管理角色，负责整个平台的基础配置、空间管理及全局权限控制，保障平台稳定运行。 \\ \hline
@@ -37,6 +37,8 @@
     客户 & 平台内容的消费角色，包括广告主、代理商等，通过页面浏览、搜索或智能助手等方式使用平台内容。 \\ \hline
   \end{tabular}
 \end{table}
+
+除上述用户角色外，平台还需要与上游智能应用（如AI助手）进行接口对接。该类调用方通常以系统身份访问平台的内容检索与问答能力，其行为数据将被纳入会话分析与效果评估范围。
 
 
 \subsection{内容管理功能需求}
@@ -51,13 +53,13 @@
 
 内容管理模块的功能需求可进一步拆分为多个相互衔接的功能块，以覆盖内容从组织边界建立、内容生产维护到权限约束与发布上线的全链路。各功能块共同构成内容资产的可管、可控与可追溯能力。为保证论述结构清晰，本节按照功能块依次给出需求说明，并为每一类子需求列举 1--3 个代表性用例。
 
-（1）空间与应用管理。平台需要支持以空间为单位建立业务隔离与治理边界。空间用于承载内容资产的业务归属、成员范围与默认权限策略，并支持空间的创建、编辑以及基础配置维护。为适配不同消费场景，平台需在空间内支持应用配置：应用定义内容对外呈现的组织方式与可用能力，包括可用内容形态、类目树与标签体系、检索范围与排序规则等。空间与应用管理功能主要包含创建空间、创建应用与应用配置等用例。其中，创建空间与创建应用用例描述分别如表\ref{tab:cm_create_space}与表\ref{tab:cm_create_app}所示。
+（1）空间与应用管理。平台需要支持以空间为单位建立业务隔离与治理边界。空间用于承载内容资产的业务归属、成员范围与默认权限策略，并支持空间的创建、编辑以及基础配置维护。为适配不同消费场景，平台需在空间内支持应用配置：应用定义内容对外呈现的组织方式与可用能力，包括可用内容形态、类目树与标签体系、检索范围与排序规则等。空间与应用管理功能主要包含创建空间与创建应用等用例。其中，创建空间与创建应用用例描述分别如表\ref{tab:cm_create_space}与表\ref{tab:cm_create_app}所示。
 
 \begin{table}[H]
   \centering
   \caption{创建空间用例描述表}
   \label{tab:cm_create_space}
-  \begin{tabular}{|c|p{10cm}|}
+  \begin{tabular}{c|p{10cm}}
     \hline
     ID & CM-05 \\ \hline
     用例名称 & 创建空间 \\ \hline
@@ -75,7 +77,7 @@
   \centering
   \caption{创建应用用例描述表}
   \label{tab:cm_create_app}
-  \begin{tabular}{|c|p{10cm}|}
+  \begin{tabular}{c|p{10cm}}
     \hline
     ID & CM-06 \\ \hline
     用例名称 & 创建应用 \\ \hline
@@ -95,12 +97,12 @@
   \centering
   \caption{创建内容用例描述表}
   \label{tab:cm_create_content}
-  \begin{tabular}{|c|p{10cm}|}
+  \begin{tabular}{c|p{10cm}}
     \hline
     ID & CM-01 \\ \hline
     用例名称 & 创建内容 \\ \hline
     参与者 & 业务运营 \\ \hline
-    用例描述 & 在指定空间与应用下创建新的内容实体，支持文章、问答、课程、案例等多种形态，并生成初始草稿版本。 \\ \hline
+    用例描述 & 在指定空间与应用下创建新的内容实体，支持knowledge、faq、course、case等多种形态，并生成初始草稿版本。 \\ \hline
     触发条件 & 业务需要新增产品说明、规则解读或运营素材等内容资产。 \\ \hline
     前置条件 & 1. 目标空间与应用已创建并处于可用状态。 2. 当前用户拥有该空间下的内容创建权限。 \\ \hline
     后置条件 & 1. 系统生成唯一的内容ID。 2. 内容状态置为“草稿”。 3. 记录创建操作日志。 \\ \hline
@@ -113,7 +115,7 @@
   \centering
   \caption{编辑内容用例描述表}
   \label{tab:cm_edit_content}
-  \begin{tabular}{|c|p{10cm}|}
+  \begin{tabular}{c|p{10cm}}
     \hline
     ID & CM-02 \\ \hline
     用例名称 & 编辑内容 \\ \hline
@@ -131,7 +133,7 @@
   \centering
   \caption{删除内容用例描述表}
   \label{tab:cm_delete_content}
-  \begin{tabular}{|c|p{10cm}|}
+  \begin{tabular}{c|p{10cm}}
     \hline
     ID & CM-03 \\ \hline
     用例名称 & 删除内容 \\ \hline
@@ -141,7 +143,7 @@
     前置条件 & 1. 内容未处于“审批中”状态。 2. 当前用户拥有删除权限。 \\ \hline
     后置条件 & 1. 内容状态置为“已删除”或从数据库移除。 2. 触发相关索引的删除事件。 \\ \hline
     基本流程 & 1. 用户选中一条或多条内容，点击“删除”按钮。 2. 系统弹出二次确认弹窗，提示删除后果。 3. 用户确认删除。 4. 系统执行删除操作，并同步清理关联资源。 \\ \hline
-    替代流程 & 1. 若内容已被其他上线内容引用，系统提示“存在引用关系”，阻止删除或提示解除引用。 \\ \hline
+    替代流程 & 1. 若内容已被其他应用引用，系统提示“存在引用关系”，阻止删除或提示解除引用。 \\ \hline
   \end{tabular}
 \end{table}
 
@@ -151,7 +153,7 @@
   \centering
   \caption{成员角色分配用例描述表}
   \label{tab:cm_assign_role}
-  \begin{tabular}{|c|p{10cm}|}
+  \begin{tabular}{c|p{10cm}}
     \hline
     ID & CM-07 \\ \hline
     用例名称 & 成员角色分配 \\ \hline
@@ -169,7 +171,7 @@
   \centering
   \caption{权限策略配置用例描述表}
   \label{tab:cm_config_permission}
-  \begin{tabular}{|c|p{10cm}|}
+  \begin{tabular}{c|p{10cm}}
     \hline
     ID & CM-08 \\ \hline
     用例名称 & 权限策略配置 \\ \hline
@@ -189,7 +191,7 @@
   \centering
   \caption{提交审核用例描述表}
   \label{tab:cm_submit_review}
-  \begin{tabular}{|c|p{10cm}|}
+  \begin{tabular}{c|p{10cm}}
     \hline
     ID & CM-09 \\ \hline
     用例名称 & 提交审核 \\ \hline
@@ -207,7 +209,7 @@
   \centering
   \caption{内容审批用例描述表}
   \label{tab:cm_approve_content}
-  \begin{tabular}{|c|p{10cm}|}
+  \begin{tabular}{c|p{10cm}}
     \hline
     ID & CM-10 \\ \hline
     用例名称 & 内容审批 \\ \hline
@@ -225,7 +227,7 @@
   \centering
   \caption{内容上下线用例描述表}
   \label{tab:cm_online_offline}
-  \begin{tabular}{|c|p{10cm}|}
+  \begin{tabular}{c|p{10cm}}
     \hline
     ID & CM-04 \\ \hline
     用例名称 & 内容上下线 \\ \hline
@@ -239,13 +241,13 @@
   \end{tabular}
 \end{table}
 
-（5）其他功能。除核心链路外，平台还需提供辅助能力以提升内容组织效率与复用效果，包括类目管理、标签管理以及引用机制等。其他功能主要包含类目管理、标签管理与引用管理等用例，其用例描述分别如表\ref{tab:cm_category_manage}、表\ref{tab:cm_tag_manage}与表\ref{tab:cm_reference_manage}所示。
+（5）其他功能。除核心链路外，平台还需提供辅助能力以提升内容组织效率与复用效果，包括类目管理、标签管理以及应用引用机制等。其他功能主要包含类目管理、标签管理与应用引用内容等用例，其用例描述分别如表\ref{tab:cm_category_manage}、表\ref{tab:cm_tag_manage}与表\ref{tab:cm_reference_manage}所示。
 
 \begin{table}[H]
   \centering
   \caption{类目管理用例描述表}
   \label{tab:cm_category_manage}
-  \begin{tabular}{|c|p{10cm}|}
+  \begin{tabular}{c|p{10cm}}
     \hline
     ID & CM-11 \\ \hline
     用例名称 & 类目管理 \\ \hline
@@ -263,7 +265,7 @@
   \centering
   \caption{标签管理用例描述表}
   \label{tab:cm_tag_manage}
-  \begin{tabular}{|c|p{10cm}|}
+  \begin{tabular}{c|p{10cm}}
     \hline
     ID & CM-12 \\ \hline
     用例名称 & 标签管理 \\ \hline
@@ -279,26 +281,26 @@
 
 \begin{table}[H]
   \centering
-  \caption{引用管理用例描述表}
+  \caption{应用引用内容用例描述表}
   \label{tab:cm_reference_manage}
-  \begin{tabular}{|c|p{10cm}|}
+  \begin{tabular}{c|p{10cm}}
     \hline
     ID & CM-13 \\ \hline
-    用例名称 & 引用管理 \\ \hline
-    参与者 & 业务运营 \\ \hline
-    用例描述 & 在内容中引用其他内容的条目或片段，并记录引用关系以支持复用与影响范围分析。 \\ \hline
-    触发条件 & 需要将权威口径在多内容中复用或在内容间建立关联跳转。 \\ \hline
-    前置条件 & 1. 被引用内容存在且当前用户具备其查看权限。 2. 当前用户具备内容编辑权限。 \\ \hline
-    后置条件 & 1. 系统记录引用关系并更新内容结构化关联信息。 \\ \hline
-    基本流程 & 1. 用户在编辑器中选择引用插入能力。 2. 用户检索并选择目标内容/片段。 3. 系统插入引用并记录引用关系。 4. 用户保存内容，系统完成持久化。 \\ \hline
-    替代流程 & 1. 若被引用内容已下线或权限不足，系统禁止引用并提示原因。 \\ \hline
+    用例名称 & 应用引用内容 \\ \hline
+    参与者 & 业务负责人，业务运营 \\ \hline
+    用例描述 & 在应用维度引用其他应用或其他空间下的已发布内容，使其在本应用中可见与可用，并记录引用关系以支撑复用与影响范围分析。 \\ \hline
+    触发条件 & 需要将权威口径内容在多个应用复用，避免重复维护与口径不一致。 \\ \hline
+    前置条件 & 1. 被引用内容已发布且未下线。 2. 当前用户具备应用配置权限并对被引用内容具备查看权限。 \\ \hline
+    后置条件 & 1. 系统记录应用-内容引用关系并使引用在应用侧生效。 2. 记录引用操作日志以便审计与追溯。 \\ \hline
+    基本流程 & 1. 用户进入应用配置页面选择“内容引用”。 2. 用户选择引用来源（空间/应用）并检索目标内容。 3. 用户确认引用并保存配置。 4. 系统校验权限与内容状态后创建引用关系并返回成功提示。 \\ \hline
+    替代流程 & 1. 若内容未发布或权限不足，系统拒绝引用并提示原因。 \\ \hline
   \end{tabular}
 \end{table}
 
 \subsection{内容应用功能需求}
 内容应用功能的用例图如图\ref{fig:ca_usecase}所示。内容应用模块的主要功能是对内容进行展示、检索与问答，以满足不同场景下的内容消费需求。一方面，平台需要支持面向门户与管理后台的页面化展示与检索能力，帮助用户通过目录导航、列表筛选与关键词搜索快速定位内容；另一方面，平台需要面向智能问答等上游智能应用提供检索增强生成能力，使用户能够以对话方式获取结构化且可追溯的内容依据。
 
-\begin{figure}[htbp]
+\begin{figure}[H]
   \centering
   \fbox{\parbox{0.92\linewidth}{\vspace{18mm}\centering 内容应用用例图占位（待补充）\vspace{18mm}}}
   \caption{内容应用用例图}
@@ -311,17 +313,35 @@
 
 （2）内容搜索。平台需提供关键词搜索与结构化筛选能力，支持对标题、正文、标签与类目等字段的组合查询，并保证检索结果在权限范围内可见。为提升体验，搜索结果需支持高亮、排序与分页等能力。
 
-（3）智能问答。平台需提供面向智能问答场景的内容召回与知识支撑能力，包括问题理解、内容切片、召回与重排、证据组织与引用返回等流程，为上游生成模型提供高相关、可定位的内容依据，以降低幻觉与口径不一致风险。
+（3）智能问答。平台需提供面向智能问答场景的内容支撑能力：当用户以自然语言提问时，系统能够在指定空间与应用范围内检索相关内容并生成回答，同时返回可追溯的引用来源，以保障结果可解释并降低口径不一致风险。
 
 本节选取三个关键用例进行描述。
 
-\begin{table}[htbp]
+\begin{table}[H]
+  \centering
+  \caption{内容展示用例描述表}
+  \label{tab:ca_display}
+  \begin{tabular}{c|p{10cm}}
+    \hline
+    ID & CA-01 \\ \hline
+    用例名称 & 内容展示 \\ \hline
+    参与者 & 客户，业务运营 \\ \hline
+    用例描述 & 用户在内容门户或管理后台按目录导航与列表聚合浏览内容，并查看内容详情。 \\ \hline
+    触发条件 & 用户希望通过类目、标签或列表入口快速定位并阅读内容。 \\ \hline
+    前置条件 & 1. 目标应用存在已发布内容。 2. 用户具备对应空间与应用的访问权限。 \\ \hline
+    后置条件 & 系统展示内容列表与详情，并记录访问行为数据用于后续分析。 \\ \hline
+    基本流程 & 1. 用户进入内容门户或管理后台。 2. 用户通过类目树或标签进入内容列表。 3. 用户点击某一条内容进入详情页查看正文与关联信息。 \\ \hline
+    替代流程 & 1. 若内容无权限访问或已下线，系统提示并返回可访问的替代内容或上级列表。 \\ \hline
+  \end{tabular}
+\end{table}
+
+\begin{table}[H]
   \centering
   \caption{内容检索用例描述表}
   \label{tab:ca_search}
-  \begin{tabular}{|c|p{10cm}|}
+  \begin{tabular}{c|p{10cm}}
     \hline
-    ID & CA-01 \\ \hline
+    ID & CA-02 \\ \hline
     用例名称 & 内容检索 \\ \hline
     参与者 & 客户，业务运营 \\ \hline
     用例描述 & 用户通过关键词与筛选条件检索内容，系统返回权限范围内的相关结果列表。 \\ \hline
@@ -329,33 +349,15 @@
     前置条件 & 1. 目标空间与应用存在已发布内容。 2. 用户具备对应空间与应用的访问权限。 \\ \hline
     后置条件 & 系统返回结果列表并记录检索行为数据用于后续分析。 \\ \hline
     基本流程 & 1. 用户进入内容门户或管理后台的搜索页面。 2. 用户输入关键词并选择筛选条件。 3. 系统执行权限过滤与检索召回。 4. 系统按相关性与业务规则排序并返回结果。 \\ \hline
-    扩展流程 & 1. 若无匹配结果，系统提示并引导用户调整关键词或筛选条件。 \\ \hline
+    替代流程 & 1. 若无匹配结果，系统提示并引导用户调整关键词或筛选条件。 \\ \hline
   \end{tabular}
 \end{table}
 
-\begin{table}[htbp]
-  \centering
-  \caption{内容召回用例描述表}
-  \label{tab:ca_recall}
-  \begin{tabular}{|c|p{10cm}|}
-    \hline
-    ID & CA-02 \\ \hline
-    用例名称 & 内容召回 \\ \hline
-    参与者 & AI助手 \\ \hline
-    用例描述 & 上游智能应用提交问题与上下文，系统返回可追溯的内容片段集合用于下游生成。 \\ \hline
-    触发条件 & AI助手在对话中需要检索平台内容作为回答依据。 \\ \hline
-    前置条件 & 1. 已建立内容索引（全文索引与向量索引）。 2. 已完成权限校验与空间/应用范围确定。 \\ \hline
-    后置条件 & 系统返回召回片段与对应来源信息，记录召回与重排过程的日志与指标。 \\ \hline
-    基本流程 & 1. AI助手调用召回接口并提交问题与范围参数。 2. 系统对问题进行向量化与检索策略选择。 3. 系统执行多通道召回并进行重排。 4. 系统返回片段列表与来源定位信息。 \\ \hline
-    扩展流程 & 1. 若召回置信度不足，系统返回低置信信号以引导上游降级策略（如转人工或返回检索结果）。 \\ \hline
-  \end{tabular}
-\end{table}
-
-\begin{table}[htbp]
+\begin{table}[H]
   \centering
   \caption{生成式问答用例描述表}
   \label{tab:ca_qa}
-  \begin{tabular}{|c|p{10cm}|}
+  \begin{tabular}{c|p{10cm}}
     \hline
     ID & CA-03 \\ \hline
     用例名称 & 生成式问答 \\ \hline
@@ -365,14 +367,14 @@
     前置条件 & 1. 用户具备问答入口的访问权限。 2. 系统可获取足够的召回证据或具备降级策略。 \\ \hline
     后置条件 & 系统返回回答与引用，并记录会话明细与反馈信息用于评估。 \\ \hline
     基本流程 & 1. 用户在AI助手中输入问题。 2. 系统完成内容召回与证据组织。 3. 生成模型基于证据生成回答。 4. 系统返回回答与引用来源。 \\ \hline
-    扩展流程 & 1. 若问题不在知识覆盖范围内，系统提示并引导用户转人工或查看相关内容列表。 \\ \hline
+    替代流程 & 1. 若问题不在知识覆盖范围内，系统提示并引导用户转人工或查看相关内容列表。 \\ \hline
   \end{tabular}
 \end{table}
 
 \subsection{内容治理功能需求}
 内容治理功能的用例图如图\ref{fig:cg_usecase}所示。随着内容规模扩大与消费频率提升，重复冗余、表述冲突与覆盖不足等质量问题会直接影响内容检索与智能问答效果。内容治理模块的主要功能是对内容质量进行指标化检测，并以任务形式推动治理闭环，保证内容体系在持续演进过程中的可维护性与可控性。
 
-\begin{figure}[htbp]
+\begin{figure}[H]
   \centering
   \fbox{\parbox{0.92\linewidth}{\vspace{18mm}\centering 内容治理用例图占位（待补充）\vspace{18mm}}}
   \caption{内容治理用例图}
@@ -389,29 +391,29 @@
 
 本节选取三个关键用例进行描述。
 
-\begin{table}[htbp]
+\begin{table}[H]
   \centering
-  \caption{重复度检测用例描述表}
+  \caption{质量检测用例描述表}
   \label{tab:cg_dup_detect}
-  \begin{tabular}{|c|p{10cm}|}
+  \begin{tabular}{c|p{10cm}}
     \hline
     ID & CG-01 \\ \hline
-    用例名称 & 重复度检测 \\ \hline
+    用例名称 & 质量检测 \\ \hline
     参与者 & 平台负责人 \\ \hline
-    用例描述 & 系统对指定范围内的内容进行重复度分析，输出候选重复内容集合与合并建议。 \\ \hline
-    触发条件 & 需要对内容体系的重复冗余情况进行阶段性治理或例行巡检。 \\ \hline
-    前置条件 & 1. 已建立向量索引或相似度检索能力。 2. 指定空间与应用范围可用。 \\ \hline
+    用例描述 & 系统对指定范围内内容执行重复度、歧义度或覆盖度检测，输出可定位的问题集合与治理建议。 \\ \hline
+    触发条件 & 需要对内容体系的质量问题进行阶段性治理或例行巡检。 \\ \hline
+    前置条件 & 1. 指定空间与应用范围可用。 2. 已具备相似度计算、冲突判定或缺口识别能力。 \\ \hline
     后置条件 & 系统生成检测结果并可转化为治理任务。 \\ \hline
-    基本流程 & 1. 用户在治理模块选择检测范围与检测类型。 2. 系统执行相似度计算并聚类候选重复内容。 3. 系统输出重复组与建议处理方式。 \\ \hline
-    扩展流程 & 1. 若检测范围过大导致资源不足，系统支持分批检测并输出进度。 \\ \hline
+    基本流程 & 1. 用户在治理模块选择检测范围与检测类型。 2. 系统执行对应检测并生成问题定位与影响范围。 3. 系统输出问题集合与建议处理方式。 \\ \hline
+    替代流程 & 1. 若检测范围过大导致资源不足，系统支持分批检测并输出进度。 \\ \hline
   \end{tabular}
 \end{table}
 
-\begin{table}[htbp]
+\begin{table}[H]
   \centering
   \caption{治理任务创建用例描述表}
   \label{tab:cg_task_create}
-  \begin{tabular}{|c|p{10cm}|}
+  \begin{tabular}{c|p{10cm}}
     \hline
     ID & CG-02 \\ \hline
     用例名称 & 治理任务创建 \\ \hline
@@ -421,15 +423,15 @@
     前置条件 & 已产生可定位的质量问题集合。 \\ \hline
     后置条件 & 1. 系统创建治理任务并进入待处理状态。 2. 系统通知责任人并记录任务审计信息。 \\ \hline
     基本流程 & 1. 用户在检测结果中选择问题条目并点击创建任务。 2. 用户设置任务类型、优先级与责任人。 3. 系统创建任务并生成问题定位与建议处理内容。 \\ \hline
-    扩展流程 & 1. 若同一问题已存在未完成任务，系统提示合并或追加处理。 \\ \hline
+    替代流程 & 1. 若同一问题已存在未完成任务，系统提示合并或追加处理。 \\ \hline
   \end{tabular}
 \end{table}
 
-\begin{table}[htbp]
+\begin{table}[H]
   \centering
   \caption{治理任务处理用例描述表}
   \label{tab:cg_task_handle}
-  \begin{tabular}{|c|p{10cm}|}
+  \begin{tabular}{c|p{10cm}}
     \hline
     ID & CG-03 \\ \hline
     用例名称 & 治理任务处理 \\ \hline
@@ -439,7 +441,7 @@
     前置条件 & 1. 责任人具备对应内容的编辑权限。 2. 任务处于可处理状态。 \\ \hline
     后置条件 & 1. 内容变更进入相应发布流程。 2. 任务状态更新并记录处理结果。 \\ \hline
     基本流程 & 1. 责任人打开治理任务查看问题定位与建议。 2. 责任人跳转至对应内容进行修订或合并。 3. 责任人提交任务处理说明并完成。 4. 系统更新任务状态并触发后续校验或复检。 \\ \hline
-    扩展流程 & 1. 若处理涉及多内容协同，系统支持拆分子任务并分别跟踪。 \\ \hline
+    替代流程 & 1. 若处理涉及多内容协同，系统支持拆分子任务并分别跟踪。 \\ \hline
   \end{tabular}
 \end{table}
 
@@ -447,26 +449,20 @@
 \subsection{数据洞察功能需求}
 数据洞察功能的用例图如图\ref{fig:di_usecase}所示。数据洞察模块的主要功能是对内容使用效果与治理成效进行量化评估，支撑运营决策与平台迭代。该模块通过对页面访问、检索与问答链路、用户会话等数据进行采集与分析，输出面向运营与治理的指标体系，使平台能够形成“应用驱动生产、数据反哺治理”的闭环。
 
-\begin{figure}[htbp]
+\begin{figure}[H]
   \centering
   \fbox{\parbox{0.92\linewidth}{\vspace{18mm}\centering 数据洞察用例图占位（待补充）\vspace{18mm}}}
   \caption{数据洞察用例图}
   \label{fig:di_usecase}
 \end{figure}
 
-数据洞察模块的关键用例包括：页面数据采集、会话采集、会话分析与指标展示、治理成效统计等。
+数据洞察模块的关键用例包括会话分析、内容效果评估与治理成效统计等。平台通过对页面访问、检索与问答链路日志进行采集与聚合，支撑运营人员从会话、内容与治理三个视角对平台效果进行量化评估，并为内容生产与治理策略调整提供依据。
 
-（1）页面数据采集。统计内容在页面场景下的曝光、点击、停留、跳出等行为，用于评估内容可发现性与可读性。
-
-（2）会话采集与分析。记录用户在检索与问答链路中的交互轨迹，沉淀一次会话的输入输出、召回证据、引用内容与反馈信息，支持从会话视角分析命中情况、转人工情况与用户满意度信号。
-
-（3）治理成效统计。将治理任务的完成情况与内容质量指标变化关联起来，评估治理策略的有效性，并为后续治理规则调整提供依据。
-
-\begin{table}[htbp]
+\begin{table}[H]
   \centering
   \caption{查看会话分析用例描述表}
   \label{tab:di_session_analysis}
-  \begin{tabular}{|c|p{10cm}|}
+  \begin{tabular}{c|p{10cm}}
     \hline
     ID & DI-01 \\ \hline
     用例名称 & 查看会话分析 \\ \hline
@@ -476,15 +472,15 @@
     前置条件 & 已完成数据采集与指标聚合。 \\ \hline
     后置条件 & 无 \\ \hline
     基本流程 & 1. 用户进入数据洞察模块并选择时间范围与业务范围。 2. 系统展示会话指标概览。 3. 用户下钻查看会话明细与证据引用。 \\ \hline
-    扩展流程 & 1. 用户可按问题类型、命中率或转人工率筛选会话集合。 \\ \hline
+    替代流程 & 1. 用户可按问题类型、命中率或转人工率筛选会话集合。 \\ \hline
   \end{tabular}
 \end{table}
 
-\begin{table}[htbp]
+\begin{table}[H]
   \centering
   \caption{查看内容效果用例描述表}
   \label{tab:di_content_effect}
-  \begin{tabular}{|c|p{10cm}|}
+  \begin{tabular}{c|p{10cm}}
     \hline
     ID & DI-02 \\ \hline
     用例名称 & 查看内容效果 \\ \hline
@@ -494,15 +490,15 @@
     前置条件 & 已完成内容维度的日志采集与指标聚合。 \\ \hline
     后置条件 & 无 \\ \hline
     基本流程 & 1. 用户进入数据洞察模块并选择内容范围与时间范围。 2. 系统展示内容效果指标列表。 3. 用户点击某一内容下钻查看来源渠道与明细。 \\ \hline
-    扩展流程 & 1. 用户可按空间、应用、类目与标签等维度过滤内容集合。 \\ \hline
+    替代流程 & 1. 用户可按空间、应用、类目与标签等维度过滤内容集合。 \\ \hline
   \end{tabular}
 \end{table}
 
-\begin{table}[htbp]
+\begin{table}[H]
   \centering
   \caption{查看治理成效用例描述表}
   \label{tab:di_govern_effect}
-  \begin{tabular}{|c|p{10cm}|}
+  \begin{tabular}{c|p{10cm}}
     \hline
     ID & DI-03 \\ \hline
     用例名称 & 查看治理成效 \\ \hline
@@ -512,7 +508,7 @@
     前置条件 & 1. 治理任务已线上化流转并沉淀状态数据。 2. 质量检测结果已指标化存储。 \\ \hline
     后置条件 & 无 \\ \hline
     基本流程 & 1. 用户进入数据洞察模块选择治理分析视图。 2. 系统展示任务完成率、处理周期与问题分布。 3. 用户下钻查看具体问题类型、责任归属与复检结果。 \\ \hline
-    扩展流程 & 1. 用户可按空间、应用或治理类型筛选查看。 \\ \hline
+    替代流程 & 1. 用户可按空间、应用或治理类型筛选查看。 \\ \hline
   \end{tabular}
 \end{table}
 
@@ -710,32 +706,10 @@
 \end{figure}
 
 \section{数据库设计}
-平台的数据存储与检索体系需要同时满足内容管理的结构化写入、内容正文的灵活存储、检索与问答的高效召回，以及数据洞察的离线统计分析等需求。因此平台采用“关系型存储+文档存储+缓存+对象存储+检索索引+离线数仓”的组合方式，并通过消息队列与索引构建服务将内容发布与下游索引更新解耦。
+平台的数据存储与检索体系需要同时满足内容管理的结构化写入、内容正文的灵活存储、检索与问答的高效召回，以及数据洞察的离线统计分析等需求。因此平台采用“关系型存储+文档存储+缓存+对象存储+检索索引+离线数仓”的组合方式，并通过消息队列与索引构建服务将内容发布与下游索引更新解耦。在关系型数据库中，平台主要存储空间、应用、内容元数据、版本、授权策略、审批、索引元信息与治理任务等强一致数据；内容正文与形态扩展字段以引用方式关联文档存储或对象存储；离线洞察指标由数据平台按约定周期产出并供平台查询展示。
 
-在结构化数据方面，平台使用关系型数据库存储空间、应用、权限、审批、类目、标签以及内容元数据等强一致性数据，以保障权限校验与流程状态的正确性。在非结构化数据方面，平台使用文档数据库存储内容正文及形态扩展字段，以提升对多形态内容的适配能力。为提高读链路性能，平台使用缓存存储热点内容与配置数据。附件与图片等大对象通过对象存储管理，并在内容正文中以引用方式关联。检索能力由全文检索引擎与向量索引共同支撑，分别负责关键词检索与语义召回。数据洞察的离线分析依赖离线数据存储与计算体系，以支撑历史趋势与治理成效统计。
-
-\subsection{核心表设计}
-平台在关系型数据库中维护空间、应用、权限、审批、类目与标签等强一致性数据，并以内容元数据表承载内容的统一字段集合。内容正文与形态扩展字段可存储在文档数据库中，并以内容标识与版本标识与元数据关联。为保证查询性能与状态流转的正确性，内容元数据需要对空间、应用、状态、更新时间等字段建立组合索引，并对审批单与治理任务表建立按状态与责任人维度的索引，以支撑待处理列表与审计查询。
-
-\subsection{索引与事件数据}
-索引构建过程需要维护索引元信息与切片数据。切片数据用于向量化与证据定位，可包含片段内容、片段位置、来源内容标识与可见范围等字段。内容发布、治理任务状态变更等关键动作通过消息队列驱动下游处理，并在事件表中记录事件类型、关联对象、时间戳与处理状态，用于支持幂等处理与故障恢复。
-
-\begin{table}[htbp]
-  \centering
-  \caption{核心数据对象说明表}
-  \label{tab:db_core_entities}
-  \begin{tabular}{|c|p{10cm}|}
-    \hline
-    数据对象 & 描述 \\ \hline
-    空间与应用 & 定义业务线边界、消费场景配置与权限边界。 \\ \hline
-    内容与版本 & 存储内容元数据、正文与版本信息，支撑草稿到发布的状态流转。 \\ \hline
-    类目与标签 & 提供内容组织与检索入口，支持导航与聚合。 \\ \hline
-    权限与审批 & 定义角色权限、操作审计与审批流程，保障内容可控发布。 \\ \hline
-    索引与切片 & 存储内容切片与索引元信息，支撑全文检索与向量检索。 \\ \hline
-    治理任务 & 存储治理问题定位、责任归属、处理状态与结果回收信息。 \\ \hline
-    事件与埋点 & 存储内容变更事件与使用日志，支撑索引更新与数据洞察分析。 \\ \hline
-  \end{tabular}
-\end{table}
+\subsection{概念结构设计}
+图\ref{fig:db_er}所示为平台的关键实体关系图。平台以空间与应用作为组织边界，其中空间用于定义业务归属与权限边界，应用用于定义内容消费场景与配置边界。在内容域中，平台以内容作为统一抽象实体，并通过内容类型字段区分四类内容形态（knowledge、faq、course、case），内容的具体版本通过内容版本实体进行管理。为支持跨应用复用，平台将“应用引用内容”抽象为应用-内容引用关系，用于表达某一应用可使用哪些内容。内容可见性与操作权限通过授权策略进行表达，授权策略在内容粒度上绑定主体与动作，以支撑空间/应用隔离下的精细化控制。发布上线依赖审批表记录一次提审的审批状态与审批意见，并在通过后驱动内容状态流转。为支撑RAG检索链路，平台以文档与切片描述索引对象：文档由多个切片组成，内容与文档通过关联表建立对应关系，从而将内容版本稳定映射到可检索证据片段。
 
 \begin{figure}[htbp]
   \centering
@@ -743,6 +717,346 @@
   \caption{数据库E-R图}
   \label{fig:db_er}
 \end{figure}
+
+\subsection{表结构设计}
+本节对平台关键数据表进行说明。平台核心业务表统一采用自增主键id，并在需要进行责任追溯与数据回收的表中保留creator\_id、create\_time、modifier\_id与modify\_time四个字段，以及is\_deleted逻辑删除标识。对于内容正文与富文本等大字段，本系统在关系型数据库中仅保存引用标识（如对象存储键或文档库标识），避免大字段影响事务写入性能。
+
+（1）空间与应用表。空间表用于存储空间的基础信息与负责人信息，应用表用于存储应用的归属空间与基础配置。空间表与应用表结构分别如表\ref{tab:db_space}与表\ref{tab:db_app}所示。
+
+\begin{table}[htbp]
+  \centering
+  \caption{空间表}
+  \label{tab:db_space}
+  \begin{tabular}{c|c|c|p{6.3cm}}
+    \hline
+    字段名 & 字段中文名 & 字段类型 & 说明 \\ \hline
+    id & 主键ID & bigint & 自增主键 \\ \hline
+    name & 空间名称 & varchar(255) & 空间的业务标识名称 \\ \hline
+    owner\_id & 负责人ID & bigint & 空间负责人用户标识 \\ \hline
+    status & 状态 & varchar(50) & ENABLED/DISABLED等 \\ \hline
+    creator\_id & 创建人ID & bigint & \\ \hline
+    create\_time & 创建时间 & datetime & \\ \hline
+    modifier\_id & 更新人ID & bigint & \\ \hline
+    modify\_time & 更新时间 & datetime & \\ \hline
+    is\_deleted & 是否删除 & tinyint & 0未删除，1已删除 \\ \hline
+  \end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+  \centering
+  \caption{应用表}
+  \label{tab:db_app}
+  \begin{tabular}{c|c|c|p{6.3cm}}
+    \hline
+    字段名 & 字段中文名 & 字段类型 & 说明 \\ \hline
+    id & 主键ID & bigint & 自增主键 \\ \hline
+    space\_id & 空间ID & bigint & 外键，关联空间 \\ \hline
+    name & 应用名称 & varchar(255) & 应用的业务标识名称 \\ \hline
+    type & 应用类型 & varchar(50) & 门户/智能助手/开放接口等 \\ \hline
+    status & 状态 & varchar(50) & ENABLED/DISABLED等 \\ \hline
+    creator\_id & 创建人ID & bigint & \\ \hline
+    create\_time & 创建时间 & datetime & \\ \hline
+    modifier\_id & 更新人ID & bigint & \\ \hline
+    modify\_time & 更新时间 & datetime & \\ \hline
+    is\_deleted & 是否删除 & tinyint & 0未删除，1已删除 \\ \hline
+  \end{tabular}
+\end{table}
+
+（2）内容与版本表。内容表用于存储统一内容实体的元数据字段，通过content\_type区分knowledge、faq、course、case四类内容形态；内容版本表用于记录内容的版本链与大字段引用。对于多形态内容的差异字段，平台采用“形态扩展表/详情存储”方式进行承载，其中ext\_json用于保留少量通用扩展字段。内容表与内容版本表结构分别如表\ref{tab:db_content}与表\ref{tab:db_content_version}所示。
+
+\begin{table}[htbp]
+  \centering
+  \caption{内容表}
+  \label{tab:db_content}
+  \begin{tabular}{c|c|c|p{6.3cm}}
+    \hline
+    字段名 & 字段中文名 & 字段类型 & 说明 \\ \hline
+    id & 主键ID & bigint & 自增主键 \\ \hline
+    space\_id & 空间ID & bigint & 外键，关联空间 \\ \hline
+    source\_app\_id & 源应用ID & bigint & 内容归属的应用 \\ \hline
+    content\_type & 内容类型 & varchar(50) & knowledge/faq/course/case \\ \hline
+    title & 标题 & varchar(255) & \\ \hline
+    summary & 摘要 & varchar(1024) & \\ \hline
+    status & 状态 & varchar(50) & DRAFT/PENDING\_REVIEW/PUBLISHED/OFFLINE/DELETED \\ \hline
+    current\_version\_id & 当前版本ID & bigint & 关联内容最新版本 \\ \hline
+    creator\_id & 创建人ID & bigint & \\ \hline
+    create\_time & 创建时间 & datetime & \\ \hline
+    modifier\_id & 更新人ID & bigint & \\ \hline
+    modify\_time & 更新时间 & datetime & \\ \hline
+    is\_deleted & 是否删除 & tinyint & 0未删除，1已删除 \\ \hline
+  \end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+  \centering
+  \caption{内容版本表}
+  \label{tab:db_content_version}
+  \begin{tabular}{c|c|c|p{6.3cm}}
+    \hline
+    字段名 & 字段中文名 & 字段类型 & 说明 \\ \hline
+    id & 主键ID & bigint & 自增主键 \\ \hline
+    content\_id & 内容ID & bigint & 外键，关联内容 \\ \hline
+    version\_no & 版本号 & int(11) & 递增版本号 \\ \hline
+    change\_summary & 变更摘要 & varchar(1024) & 版本变更说明 \\ \hline
+    body\_ref & 正文引用 & varchar(255) & 文档库标识或对象存储键 \\ \hline
+    ext\_json & 扩展字段 & text & 形态扩展字段JSON \\ \hline
+    creator\_id & 创建人ID & bigint & \\ \hline
+    create\_time & 创建时间 & datetime & \\ \hline
+    modifier\_id & 更新人ID & bigint & \\ \hline
+    modify\_time & 更新时间 & datetime & \\ \hline
+    is\_deleted & 是否删除 & tinyint & 0未删除，1已删除 \\ \hline
+  \end{tabular}
+\end{table}
+
+（3）多形态内容扩展表。为体现knowledge、faq、course、case四类内容的差异化字段设计，平台在统一内容表的基础上，为各形态提供扩展表或详情存储。知识（knowledge）、FAQ（faq）与课程（course）的差异字段存储在关系型数据库的形态扩展表中，并与内容表通过content\_id关联；课程由多个课节构成，课节信息通过lesson表进行维护。案例（case）的详情数据存储在MongoDB中，其中除少量基础字段外，其余字段统一存放于JSON详情字段，以适配案例结构的灵活演进。相关表结构如表\ref{tab:db_knowledge_content}至表\ref{tab:db_case_mongo}所示。
+
+\begin{table}[htbp]
+  \centering
+  \caption{知识内容扩展表（knowledge\_content）}
+  \label{tab:db_knowledge_content}
+  \begin{tabular}{c|c|c|p{6.3cm}}
+    \hline
+    字段名 & 字段中文名 & 字段类型 & 说明 \\ \hline
+    id & 主键ID & bigint & 自增主键 \\ \hline
+    content\_id & 内容ID & bigint & 外键，关联内容表 \\ \hline
+    editor\_type & 编辑器类型 & varchar(50) & 富文本/Markdown等 \\ \hline
+    keywords & 关键词 & varchar(255) & 可选，用于运营标注 \\ \hline
+    creator\_id & 创建人ID & bigint & \\ \hline
+    create\_time & 创建时间 & datetime & \\ \hline
+    modifier\_id & 更新人ID & bigint & \\ \hline
+    modify\_time & 更新时间 & datetime & \\ \hline
+    is\_deleted & 是否删除 & tinyint & 0未删除，1已删除 \\ \hline
+  \end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+  \centering
+  \caption{FAQ内容扩展表（faq\_content）}
+  \label{tab:db_faq_content}
+  \begin{tabular}{c|c|c|p{6.3cm}}
+    \hline
+    字段名 & 字段中文名 & 字段类型 & 说明 \\ \hline
+    id & 主键ID & bigint & 自增主键 \\ \hline
+    content\_id & 内容ID & bigint & 外键，关联内容表 \\ \hline
+    question & 标准问题 & varchar(1024) & FAQ标准问法 \\ \hline
+    answer\_ref & 答案引用 & varchar(255) & 答案正文引用标识 \\ \hline
+    creator\_id & 创建人ID & bigint & \\ \hline
+    create\_time & 创建时间 & datetime & \\ \hline
+    modifier\_id & 更新人ID & bigint & \\ \hline
+    modify\_time & 更新时间 & datetime & \\ \hline
+    is\_deleted & 是否删除 & tinyint & 0未删除，1已删除 \\ \hline
+  \end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+  \centering
+  \caption{课程内容扩展表（course\_content）}
+  \label{tab:db_course_content}
+  \begin{tabular}{c|c|c|p{6.3cm}}
+    \hline
+    字段名 & 字段中文名 & 字段类型 & 说明 \\ \hline
+    id & 主键ID & bigint & 自增主键 \\ \hline
+    content\_id & 内容ID & bigint & 外键，关联内容表 \\ \hline
+    cover\_ref & 封面引用 & varchar(255) & 封面图片对象存储键 \\ \hline
+    level & 难度等级 & varchar(50) & 初级/中级/高级等 \\ \hline
+    creator\_id & 创建人ID & bigint & \\ \hline
+    create\_time & 创建时间 & datetime & \\ \hline
+    modifier\_id & 更新人ID & bigint & \\ \hline
+    modify\_time & 更新时间 & datetime & \\ \hline
+    is\_deleted & 是否删除 & tinyint & 0未删除，1已删除 \\ \hline
+  \end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+  \centering
+  \caption{课节表（lesson）}
+  \label{tab:db_lesson}
+  \begin{tabular}{c|c|c|p{6.3cm}}
+    \hline
+    字段名 & 字段中文名 & 字段类型 & 说明 \\ \hline
+    id & 主键ID & bigint & 自增主键 \\ \hline
+    course\_content\_id & 课程扩展ID & bigint & 外键，关联course\_content \\ \hline
+    title & 课节标题 & varchar(255) & \\ \hline
+    lesson\_no & 课节序号 & int(11) & 课程内排序序号 \\ \hline
+    content\_ref & 课节内容引用 & varchar(255) & 课节内容对象存储键或文档引用 \\ \hline
+    creator\_id & 创建人ID & bigint & \\ \hline
+    create\_time & 创建时间 & datetime & \\ \hline
+    modifier\_id & 更新人ID & bigint & \\ \hline
+    modify\_time & 更新时间 & datetime & \\ \hline
+    is\_deleted & 是否删除 & tinyint & 0未删除，1已删除 \\ \hline
+  \end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+  \centering
+  \caption{案例详情集合（MongoDB：case\_detail）}
+  \label{tab:db_case_mongo}
+  \begin{tabular}{c|c|c|p{6.3cm}}
+    \hline
+    字段名 & 字段中文名 & 字段类型 & 说明 \\ \hline
+    \_id & 主键ID & ObjectId & MongoDB自带主键 \\ \hline
+    content\_id & 内容ID & bigint & 关联统一内容表的id \\ \hline
+    title & 标题 & string & 基础字段，便于查询与展示 \\ \hline
+    summary & 摘要 & string & 基础字段，便于列表展示 \\ \hline
+    detail & 详情字段 & json & 案例的其余结构化/非结构化字段 \\ \hline
+    creator\_id & 创建人ID & long & \\ \hline
+    create\_time & 创建时间 & datetime & \\ \hline
+    modifier\_id & 更新人ID & long & \\ \hline
+    modify\_time & 更新时间 & datetime & \\ \hline
+    is\_deleted & 是否删除 & int & 0未删除，1已删除 \\ \hline
+  \end{tabular}
+\end{table}
+
+（4）应用引用与内容权限表。应用引用表用于表达应用可使用哪些内容，以支撑跨应用复用；内容权限表（content\_auth）用于表达内容在可见性与操作权限层面的授权策略。内容权限表以“授权对象+策略+变量+权限码”的方式描述授权，其中mapping\_type与mapping\_id用于标识被授权的资源对象（如内容或应用等），auth\_tactic用于标识采用的策略类型，auth\_variable用于记录策略所需的变量值，auth\_code用于描述操作权限集合（例如r/w/u分别表示读、写、更新权限）。应用引用表与内容权限表结构分别如表\ref{tab:db_app_content_ref}与表\ref{tab:db_content_auth}所示。
+
+\begin{table}[htbp]
+  \centering
+  \caption{应用引用内容表}
+  \label{tab:db_app_content_ref}
+  \begin{tabular}{c|c|c|p{6.3cm}}
+    \hline
+    字段名 & 字段中文名 & 字段类型 & 说明 \\ \hline
+    id & 主键ID & bigint & 自增主键 \\ \hline
+    app\_id & 应用ID & bigint & 外键，关联应用 \\ \hline
+    content\_id & 内容ID & bigint & 外键，关联内容 \\ \hline
+    ref\_type & 引用类型 & varchar(50) & REFERENCE/ALIAS等 \\ \hline
+    creator\_id & 创建人ID & bigint & \\ \hline
+    create\_time & 创建时间 & datetime & \\ \hline
+    modifier\_id & 更新人ID & bigint & \\ \hline
+    modify\_time & 更新时间 & datetime & \\ \hline
+    is\_deleted & 是否删除 & tinyint & 0未删除，1已删除 \\ \hline
+  \end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+  \centering
+  \caption{内容权限表（content\_auth）}
+  \label{tab:db_content_auth}
+  \begin{tabular}{c|c|c|p{6.3cm}}
+    \hline
+    字段名 & 字段中文名 & 字段类型 & 说明 \\ \hline
+    id & 主键ID & bigint & 自增主键 \\ \hline
+    mapping\_type & 授权类型 & tinyint & 被授权对象类型标识 \\ \hline
+    mapping\_id & 类型ID & bigint & 被授权对象的唯一标识 \\ \hline
+    auth\_tactic & 权限策略 & varchar(50) & 策略类型（如员工匹配等） \\ \hline
+    auth\_variable & 权限变量 & varchar(200) & 策略变量值（如员工ID、部门ID等） \\ \hline
+    auth\_code & 操作权限 & varchar(20) & 权限码集合（如r/w/u） \\ \hline
+    creator\_id & 创建人ID & bigint & \\ \hline
+    create\_time & 创建时间 & datetime & \\ \hline
+    modifier\_id & 更新人ID & bigint & \\ \hline
+    modify\_time & 更新时间 & datetime & \\ \hline
+    is\_deleted & 是否删除 & tinyint & 0未删除，1已删除 \\ \hline
+  \end{tabular}
+\end{table}
+
+（5）审批表。审批表用于记录一次内容提审的审批状态、审批意见与审批人信息。为保证审批对象明确，审批表关联目标内容版本ID。审批表结构如表\ref{tab:db_approval}所示。
+
+\begin{table}[htbp]
+  \centering
+  \caption{审批表}
+  \label{tab:db_approval}
+  \begin{tabular}{c|c|c|p{6.3cm}}
+    \hline
+    字段名 & 字段中文名 & 字段类型 & 说明 \\ \hline
+    id & 主键ID & bigint & 自增主键 \\ \hline
+    content\_id & 内容ID & bigint & 外键，关联内容 \\ \hline
+    target\_version\_id & 目标版本ID & bigint & 外键，关联内容版本 \\ \hline
+    submitter\_id & 提交人ID & bigint & 用户标识 \\ \hline
+    reviewer\_id & 审批人ID & bigint & 用户标识，可为空 \\ \hline
+    status & 审批状态 & varchar(50) & PENDING/APPROVED/REJECTED/CANCELLED \\ \hline
+    comment & 审批意见 & varchar(1024) & 通过/拒绝原因说明 \\ \hline
+    creator\_id & 创建人ID & bigint & \\ \hline
+    create\_time & 创建时间 & datetime & \\ \hline
+    modifier\_id & 更新人ID & bigint & \\ \hline
+    modify\_time & 更新时间 & datetime & \\ \hline
+    is\_deleted & 是否删除 & tinyint & 0未删除，1已删除 \\ \hline
+  \end{tabular}
+\end{table}
+
+（6）索引文档与切片表。为支撑全文检索与向量召回，平台将可索引对象抽象为文档（document）与切片（slice）：一个文档可包含多个切片，切片用于向量化与证据定位；内容与文档通过关联表建立对应关系，以实现内容版本到检索证据的稳定映射。文档表、切片表与内容-文档关联表结构分别如表\ref{tab:db_document}、表\ref{tab:db_slice}与表\ref{tab:db_content_document_ref}所示。
+
+\begin{table}[htbp]
+  \centering
+  \caption{文档表}
+  \label{tab:db_document}
+  \begin{tabular}{c|c|c|p{6.3cm}}
+    \hline
+    字段名 & 字段中文名 & 字段类型 & 说明 \\ \hline
+    id & 主键ID & bigint & 自增主键 \\ \hline
+    status & 状态 & varchar(50) & ENABLED/DISABLED等 \\ \hline
+    creator\_id & 创建人ID & bigint & \\ \hline
+    create\_time & 创建时间 & datetime & \\ \hline
+    modifier\_id & 更新人ID & bigint & \\ \hline
+    modify\_time & 更新时间 & datetime & \\ \hline
+    is\_deleted & 是否删除 & tinyint & 0未删除，1已删除 \\ \hline
+  \end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+  \centering
+  \caption{切片表}
+  \label{tab:db_slice}
+  \begin{tabular}{c|c|c|p{6.3cm}}
+    \hline
+    字段名 & 字段中文名 & 字段类型 & 说明 \\ \hline
+    id & 主键ID & bigint & 自增主键 \\ \hline
+    document\_id & 文档ID & bigint & 外键，关联文档 \\ \hline
+    slice\_no & 切片序号 & int(11) & 文档内序号 \\ \hline
+    text\_ref & 文本引用 & varchar(255) & 切片文本引用或直接存储标识 \\ \hline
+    offset\_start & 起始位置 & int(11) & 片段在文档内的起始偏移 \\ \hline
+    offset\_end & 结束位置 & int(11) & 片段在文档内的结束偏移 \\ \hline
+    meta\_json & 元数据 & text & 召回与可见性相关元信息 \\ \hline
+    creator\_id & 创建人ID & bigint & \\ \hline
+    create\_time & 创建时间 & datetime & \\ \hline
+    modifier\_id & 更新人ID & bigint & \\ \hline
+    modify\_time & 更新时间 & datetime & \\ \hline
+    is\_deleted & 是否删除 & tinyint & 0未删除，1已删除 \\ \hline
+  \end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+  \centering
+  \caption{内容-文档关联表}
+  \label{tab:db_content_document_ref}
+  \begin{tabular}{c|c|c|p{6.3cm}}
+    \hline
+    字段名 & 字段中文名 & 字段类型 & 说明 \\ \hline
+    id & 主键ID & bigint & 自增主键 \\ \hline
+    content\_id & 内容ID & bigint & 外键，关联内容 \\ \hline
+    document\_id & 文档ID & bigint & 外键，关联文档 \\ \hline
+    version\_id & 版本ID & bigint & 外键，关联内容版本 \\ \hline
+    purpose & 用途 & varchar(50) & INDEX/RECALL等 \\ \hline
+    creator\_id & 创建人ID & bigint & \\ \hline
+    create\_time & 创建时间 & datetime & \\ \hline
+    modifier\_id & 更新人ID & bigint & \\ \hline
+    modify\_time & 更新时间 & datetime & \\ \hline
+    is\_deleted & 是否删除 & tinyint & 0未删除，1已删除 \\ \hline
+  \end{tabular}
+\end{table}
+
+（7）治理任务表。治理任务用于承载重复、歧义与覆盖等治理问题的处理闭环，任务中包含问题定位、责任归属与处理状态等字段。治理任务表结构如表\ref{tab:db_govern_task}所示。
+
+\begin{table}[htbp]
+  \centering
+  \caption{治理任务表}
+  \label{tab:db_govern_task}
+  \begin{tabular}{c|c|c|p{6.3cm}}
+    \hline
+    字段名 & 字段中文名 & 字段类型 & 说明 \\ \hline
+    id & 主键ID & bigint & 自增主键 \\ \hline
+    task\_type & 任务类型 & varchar(50) & DUPLICATE/AMBIGUOUS/COVERAGE等 \\ \hline
+    priority & 优先级 & varchar(50) & P0/P1/P2等 \\ \hline
+    status & 状态 & varchar(50) & TODO/IN\_PROGRESS/REVIEW/DONE/CLOSED \\ \hline
+    assignee\_id & 责任人ID & bigint & 用户标识 \\ \hline
+    locator\_json & 问题定位 & text & 关联内容/切片与证据定位信息 \\ \hline
+    result\_json & 处理结果 & text & 合并/修订/下线等结果说明 \\ \hline
+    creator\_id & 创建人ID & bigint & \\ \hline
+    create\_time & 创建时间 & datetime & \\ \hline
+    modifier\_id & 更新人ID & bigint & \\ \hline
+    modify\_time & 更新时间 & datetime & \\ \hline
+    is\_deleted & 是否删除 & tinyint & 0未删除，1已删除 \\ \hline
+  \end{tabular}
+\end{table}
 
 \section{本章小结}
 本章围绕面向广告与商业化内容的管理、应用与治理平台展开分析与设计。首先从业务与系统视角给出了平台的整体定位与关键链路，明确平台由内容管理、内容应用、内容治理与数据洞察四个核心域构成，并以统一数据模型、权限体系与事件机制实现协同。随后在需求分析中按照模块给出了核心用例与用例描述表，明确平台在页面检索与智能问答场景下的能力边界，以及治理闭环与效果评估的关键需求。在总体设计与模块设计部分，本章给出了平台的分层架构与关键模块设计思路，并说明了内容发布后的事件驱动机制与索引构建策略。最后在数据库设计部分对平台的核心数据对象与存储选型进行了说明，为后续系统实现与效果评估奠定基础。
