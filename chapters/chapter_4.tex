@@ -3,7 +3,7 @@
 \section{内容管理模块的实现}
 \label{sec:impl_cm}
 
-内容管理模块是平台的内容资产底座，承担内容生产、组织、权限与发布等职责，是后续内容应用与内容治理的唯一权威数据源。实现层面，模块围绕统一内容模型构建空间与应用组织、内容与版本管理、类目与标签组织、跨应用引用、权限控制与审批发布等能力，并通过事件机制在发布后驱动索引构建与数据回收，保证“发布版本”口径在展示、检索、问答与治理链路中的一致性。
+内容管理模块是平台的内容资产底座，承担内容生产、组织、权限与发布等职责，是后续内容应用与内容治理的数据输入来源。实现层面，模块围绕统一内容模型构建空间与应用组织、内容与版本管理、类目与标签组织、跨应用引用、权限控制与审批发布等能力，并通过事件机制在发布后驱动索引构建与数据回收，保证“发布版本”口径在展示、检索、问答与治理链路中的一致性。
 
 参考师兄论文在实现章节中的组织方式，本节首先给出内容管理模块对外提供的关键接口概览，随后按子模块展开说明其核心实现机制。内容管理模块的关键服务端接口定义如表\ref{tab:cm_api}所示。
 
@@ -17,11 +17,11 @@
     空间/应用管理 & createSpace / updateSpace / getSpaceDetail & 创建与维护业务空间，作为业务归属与权限边界。 \\ \hline
     空间/应用管理 & createApp / updateApp / getAppDetail & 在空间内创建应用并配置消费场景能力与内容范围。 \\ \hline
     内容管理 & createContent / updateContent & 创建与编辑内容元数据，写入草稿版本并维护版本链。 \\ \hline
-    内容管理 & saveDraft / getDraft & 保存草稿并获取可编辑版本，支持并发编辑的锁定控制。 \\ \hline
-    内容管理 & submitReview / approve / reject & 发起提审、审批通过或驳回，驱动内容状态流转并记录审计。 \\ \hline
+    内容管理 & saveDraft / getDraft & 保存草稿并获取可编辑版本，支持并发编辑的一致性控制。 \\ \hline
+    内容管理 & submitReview / approve / reject & 发起提审、审批通过或驳回，驱动内容状态流转并生成发布口径。 \\ \hline
     内容管理 & publish / offline & 发布生成对外可见的发布版本，或下线使内容对外不可见。 \\ \hline
     组织能力 & upsertCategory / moveCategory / upsertTag & 维护应用内类目树与标签体系，支撑导航、筛选与聚合展示。 \\ \hline
-    引用能力 & addReference / removeReference / getReferenceList & 配置应用引用内容关系，支撑跨应用复用与影响范围追溯。 \\ \hline
+    引用能力 & addReference / removeReference / getReferenceList & 配置应用引用内容关系，支撑跨应用复用与影响范围计算。 \\ \hline
     权限能力 & checkPermission / getContentAuth & 基于 RBAC 与 content\_auth 进行访问控制与策略查询。 \\ \hline
   \end{tabular}
 \end{table}
@@ -31,11 +31,11 @@
 \subsection{多形态内容统一建模与管理}
 \label{subsec:impl_cm_model}
 
-多形态内容统一建模是内容管理模块实现的基础。平台将knowledge、faq、course、case 四类内容抽象为统一的内容实体 Content，并将内容的可编辑大字段与变更历史沉淀在内容版本 ContentVersion 中，从而实现“内容元数据稳定、正文与结构灵活演进、发布口径一致”的工程目标。其核心实现要点包括统一元数据字段设计、多形态差异字段承载、版本链维护以及面向发布的状态与版本约束。
+多形态内容统一建模是内容管理模块实现的基础。平台将knowledge、faq、course、case四类内容抽象为统一的内容实体content，并在子表中分别维护不同形态的结构与正文字段，从而实现“统一元数据口径、差异字段独立演进、发布状态可控”的工程目标。其核心实现要点包括统一元数据字段设计、多形态差异字段承载、面向发布的状态约束以及跨链路可回溯的内容标识体系。
 
-类似师兄论文在4.1节中对“关键机制+关键实现片段”的组织方式，本节围绕“内容创建与编辑、版本链维护、状态流转约束”给出实现说明，并通过关键实现片段支撑论述。内容创建与版本管理的交互过程与状态流转可分别与图\ref{fig:cm_content_version_seq}与图\ref{fig:cm_content_state}对应理解。
+本节围绕“内容创建与编辑、版本链维护、状态流转约束”给出实现说明，并通过关键实现片段支撑论述。内容创建与版本管理的交互过程与状态流转可分别与图\ref{fig:cm_content_version_seq}与图\ref{fig:cm_content_state}对应理解。
 
-为便于后续内容应用、治理与洞察模块在实现上复用统一口径，内容管理模块在存储层形成了以空间、应用、内容、版本为主干的结构化表设计，并为不同形态提供扩展表或详情存储。内容管理模块的核心数据表与职责划分如表\ref{tab:cm_data_tables}所示。
+为便于后续内容应用、治理与洞察模块在实现上复用统一口径，内容管理模块在存储层形成了以空间、应用、内容为主干的结构化表设计，并为不同形态提供子表或详情存储。内容管理模块的核心数据表与职责划分如表\ref{tab:cm_data_tables}所示。
 
 \begin{table}[htbp]
   \centering
@@ -44,49 +44,53 @@
   \begin{tabular}{c|p{4.2cm}|p{7.2cm}}
     \hline
     数据对象 & 关键字段（示例） & 说明 \\ \hline
-    Space & id, name, owner\_id, status & 业务归属与隔离边界，承载成员与默认权限策略。 \\ \hline
-    App & id, space\_id, name, type, status & 内容消费场景与配置边界，定义可用形态、组织方式与范围。 \\ \hline
-    Content & id, space\_id, source\_app\_id, content\_type, title, summary, status, current\_version\_id & 统一内容实体元数据，content\_type区分knowledge/faq/course/case。 \\ \hline
-    ContentVersion & id, content\_id, version\_no, change\_summary, body(大字段), ext\_json & 内容版本链，承载可编辑正文与版本快照，用于草稿与发布口径。 \\ \hline
-    knowledge\_content & content\_id, editor\_type, keywords & 知识类差异字段扩展，记录编辑器类型与运营标注。 \\ \hline
-    faq\_content & content\_id, question, answer(大字段) & FAQ差异字段扩展，以标准问答对为核心语义单元。 \\ \hline
-    course\_content & content\_id, cover\_ref, level & 课程差异字段扩展，配合课节表表达学习路径。 \\ \hline
-    lesson & course\_content\_id, title, lesson\_no, content(大字段) & 课程课节明细，lesson\_no用于确定课程内顺序。 \\ \hline
-    case\_detail(MongoDB) & content\_id, title, summary, detail(json) & 案例详情为灵活结构，采用文档存储承载可变字段。 \\ \hline
-    AppContentRef & app\_id, content\_id & 应用引用内容关系，用于跨应用复用与影响范围分析。 \\ \hline
-    content\_auth & mapping\_type/id, auth\_tactic, auth\_variable, auth\_code & 内容粒度策略授权，与RBAC共同完成访问控制。 \\ \hline
+    space & id, name, owner\_id, status & 业务归属与隔离边界，承载成员与默认权限策略。 \\ \hline
+    application & id, space\_id, name, type, status & 内容消费场景与配置边界，定义可用形态、组织方式与范围。 \\ \hline
+    content & id, space\_id, app\_id, content\_type, title, summary, status & 统一内容实体元数据，content\_type区分knowledge/faq/course/case。 \\ \hline
+    knowledge & content\_id, body & 知识正文（富文本/Markdown），用于页面展示与切片索引。 \\ \hline
+    faq & content\_id, question, answer & FAQ以标准问答对表达最小知识单元。 \\ \hline
+    faq\_similar\_question & faq\_id, question & 相似问扩展，用于覆盖不同问法并提升FAQ召回。 \\ \hline
+    course / course\_lesson & content\_id, title, lesson\_no, content & 课程按“课程元信息+课节”拆分，lesson\_no维护顺序。 \\ \hline
+    case\_detail(MongoDB) & content\_id, detail(json) & 案例详情字段灵活演进，采用文档存储承载可变结构。 \\ \hline
+    content\_app\_ref & source\_app\_id, target\_app\_id, content\_id & 应用引用内容关系，用于跨应用复用与影响范围分析。 \\ \hline
+    content\_approval & content\_id, submitter\_id, reviewer\_id, status & 内容审批记录，驱动发布状态流转并约束上线口径。 \\ \hline
+    content\_auth & content\_id, auth\_tactic, auth\_variable, auth\_code & 内容粒度策略授权，与RBAC共同完成访问控制。 \\ \hline
   \end{tabular}
 \end{table}
 
-（1）统一内容实体与版本链维护。平台在关系型数据库中维护内容表与内容版本表：内容表记录空间、源应用、类型、标题、摘要、状态等元数据，并以current\_version\_id指向最新草稿版本；内容版本表记录每一次编辑产生的版本节点，承载正文内容、结构化字段快照与版本号等信息。该设计使内容编辑过程可以在“草稿版本”上持续迭代，而对外生效的内容以“发布版本”为准，从数据层面约束了消费口径的一致性。
+（1）统一内容实体与多形态子表。平台在关系型数据库中维护content表与多形态子表：content表记录空间、归属应用、类型、标题、摘要、状态等元数据；不同内容形态的正文与结构字段落在对应子表中，例如knowledge.body、faq.question/answer、course\_lesson.content。该设计使列表、权限、检索与治理能够基于统一的content标识协同，同时允许不同形态按需演进字段结构。
 
-（2）内容创建与版本递增关键实现。内容创建与编辑的核心在于稳定维护版本链，并避免并发编辑导致的数据覆盖。创建时，系统在同一事务内写入Content元数据并初始化草稿版本；编辑保存时，系统生成新的版本节点并进行条件更新校验，确保写入基于最新版本。内容创建与草稿保存的关键实现片段如图\ref{fig:cm_version_key_code}所示。
+（2）内容创建与编辑保存关键实现。内容创建与编辑的核心在于保证跨表写入的原子性，并避免并发编辑导致的数据覆盖。创建时，系统在同一事务内写入content元数据，并根据content\_type写入对应子表的正文或结构字段；编辑保存时，系统采用“读-改-写 + 条件更新”的方式进行一致性控制：客户端携带基于modify\_time的基线时间戳，写入时在SQL层做条件更新校验，若影响行数为0则提示刷新后重试。内容创建与草稿保存的关键实现片段如图\ref{fig:cm_version_key_code}所示。
 
 \begin{figure}[htbp]
   \centering
   \begin{minipage}{0.94\linewidth}
     \begin{lstlisting}[basicstyle=\ttfamily\small,numbers=left,numberstyle=\tiny,frame=single,breaklines=true]
 public Long createContent(CreateReq req) {
-  // 1) 写入内容元数据
-  Long contentId = contentDao.insertContent(req.spaceId, req.appId, req.type, req.title, req.summary);
-  // 2) 初始化草稿版本（version_no = 1）
-  Long versionId = versionDao.insertVersion(contentId, 1, req.body, req.changeSummary);
-  // 3) 回写当前草稿版本
-  contentDao.updateCurrentVersion(contentId, versionId);
+  Long contentId = contentDao.insertContent(req.spaceId, req.appId, req.type, req.title, req.summary, "DRAFT");
+  if ("knowledge".equals(req.type)) {
+    knowledgeDao.insert(contentId, req.body);
+  } else if ("faq".equals(req.type)) {
+    faqDao.insert(contentId, req.question, req.answer);
+  } else if ("course".equals(req.type)) {
+    courseDao.insert(contentId, req.courseMeta);
+  } else if ("case".equals(req.type)) {
+    caseDao.insertDetail(contentId, req.detailJson);
+  }
   return contentId;
 }
 
 public Long saveDraft(SaveDraftReq req) {
-  // 1) 获取当前版本号（由客户端携带，用于并发控制）
-  int currentNo = versionDao.getVersionNo(req.contentId, req.baseVersionId);
-  // 2) 生成新版本节点
-  Long newVersionId = versionDao.insertVersion(req.contentId, currentNo + 1, req.body, req.changeSummary);
-  // 3) 条件更新：仅当 current_version_id 未变化时才切换到新版本
-  boolean ok = contentDao.compareAndSetCurrentVersion(req.contentId, req.baseVersionId, newVersionId);
+  boolean ok = contentDao.casUpdateMeta(req.contentId, req.baseModifyTime, req.title, req.summary);
   if (!ok) {
     throw new ConflictException("content version changed, please refresh");
   }
-  return newVersionId;
+  if ("knowledge".equals(req.type)) {
+    knowledgeDao.updateBody(req.contentId, req.body);
+  } else if ("faq".equals(req.type)) {
+    faqDao.update(req.contentId, req.question, req.answer);
+  }
+  return req.contentId;
 }
     \end{lstlisting}
   \end{minipage}
@@ -94,44 +98,61 @@ public Long saveDraft(SaveDraftReq req) {
   \label{fig:cm_version_key_code}
 \end{figure}
 
-（2）多形态差异字段的具体落地。不同内容形态的差异不仅体现在“是否有正文”这一层面，更体现在内容结构、编辑方式与消费方式上，平台在实现中对四类内容分别做了面向工程的字段拆分与存储选择。
+页面化展示在实现上采用“元数据轻量返回、正文按需加载”的策略：列表与目录页仅返回content表中的title、summary、content\_type等元数据字段，并携带类目、标签等用于前端渲染筛选项；详情页在完成对象级权限校验后再读取对应形态子表的正文或结构字段，避免大字段在高频列表请求中被重复加载。对于course与case等结构型内容，详情页由服务端将多条课节记录或MongoDB detail(json)聚合为统一的渲染模型，保证前端消费一致。
 
-对于knowledge，平台支持富文本与Markdown等编辑器形式，正文以版本为单位存储，扩展表记录editor\_type等编辑器特征，便于在渲染与切片阶段进行差异化处理；同时支持keywords等运营标注字段用于检索权重与筛选配置。对于faq，平台以“标准问题 + 标准答案”作为最小知识单元，其中question字段用于稳定表达问法，答案内容作为大字段存储并与内容版本关联，以保证问答口径可随版本演进并支持回溯。对于course，平台将课程元信息与课节拆分：course\_content负责承载封面、难度等元信息，lesson表以lesson\_no维护课节顺序并存储每一节的内容，从而在页面展示与学习路径导航中能够按序组织。对于case，平台除少量基础字段外，将其余结构化/非结构化详情统一沉淀在MongoDB的detail(json)字段中，以适配案例字段随业务演进频繁变化的特点，并降低关系型表结构变更成本。
+在性能层面，内容列表查询以space\_id与app\_id作为强过滤条件，并结合状态字段仅返回已发布内容；类目与标签维度通过关联表或索引字段进行过滤与排序。对于高频访问的应用目录树与标签集合，服务端可按(app\_id)维度做短期缓存，以减少重复构建树结构带来的CPU开销；当类目或标签发生变更时，更新接口同步触发缓存失效，保证读链路与配置链路一致。
 
-（3）正文与大字段存储方式。当前系统实现中，内容正文、FAQ答案、课节内容等大字段直接存储在MySQL中，并随版本或课节记录一并落库。与“仅保存引用标识”的方案相比，直接存储的实现路径更简单，读写链路无需额外依赖外部正文存储；同时也带来数据库体量增长与大字段读写成本上升的问题。因此在实现上，平台通过“版本表承载正文、扩展表承载形态差异字段、文档存储承载case详情”的分层方式，尽量将高频查询的元数据与低频读取的大字段分离，并在列表与搜索等场景默认仅读取元数据与必要摘要，避免大字段在非必要场景被频繁加载。
+（3）多形态差异字段落地。不同内容形态的差异不仅体现在“是否有正文”，更体现在内容结构、编辑方式与召回粒度上。knowledge以长文为主，正文用于页面渲染与段落切片；faq以问答对为主，并通过faq\_similar\_question维护相似问集合以覆盖不同问法；course以课节为基本单元，lesson\_no用于稳定排序与学习路径展示；case字段结构随业务演进变化较快，采用文档存储承载detail(json)以降低关系型表结构频繁变更成本。
 
-（4）状态与发布口径约束。内容生命周期至少包含草稿、待审批、已发布、已下线等状态，平台在状态机约束下实现编辑、提审、审批、发布与下线等操作。实现中，写链路在保存草稿时仅更新草稿版本；发布动作在审批通过后生成发布版本并触发发布事件，确保内容应用与治理模块消费的都是已发布版本，避免“草稿可见”导致的口径漂移。相关状态流转与版本管理的交互过程可与前文系统设计中的内容状态机图、版本管理时序图对应理解。
-
-（5）版本快照与回溯能力。版本链不仅用于草稿编辑与发布口径控制，也用于支撑质量治理与运营追溯。一方面，平台在每次编辑保存时生成新的版本节点并记录change\_summary等摘要信息，便于运营人员理解版本差异并快速定位变更原因；另一方面，平台在治理任务处理引发内容修订时，以“修订—提审—审批—发布”的流程生成新的发布版本，使治理前后的口径能够被稳定对比，并为复检回收提供明确的版本边界。
-
-（6）创建与编辑的写入路径。四类内容在“统一内容实体+差异扩展”的模型下具备一致的写入骨架：创建时先写入Content元数据并初始化草稿版本，再按content\_type写入对应的扩展信息或详情数据；编辑时在更新元数据的同时生成新的版本节点，并将变更摘要与关键字段快照随版本记录沉淀，以保证后续发布、检索与治理能够准确对齐到同一版本。以case为例，平台在MySQL侧维护用于列表展示与检索的基础字段（如title、summary），在MongoDB侧以content\_id作为关联键存储detail(json)详情，并在Mongo文档中冗余title与summary字段以降低跨存储查询的复杂度，从而在结构灵活性与工程实现成本之间取得平衡。
-
-在实现中，为降低并发编辑造成的覆盖风险，平台在保存草稿时采用“版本号递增+条件更新”的方式进行一致性控制：写入层在生成新版本节点时同时校验目标内容当前版本是否与请求携带版本一致，避免不同编辑者在旧版本基础上写入导致的丢失更新；若校验失败，则返回冲突提示并要求刷新后重试。该策略不依赖特定框架与中间件，能够在关系型数据库事务范围内完成一致性约束，是内容高频编辑场景下更易落地的工程方案。
+（4）状态与发布口径约束。内容生命周期至少包含草稿、待审批、已发布、已下线等状态，平台在状态机约束下实现编辑、提审、审批、发布与下线等操作。实现中，读链路对外仅返回已发布状态内容；写链路在提审时冻结变更并进入待审批状态，审批通过后更新内容状态为已发布并触发发布事件，驱动下游索引更新与数据回收，避免“草稿可见”导致的口径漂移。
 
 \subsection{内容组织与引用机制}
 \label{subsec:impl_cm_org_ref}
 
-内容组织与引用机制用于提升内容的可发现性与复用效率，降低重复维护成本与口径不一致风险。实现层面，平台以“应用内类目树 + 标签体系 + 应用引用内容关系”为核心组织方式：类目树提供稳定的导航入口，标签提供跨类目聚合与筛选能力，引用关系提供跨应用复用的工程化落地。
+内容组织与引用机制用于提升内容的可发现性与复用效率，降低重复维护成本与口径不一致风险。实现层面，平台以“应用内类目树+标签体系+应用引用内容关系”为核心组织方式：类目树提供稳定的导航入口，标签提供跨类目聚合与筛选能力，引用关系提供跨应用复用的工程化落地。
 
-（1）类目树与标签体系实现。类目树以应用为边界维护，采用父子层级结构表达目录导航关系，并对节点移动、删除等操作进行约束以避免形成环或不合法层级。为提升查询效率，平台在类目查询场景提供“按应用获取完整树”和“按节点获取路径/子树”等接口，并在内容展示时通过类目挂载关系完成目录聚合。标签体系以扁平集合方式管理，支持标签的新增、禁用与与内容的绑定关系维护，用于在门户与后台提供基于标签的聚合与筛选能力。
+（1）类目树与标签体系实现。类目树以应用为边界维护，采用父子层级结构表达目录导航关系，并对节点移动、删除等操作进行约束以避免形成环或不合法层级。平台在类目查询场景提供“按应用获取完整树”和“按节点获取路径/子树”等接口，并在内容展示时通过内容-类目关联完成目录聚合。标签体系以扁平集合方式管理，支持标签的新增、禁用与与内容的绑定关系维护，用于在门户与后台提供基于标签的聚合与筛选能力。
 
-（2）应用引用内容关系实现。应用引用内容用于表达“某应用可使用哪些已发布内容”，其本质是应用与内容的多对多关系。实现中，平台通过AppContentRef表维护引用关系：写入引用时校验被引用内容的发布状态与调用方权限，避免将未发布或无权限内容暴露到目标应用；读取内容列表与检索范围确定时，以引用关系作为范围约束之一，从而在应用侧形成可控的内容可见集合。该机制既支持权威内容在多个应用复用，也为后续治理与影响范围分析提供可追溯的引用边界。
+在数据结构上，类目表以parent\_id表达父子关系，并维护path字段以表达祖先链路编码，使得“获取节点路径”“批量获取子树”等操作可以在单次查询或少量查询中完成，降低前端渲染目录树的请求开销。对于类目移动，服务端需要校验目标父节点不能位于待移动节点的子树中，并在同一事务内完成parent\_id与path的更新，以避免出现中间态导致目录树不可用。类目移动的关键实现片段如图\ref{fig:cm_category_move_key_code}所示。
 
-为保证“可复用”与“可控”的一致性，引用关系写入并非简单的多对多插入，而需要同时满足内容状态、授权策略与范围配置等约束。引用配置的交互过程与影响范围传播可与图\ref{fig:cm_app_content_ref_seq}对应理解。引用关系写入的关键实现片段如图\ref{fig:cm_reference_key_code}所示，其核心校验点包括：被引用内容必须处于可对外消费的发布状态、调用方在目标空间/应用具备引用权限、以及在内容粒度策略上不会导致越权可见。
+\begin{figure}[htbp]
+  \centering
+  \begin{minipage}{0.94\linewidth}
+    \begin{lstlisting}[basicstyle=\ttfamily\small,numbers=left,numberstyle=\tiny,frame=single,breaklines=true]
+public void moveCategory(MoveCategoryReq req) {
+  Category node = categoryDao.get(req.categoryId);
+  Category newParent = categoryDao.get(req.newParentId);
+  if (newParent.path.startsWith(node.path)) {
+    throw new BizException("invalid move: cycle detected");
+  }
+  String newPath = newParent.path + "/" + node.id;
+  categoryDao.updateParentAndPath(node.id, req.newParentId, newPath);
+  categoryDao.batchUpdateSubtreePath(node.path, newPath);
+}
+    \end{lstlisting}
+  \end{minipage}
+  \caption{类目移动关键代码}
+  \label{fig:cm_category_move_key_code}
+\end{figure}
+
+标签体系在实现上通常以(app\_id, name)作为唯一性约束，避免同一应用下出现同名标签导致筛选歧义。对于历史标签清理，平台采用“禁用”而非“物理删除”的策略，使得历史内容的标签标注能够被稳定回溯，同时在展示与检索场景下仅对启用标签开放筛选入口。
+
+（2）应用引用内容关系实现。应用引用内容用于表达“某应用可使用哪些已发布内容”，其本质是应用与内容的多对多关系。实现中，平台通过content\_app\_ref表维护引用关系：写入引用时校验被引用内容的发布状态与调用方权限，避免将未发布或无权限内容暴露到目标应用；读取内容列表与检索范围确定时，以引用关系作为范围约束之一，从而在应用侧形成可控的内容可见集合。
+
+引用关系在工程上需要满足两个关键约束：其一是写入幂等，避免重复配置导致引用表膨胀或出现重复行；其二是引用边界清晰，引用只影响目标应用可见范围，不改变内容的归属空间与归属应用，从而保证权限、审批与治理责任仍然在内容归属侧闭环。实现中refDao.upsert通过唯一键约束或插入忽略的方式保证幂等；在读取侧，范围确定逻辑以(app\_id, space\_id)为强边界，并在启用引用时将引用集合与类目/标签条件组合过滤，确保跨应用复用不会绕过应用侧的组织配置。
+
+为保证“可复用”与“可控”的一致性，引用关系写入并非简单的多对多插入，而需要同时满足内容状态、授权策略与范围配置等约束。引用关系写入的关键实现片段如图\ref{fig:cm_reference_key_code}所示。
 
 \begin{figure}[htbp]
   \centering
   \begin{minipage}{0.94\linewidth}
     \begin{lstlisting}[basicstyle=\ttfamily\small,numbers=left,numberstyle=\tiny,frame=single,breaklines=true]
 public void addReference(AddRefReq req) {
-  // 1) 校验调用方在目标应用的引用权限（RBAC + content_auth）
   authService.checkPermission(req.operator, req.targetAppId, "CONTENT_REF_ADD");
-  // 2) 校验内容状态：仅允许引用已发布内容
   Content c = contentDao.get(req.contentId);
   if (!c.isPublished()) {
     throw new BizException("only published content can be referenced");
   }
-  // 3) 记录引用关系（幂等写入）
   refDao.upsert(req.targetAppId, req.contentId);
 }
     \end{lstlisting}
@@ -140,8 +161,6 @@ public void addReference(AddRefReq req) {
   \label{fig:cm_reference_key_code}
 \end{figure}
 
-（3）影响范围与一致性保障。内容被多个应用引用后，任何修订与发布都可能影响多个消费入口。平台在引用关系上建立索引，并在发布事件中携带空间、应用与内容标识，便于下游基于引用关系快速定位影响范围并执行索引更新、缓存刷新与指标回收，从而实现“引用复用”与“发布一致性”的协同。
-
 \subsection{权限管理与审批流程}
 \label{subsec:impl_cm_auth_approval}
 
@@ -149,13 +168,64 @@ public void addReference(AddRefReq req) {
 
 （1）RBAC权限控制实现。RBAC以用户—角色—权限项映射为基础，角色在空间或应用维度生效，权限项覆盖空间/应用配置、内容创建编辑、删除、提审、审批、上下线与查看检索等操作。实现中，接口层在处理请求时首先完成身份校验与RBAC权限校验，确保调用方具备对应操作能力，再进入后续对象级策略判断，避免越权调用对系统造成影响。
 
-在平台管理实现中，RBAC以“权限码+作用域绑定”的方式落地。权限码用于统一表达模块级与操作级权限项，例如空间管理、应用管理、成员管理、角色分配、内容写操作与审批发布等；作用域用于表达授权生效范围（全局/空间/应用）。工程上通过用户-角色绑定表记录(scope\_type, scope\_id)并在鉴权时解析请求中的space\_id与app\_id确定作用域，再依据角色-权限映射表判断是否具备目标permission\_code，从而实现跨空间隔离与空间内精细授权。为保证治理闭环可追溯，空间/应用配置变更、成员与角色分配、审批发布等关键操作统一记录审计日志。
+在鉴权决策上，平台将请求解析为\texttt{user\_id + scope\_type + scope\_id + permission\_code}四元组：scope用于表达授权生效范围（GLOBAL/SPACE/APP），permission\_code用于表达具体操作。鉴权时先根据请求携带的space\_id、app\_id解析出作用域，再判断用户在该作用域下是否绑定了包含目标权限码的角色，从而实现跨空间隔离与空间内精细授权。
 
-（2）content\_auth策略授权实现。针对内容可见性与细粒度动作控制，平台以“授权对象+策略+变量+权限码”的模型表达策略：授权对象通过mapping\_type与mapping\_id指向空间、应用或内容等资源；策略通过tactic与variable描述可见范围或动作约束；权限码code表达具体权限项。鉴权决策流程在实现上以“策略加载—变量解析—动作匹配—结果裁决”为主线，并在读链路对召回候选进行二次过滤，保证检索与问答场景下不会返回越权结果。
+为降低鉴权对高并发读链路的额外开销，平台在接入层对RBAC结果进行缓存：以\texttt{user\_id + scope\_type + scope\_id + permission\_code}作为缓存键，缓存值为鉴权是否通过及可选的角色信息。缓存更新遵循“写后失效”的原则：当空间负责人变更成员角色、或平台负责人调整角色-权限关系时，管理侧接口同步触发对应用户的缓存失效，保证权限变更能够在可接受延迟内生效。对于未命中缓存的请求，服务端从\texttt{user\_role\_binding}与\texttt{role\_permission}表加载关系并完成裁决，再回填缓存。
 
-（3）审批与发布流程实现。为保证内容对外可用前的准确性与合规性，平台将发布动作纳入流程化审批控制：提审接口会创建审批记录并将内容状态置为待审批；审批通过后生成发布版本并更新内容状态为已发布，同时产生内容发布事件驱动下游异步链路；审批驳回则回写拒绝原因并将内容退回可编辑状态。发布与下线接口会在保证幂等性的前提下触发事件，以驱动索引增量更新与统计回收，确保内容资产、索引与问答结果在发布前后保持一致。
+（2）content\_auth策略授权实现。针对内容可见性与细粒度动作控制，平台以“内容+策略+变量+权限码”的模型表达策略：策略通过auth\_tactic与auth\_variable描述可见范围或动作约束，auth\_code表达具体权限项。鉴权决策流程在实现上以“策略加载—变量解析—动作匹配—结果裁决”为主线，并在读链路对召回候选进行二次过滤，保证检索与问答场景下不会返回越权结果。
 
-审批与发布链路的实现重点在于两点：其一是以状态机约束操作合法性，避免非法状态流转；其二是发布后通过事件驱动触发下游异步处理，使“发布版本”在索引与数据侧尽快达成一致。审批与发布的关键过程可与图\ref{fig:content_publish}以及图\ref{fig:cg_fix_publish_seq}对应理解，关键实现片段如图\ref{fig:cm_publish_key_code}所示。
+在工程实现中，content\_auth的裁决遵循“动作优先”的原则：当请求为查看、编辑、删除、上下线等具体动作时，服务端先对目标内容加载其授权规则集合，并过滤出包含目标动作码的规则子集；随后按auth\_tactic执行策略匹配。根据项目口径，auth\_code以精简集合表达动作权限，例如\texttt{r/w/u}分别对应“读/写/上下线”等能力，单条规则可携带多个动作码以减少规则数量。动作码与典型业务动作的映射如表\ref{tab:cm_auth_code_map}所示。
+
+\begin{table}[htbp]
+  \centering
+  \caption{content\_auth动作码映射示例}
+  \label{tab:cm_auth_code_map}
+  \begin{tabular}{c|p{10cm}}
+    \hline
+    动作码 & 典型动作 \\ \hline
+    r & 内容可见、详情读取、检索/问答召回结果可返回 \\ \hline
+    w & 内容编辑、删除、类目/标签绑定等写操作 \\ \hline
+    u & 上线/下线、提审/审批相关的发布控制动作 \\ \hline
+  \end{tabular}
+\end{table}
+
+在策略匹配层，平台支持免登录可见、所有外部用户可见、所有内部员工可见、员工匹配、部门匹配、角色匹配与自定义表达式匹配等策略。以部门匹配为例，系统将访问者的部门ID沿组织树向上回溯得到祖先链路集合，只要规则的auth\_variable命中该集合即视为命中。策略裁决的关键实现片段如图\ref{fig:cm_content_auth_match_key_code}所示。
+
+\begin{figure}[htbp]
+  \centering
+  \begin{minipage}{0.94\linewidth}
+    \begin{lstlisting}[basicstyle=\ttfamily\small,numbers=left,numberstyle=\tiny,frame=single,breaklines=true]
+public boolean checkContentAuth(long contentId, String actionCode, Visitor v) {
+  List<AuthRule> rules = authDao.listRules(contentId);
+  for (AuthRule r : rules) {
+    if (!r.authCode.contains(actionCode)) continue;
+    if (matchTactic(r.authTactic, r.authVariable, v)) return true;
+  }
+  return false;
+}
+
+private boolean matchTactic(String tactic, String var, Visitor v) {
+  if ("public".equals(tactic)) return true;
+  if ("internal".equals(tactic)) return v.isInternal;
+  if ("employee".equals(tactic)) return String.valueOf(v.employeeId).equals(var);
+  if ("department".equals(tactic)) return v.deptPath.contains(var);
+  if ("role".equals(tactic)) return v.roleIds.contains(var);
+  if ("custom".equals(tactic)) return exprEngine.eval(var, v.attrs);
+  return false;
+}
+    \end{lstlisting}
+  \end{minipage}
+  \caption{content\_auth策略匹配关键代码}
+  \label{fig:cm_content_auth_match_key_code}
+\end{figure}
+
+为降低读链路开销，列表与检索场景尽量在查询阶段做粗过滤（例如按内容状态、空间/应用、引用集合），再对召回候选执行对象级授权校验，避免将复杂策略下推到检索引擎导致表达困难或泄露风险。
+
+（3）审批与发布流程实现。为保证内容对外可用前的准确性与合规性，平台将发布动作纳入流程化审批控制：提审接口会创建审批记录并将内容状态置为待审批；审批通过后更新内容状态为已发布，同时产生内容发布事件驱动下游异步链路；审批驳回则回写拒绝原因并将内容退回可编辑状态。发布与下线接口会在保证幂等性的前提下触发事件，以驱动索引增量更新与统计回收，确保内容资产、索引与问答结果在发布前后保持一致。
+
+审批服务以content\_approval表承载审批单，核心字段包含content\_id、submitter\_id、reviewer\_id与status。提审时服务端校验内容必填字段、权限与当前状态，创建审批单并冻结内容进入待审批；审批通过与驳回均以审批单状态作为驱动依据，避免直接以内容状态作为唯一判定导致竞态。为避免重复点击造成的重复发布，审批通过接口在更新审批状态前检查是否已处于APPROVED，若已通过则直接返回并不重复触发事件，从而在“至少一次调用”语义下保持幂等。
+
+审批与发布链路的实现重点在于两点：其一是以状态机约束操作合法性，避免非法状态流转；其二是发布后通过事件驱动触发下游异步处理，使“发布版本”在索引与数据侧尽快达成一致。关键实现片段如图\ref{fig:cm_publish_key_code}所示。
 
 \begin{figure}[htbp]
   \centering
@@ -164,14 +234,13 @@ public void addReference(AddRefReq req) {
 public void approve(ApproveReq req) {
   authService.checkPermission(req.auditor, req.spaceId, "CONTENT_APPROVE");
   Approval a = approvalDao.get(req.approvalId);
+  if (a.isApproved()) return;
   if (!a.isPending()) {
     throw new BizException("invalid approval status");
   }
-  // 1) 审批通过：更新审批记录与内容状态
   approvalDao.pass(req.approvalId, req.comment);
-  contentDao.markPublished(a.getContentId());
-  // 2) 触发发布事件，驱动索引与指标异步更新
-  eventBus.publish(new ContentPublishedEvent(a.getContentId(), a.getSpaceId(), a.getAppId()));
+  contentDao.updateStatus(a.getContentId(), "PUBLISHED");
+  eventBus.publish(new ContentPublishedEvent(a.getContentId(), a.getSpaceId(), a.getAppId(), a.getId()));
 }
     \end{lstlisting}
   \end{minipage}
@@ -179,40 +248,49 @@ public void approve(ApproveReq req) {
   \label{fig:cm_publish_key_code}
 \end{figure}
 
-（4）审计与追溯。平台对关键操作（权限变更、提审、审批、发布、下线、引用配置等）记录审计日志，审计数据与内容版本链共同构成责任追溯依据；在出现口径争议或质量问题时，能够定位到具体版本、审批意见与操作者，从而支撑治理闭环中的问题定位与复检回收。
-
 \section{内容应用模块的实现}
 \label{sec:impl_ca}
 
-内容应用模块面向最终用户与业务运营，提供内容展示、内容搜索与生成式问答等能力。与内容管理模块不同，内容应用链路强调高并发读性能、低延迟与可解释性：其一，所有对外可见结果必须以“发布版本”为输入口径，避免草稿内容对外暴露；其二，检索与问答必须结合权限与范围配置做过滤，保证跨应用复用不引入越权风险；其三，生成式回答必须提供证据引用，满足可追溯与治理闭环要求。内容应用模块的用例范围如图\ref{fig:ca_usecase}所示。
+内容应用模块面向最终用户与业务运营，提供内容展示、内容搜索与生成式问答等能力。与内容管理模块不同，内容应用链路强调高并发读性能、低延迟与可解释性：其一，所有对外可见结果必须以“发布版本”为输入口径；其二，检索与问答必须结合权限与范围配置做过滤，保证跨应用复用不引入越权风险；其三，生成式回答需提供证据引用，降低幻觉风险并支撑后续治理与优化。
 
-参考师兄论文实现章节的组织方式，4.2节按“链路机制→关键实现片段→与流程图对应”的结构展开：首先说明页面化内容应用的范围确定与读口径，其次介绍多形态内容前置处理与索引构建，再说明RAG多通道召回与重排机制，最后给出生成式问答链路的实现与引用可追溯策略。
+内容应用模块的关键服务端接口定义如表\ref{tab:ca_api}所示。
+
+\begin{table}[htbp]
+  \centering
+  \caption{内容应用模块接口表}
+  \label{tab:ca_api}
+  \begin{tabular}{c|c|p{9cm}}
+    \hline
+    服务名称 & 接口名称 & 功能描述 \\ \hline
+    页面化展示 & listContents / getDetail & 基于空间/应用/类目/标签组织内容列表与详情页。 \\ \hline
+    内容检索 & search & 多字段关键词检索与结构化筛选，结果受范围与权限控制。 \\ \hline
+    智能问答 & ask & RAG多通道召回证据并生成回答，返回可追溯引用。 \\ \hline
+    索引构建 & onContentPublished & 消费发布事件，完成切片与全文/向量索引增量更新。 \\ \hline
+  \end{tabular}
+\end{table}
+
+参考师兄论文实现章节的组织方式，本节按“链路机制$\rightarrow$关键实现片段$\rightarrow$与流程图对应”的结构展开：首先说明页面化内容应用的范围确定与读口径，其次介绍多形态内容前置处理与索引构建，再说明RAG多通道召回与重排机制，最后给出生成式问答链路的实现与引用映射方式。
+
 \subsection{页面化内容应用机制}
 \label{subsec:impl_ca_page}
 
-\subsection{多形态内容前置处理与索引构建}
+页面化内容应用机制用于支撑内容门户与管理后台的通用展示场景，包括目录、列表与详情页等典型页面形态。其实现目标是将“空间/应用边界、组织方式（类目/标签）、发布口径、权限过滤”在读链路中统一起来，从而在不同入口下保持一致的可见范围与展示效果。
 
+（1）范围确定与请求规约。页面化展示请求通常携带space\_id、app\_id、category\_id、tag等参数。服务端在接入层首先完成身份校验，并根据调用方来源（门户/后台）与应用配置确定内容范围：以space\_id与app\_id作为强边界过滤条件，并在应用启用“引用内容”时将引用关系作为可见集合约束，从而限定仅展示被引用且已发布的内容。
 
-页面化内容应用机制用于支撑内容门户与管理后台的通用展示场景，包括目录、列表与详情页等典型页面形态。其实现目标是将“空间/应用边界、组织方式（类目/标签）、发布口径、权限过滤”在读链路中统一起来，从而在不同入口下保持一致的可见范围与展示效果。页面化内容应用的整体读链路如图\ref{fig:ca_display_flow}所示。
+（2）发布口径读取与一致性约束。展示链路统一以发布口径为准：列表页仅读取内容元数据与必要摘要；详情页在校验权限后读取发布版本正文。该策略保证展示、检索与问答链路对外一致，避免草稿内容在门户侧被提前可见。
 
-（1）范围确定与请求规约。页面化展示请求通常携带space\_id、app\_id、category\_id、tag等参数。服务端在接入层首先完成身份校验，并根据调用方来源（门户/后台）与应用配置确定内容范围：一方面，以space\_id与app\_id作为强边界过滤条件；另一方面，在应用启用“引用内容”时，将AppContentRef作为可见集合约束，从而限定仅展示被引用且已发布的内容。
+（3）权限过滤与越权防护。展示链路在返回结果前执行权限过滤：先做RBAC的模块/操作级校验，再按content\_auth策略对具体内容进行对象级判断。对于列表页，服务端在查询阶段尽量将权限条件下推；对于详情页，服务端在读取正文前进行强校验，避免越权内容被渲染或被前端缓存。
 
-（2）发布版本读取与一致性口径。展示链路统一以发布版本为准：列表页仅读取内容元数据与必要摘要；详情页在校验权限后读取发布版本正文。该策略保证内容管理、索引与问答链路对外一致，避免草稿内容在门户侧被提前可见。
-
-（3）权限过滤与越权防护。页面化展示链路在返回结果前执行权限过滤：先做RBAC的模块/操作级校验，再按content\_auth策略对具体内容进行对象级判断。对于列表页，服务端在查询阶段尽量将权限条件下推，以减少后续过滤成本；对于详情页，服务端在读取正文前进行强校验，避免越权内容被渲染或被前端缓存。
-
-（4）关键实现片段。页面化展示的关键在于“范围确定→权限过滤→发布版本读取”的顺序约束。其核心实现片段如图\ref{fig:ca_display_key_code}所示。
+（4）关键实现片段。页面化展示的关键在于“范围确定$\rightarrow$权限过滤$\rightarrow$发布口径读取”的顺序约束。其核心实现片段如图\ref{fig:ca_display_key_code}所示。
 
 \begin{figure}[htbp]
   \centering
   \begin{minipage}{0.94\linewidth}
     \begin{lstlisting}[basicstyle=\ttfamily\small,numbers=left,numberstyle=\tiny,frame=single,breaklines=true]
 public Page<ContentItemDTO> listContents(ListReq req) {
-  // 1) 范围确定：space/app + 引用关系（可选）
   Scope scope = scopeService.resolve(req.spaceId, req.appId, req.operator);
-  // 2) 权限过滤：RBAC + content_auth
   authService.checkPermission(req.operator, req.appId, "CONTENT_READ");
-  // 3) 查询发布口径：仅返回已发布内容的元数据与摘要
   return contentQueryDao.queryPublished(scope, req.categoryId, req.tags, req.page, req.size);
 }
 
@@ -220,45 +298,107 @@ public ContentDetailDTO getDetail(DetailReq req) {
   Scope scope = scopeService.resolve(req.spaceId, req.appId, req.operator);
   Content c = contentDao.get(req.contentId);
   authService.checkContentVisible(req.operator, scope, c.id);
-  // 读取发布版本正文并渲染
-  ContentVersion v = versionDao.getPublishedVersion(c.id);
-  return renderService.render(v.body, c.meta);
+  if ("knowledge".equals(c.type)) {
+    String body = knowledgeDao.getBody(c.id);
+    return renderService.renderKnowledge(c, body);
+  } else if ("faq".equals(c.type)) {
+    Faq f = faqDao.get(c.id);
+    return renderService.renderFaq(c, f.question, f.answer);
+  } else if ("course".equals(c.type)) {
+    List<Lesson> lessons = courseDao.listLessons(c.id);
+    return renderService.renderCourse(c, lessons);
+  } else if ("case".equals(c.type)) {
+    String detailJson = caseDao.getDetail(c.id);
+    return renderService.renderCase(c, detailJson);
+  }
+  throw new BizException("unsupported content type");
 }
     \end{lstlisting}
   \end{minipage}
   \caption{页面化内容展示关键代码}
   \label{fig:ca_display_key_code}
 \end{figure}
-\subsection{基于RAG的多通道召回与重排}
-\subsection{生成式问答流程实现}
+
+\subsection{内容检索服务实现}
+\label{subsec:impl_ca_search}
+
+内容检索服务为门户与管理后台提供统一的关键词检索能力，并作为智能问答链路的基础召回通道之一。实现目标包括：多字段匹配（标题、摘要、正文等）、结构化过滤（类目、标签、内容类型）、分页与高亮展示，以及在空间/应用边界与权限约束下保证结果可控。
+
+（1）索引字段与映射设计。检索索引以切片为基本文档粒度，并携带用于过滤与聚合的元信息字段：content\_id、space\_id、app\_id、content\_type、category\_id、tag\_ids、modify\_time等。文本字段按业务语义拆分为title、summary与text，分别配置不同权重：title用于精准命中提升排序稳定性，summary用于概览召回，text用于正文覆盖。对于FAQ类内容，question与answer可分别入索引并设置差异化权重，以支持“只检索问题”或“问题+答案一起检索”等场景配置。
+
+（2）查询构造与排序策略。查询侧采用“过滤优先、匹配其次”的策略：先用term/range过滤固定边界（space\_id、app\_id、状态为已发布、引用集合约束等），再对文本字段做multi\_match；排序以BM25为主，并叠加标题命中、更新时间、新鲜度等轻量特征。检索结果在返回前进行对象级权限校验，保证越权切片不会被返回。
+
+（3）高亮与摘要生成。为提升可读性，检索服务对title与text开启高亮，并在无法高亮时退化为返回summary或对text做截断摘要。对于长正文切片，摘要以“命中片段前后窗口”形式生成，避免在列表页返回过长内容导致传输与渲染开销增大。
+
+检索查询构造的关键实现片段如图\ref{fig:ca_search_key_code}所示。
+
+\begin{figure}[htbp]
+  \centering
+  \begin{minipage}{0.94\linewidth}
+    \begin{lstlisting}[basicstyle=\ttfamily\small,numbers=left,numberstyle=\tiny,frame=single,breaklines=true]
+public SearchResp search(SearchReq req) {
+  Scope scope = scopeService.resolve(req.spaceId, req.appId, req.operator);
+  authService.checkPermission(req.operator, req.appId, "CONTENT_READ");
+
+  EsQuery q = new EsQuery();
+  q.filterTerm("space_id", scope.spaceId);
+  q.filterTerm("app_id", scope.appId);
+  q.filterTerm("status", "PUBLISHED");
+  q.filterTerms("content_id", scope.allowedContentIds); // 启用引用时的集合约束
+  q.filterTerms("content_type", req.types);
+  q.filterTerms("category_id", req.categoryIds);
+  q.filterTerms("tag_ids", req.tagIds);
+  q.multiMatch(req.query, fields("title^4", "summary^2", "text"));
+  q.highlight("title", "text");
+  q.sortByScoreThen("modify_time", "desc");
+
+  List<SliceHit> hits = esClient.search(q, req.page, req.size);
+  return authFilter.filterVisible(hits, req.operator); // content_auth 对象级过滤
+}
+    \end{lstlisting}
+  \end{minipage}
+  \caption{内容检索关键代码}
+  \label{fig:ca_search_key_code}
+\end{figure}
+
+\subsection{多形态内容前置处理与索引构建}
 \label{subsec:impl_ca_index}
 
-为支持高效检索与生成式问答，平台在内容发布后对多形态内容进行前置处理，并构建全文索引与向量索引。该链路由内容发布事件驱动：内容管理模块在审批通过后触发ContentPublished事件，索引构建服务消费事件并完成文档化、切片与索引写入，整体过程如图\ref{fig:index_build_flow}所示。
+为支持高效检索与生成式问答，平台在内容发布后对多形态内容进行前置处理，并构建全文索引与向量索引。该链路由内容发布事件驱动：内容管理模块在审批通过后触发ContentPublished事件，索引构建服务消费事件并完成文档化、切片与索引写入。
 
-（1）多形态前置处理策略。不同内容形态在索引侧的目标是统一为可检索的Document与最小证据单元Slice。知识类与FAQ以正文段落或问答对为主要切片粒度；课程以课节为基本单元，并在每个课节内按段落切分；案例则对detail(json)中的关键字段做字段抽取与拼接，同时保留title与summary以增强召回稳定性。前置处理阶段会对HTML标签、富文本标记、无意义噪声进行清洗，并保留必要的结构信息（如标题层级）以便后续生成回答时组织引用。
+（1）多形态前置处理与切片策略。不同内容形态在索引侧的目标是统一为可检索的最小证据单元（切片），并保证切片本身包含足够上下文信息以便被独立理解。根据项目口径，切片策略如下：
 
-（2）Document/Slice构造与元信息绑定。索引对象需与内容资产口径对齐。实现中，Document记录content\_id、version\_id、space\_id、app\_id等元信息，并维护索引更新时间与来源；Slice记录document\_id、slice\_id、text等字段，并可选维护embedding向量。该绑定方式使任意召回结果都能回溯到具体内容与版本，为引用可追溯与治理定位提供基础。
+1. 文章（knowledge）：以固定长度为基础切片，并尽量保持段落语义完整性，避免跨段切分导致上下文断裂；切片携带文章标题、摘要、类目、标签等元数据。
+2. 问答（faq）：问题与答案作为完整语义单元不做切片处理，可分别入库并建立索引；召回阶段按场景组合使用（例如仅对question检索或对question+answer联合检索）。
+3. 课程（course）：考虑到成本，一个课节作为一个切片；实现中通过大模型提取课节字幕或要点文本作为课节内容，以保证索引侧为可检索的文本。
+4. 案例（case）：每个案例作为一个切片；切片携带案例标题、摘要、类目、标签等元数据。
 
-（3）增量更新与幂等控制。索引构建消费发布事件后进行增量更新：同一content\_id的旧版本索引会被标记为过期或被覆盖更新，保证查询侧只命中最新发布版本。为避免重复消费导致的脏写，索引构建服务以(version\_id, index\_type)作为幂等键，并在写入前检查已处理版本，从而保证“至少一次投递”语义下的最终一致。
+此外，图片与表格类内容在切片时需要特殊处理：图片使用多模态embedding模型实现“图文同空间”检索，并通过大模型生成文本化理解结果与图片链接一起入库；表格避免纯文本切分，按行保持语义完整并携带表头信息，以提升表格类知识在问答中的可用性。前置处理阶段对富文本标记、无意义噪声进行清洗，并保留必要结构信息以便后续组织引用。
 
-（4）关键实现片段。索引构建核心在于“事件消费→拉取发布版本→切片→双索引写入”。其关键实现片段如图\ref{fig:index_build_key_code}所示。
+在切片结构上，平台将每个切片建模为包含\texttt{slice\_id、content\_id、space\_id、app\_id、content\_type、text}等字段的最小证据单元，并可选携带\texttt{position}用于表示在正文中的定位信息（例如段落序号或课节序号）。该设计使得召回结果既能用于生成式问答的证据输入，也能在输出侧映射为“内容标题+片段摘要+定位信息”的引用，降低用户在溯源时的跳转成本。
+
+（2）元信息绑定与权限下推。切片索引时携带content\_id、modify\_time、space\_id、app\_id与content\_auth相关元信息，用于召回阶段的范围确定与权限过滤。通过元信息绑定，可以保证任意召回结果都能回溯到具体内容及其发布时间点，并在服务侧做对象级可见性判断。索引同时构建ES与embedding两套索引：ES侧侧重字面匹配与可解释高亮，embedding侧侧重语义相似与长尾覆盖，两条通道互补并为后续RAG提供更稳健的候选集合。
+
+索引侧采用\texttt{content\_id + modify\_time}作为发布口径标识：当内容发布后触发索引更新事件，索引构建服务拉取当前已发布内容及其更新时间戳，作为索引写入的幂等与覆盖依据。召回阶段以space\_id、app\_id与内容状态作为粗过滤条件，并在服务侧对候选内容执行content\_auth对象级校验，避免复杂授权策略直接下推到索引侧导致表达困难。
+
+（3）增量更新与幂等控制。索引构建消费发布事件后进行增量更新：同一content\_id的旧索引会被覆盖或标记过期，查询侧只命中最新发布口径。为避免重复消费导致的脏写，索引构建服务以(content\_id, modify\_time, index\_type)作为幂等键，并在写入前检查已处理记录，从而在“至少一次投递”语义下实现最终一致。
+
+索引构建在工程实现上通常以\texttt{content\_id}为主键进行覆盖更新：全文索引将切片作为文档写入，并携带content\_id用于聚合与删除；向量索引将embedding向量与slice\_id绑定，并在更新时先按content\_id删除旧切片或标记旧切片不可见，再写入新切片。为降低峰值写入压力，索引构建服务对批量发布采用分批处理，并对失败批次进行重试；在重试过程中仍以幂等键约束写入，避免重复写入造成索引膨胀。
+
+（4）关键实现片段。索引构建核心在于“事件消费$\rightarrow$拉取发布版本$\rightarrow$切片$\rightarrow$双索引写入”。其关键实现片段如图\ref{fig:index_build_key_code}所示。
 
 \begin{figure}[htbp]
   \centering
   \begin{minipage}{0.94\linewidth}
     \begin{lstlisting}[basicstyle=\ttfamily\small,numbers=left,numberstyle=\tiny,frame=single,breaklines=true]
 public void onContentPublished(ContentPublishedEvent e) {
-  // 1) 幂等：已处理版本直接返回
-  if (indexMetaDao.exists(e.versionId, "FULLTEXT")) return;
-  // 2) 拉取发布版本正文
-  ContentVersion v = versionDao.getById(e.versionId);
-  // 3) 前置处理与切片
-  List<Slice> slices = sliceService.buildSlices(e.contentId, e.versionId, v.body, v.extJson);
-  // 4) 写入全文索引与向量索引
-  esClient.upsertDocuments(e.spaceId, e.appId, e.contentId, e.versionId, slices);
-  vectorClient.upsertEmbeddings(e.spaceId, e.appId, e.contentId, e.versionId, slices);
-  // 5) 记录索引元信息
-  indexMetaDao.markDone(e.versionId);
+  Content c = contentDao.get(e.contentId);
+  if (!c.isPublished()) return;
+  if (indexMetaDao.exists(e.contentId, c.modifyTime, "FULLTEXT")) return;
+  List<Slice> slices = sliceService.buildSlices(c);
+  esClient.upsertDocuments(c.spaceId, c.appId, c.id, c.modifyTime, slices);
+  vectorClient.upsertEmbeddings(c.spaceId, c.appId, c.id, c.modifyTime, slices);
+  indexMetaDao.markDone(e.contentId, c.modifyTime);
 }
     \end{lstlisting}
   \end{minipage}
@@ -266,16 +406,56 @@ public void onContentPublished(ContentPublishedEvent e) {
   \label{fig:index_build_key_code}
 \end{figure}
 
-\section{内容治理模块的实现}
+\subsection{基于RAG的多通道召回与重排}
 \label{subsec:impl_ca_rag}
 
-基于RAG的多通道召回与重排用于在生成式问答场景下提供高质量证据集合，并在可控成本下兼顾召回率与精度。实现层面，平台采用“多通道召回—融合去重—重排—证据组织”的流水线结构：全文通道负责精准关键词召回，向量通道负责语义相似召回，两者融合后进行去重与重排，最终输出与问题最相关的Slice集合。整体过程如图\ref{fig:ca_rag_flow}所示。
+基于RAG的多通道召回与重排用于在生成式问答场景下提供高质量证据集合，并在可控成本下兼顾召回率与精度。实现层面，平台采用“多通道召回—融合去重—重排—证据组织”的流水线结构：全文通道负责精准关键词召回，向量通道负责语义相似召回，两者融合后进行去重与重排，最终输出与问题最相关的slice集合。
 
-（1）多通道召回。全文召回基于ES的BM25与字段权重，支持标题、摘要与正文多字段匹配，并结合空间/应用范围与权限条件进行过滤；向量召回基于embedding相似度检索，能够覆盖同义改写与长尾问法。为控制延迟，系统对两路召回设置topK上限，并在召回阶段尽量下推过滤条件，减少后续重排候选规模。
+（1）多通道召回。全文召回基于ES的BM25与字段权重，支持标题、摘要与正文多字段匹配；向量召回基于embedding相似度检索，覆盖同义改写与长尾问法。为控制延迟，系统对两路召回设置topK上限，并在召回阶段尽量下推范围与权限过滤条件，减少后续候选规模。
 
-（2）融合去重与候选裁剪。多通道返回的候选以slice\_id为主键进行融合去重，并对同一content\_id的多个候选进行聚合，避免证据集中在单一内容上导致回答偏置。融合阶段会根据召回来源与初排分数进行粗排裁剪，为后续重排降低成本。
+为降低长尾问法与口语化输入对召回的影响，平台在召回前引入“问题改写+query规整”的预处理步骤：问题改写将用户输入改写为更标准化的表达以提升召回质量；query规整则对改写后的文本进行分词与停用词处理，并对包含业务术语与缩写的词典进行归一化。对于低质量输入（过短、纯符号、无有效词），系统直接触发未命中返回并进入覆盖度候选。预处理后的query同时用于全文检索与向量检索，以保证多通道召回输入一致。
 
-（3）重排与证据组织。重排阶段以多特征进行排序，包括语义相似分、关键词覆盖、标题命中、内容新鲜度等，并对候选进行多样性约束（例如限制同一文档的slice数量）。证据组织阶段将topN的slice按文档聚合，并截断拼接为适合大模型上下文窗口的证据段落，同时保留每段证据的来源标识，用于输出可追溯引用。
+召回阶段的关键参数包括TopK与MinScore：TopK用于控制返回候选切片数量，MinScore用于设置最小相似度阈值以过滤低相关候选。表\ref{tab:rag_params}给出了关键参数的工程含义。
+
+\begin{table}[htbp]
+  \centering
+  \caption{RAG召回关键参数}
+  \label{tab:rag_params}
+  \begin{tabular}{c|p{10cm}}
+    \hline
+    参数 & 含义 \\ \hline
+    TopK & 单通道召回的候选上限，用于控制延迟与后续重排开销 \\ \hline
+    MinScore & 最小相似度阈值，低于阈值的候选直接丢弃以提升精度与可解释性 \\ \hline
+    TopN & 重排后最终用于证据组织的切片数量，受上下文窗口与引用展示限制 \\ \hline
+  \end{tabular}
+\end{table}
+
+（2）融合去重与候选裁剪。多通道返回的候选以slice\_id为主键融合去重，并对同一content\_id的多个候选进行聚合，避免证据过度集中在单一内容上。融合阶段会根据召回来源与初排分数进行粗排裁剪，为后续重排降低成本。
+
+（3）重排与证据组织。重排阶段以多特征排序，包括语义相似分、关键词覆盖、标题命中、内容新鲜度等，并对候选进行多样性约束。证据组织阶段将topN的slice按文档聚合，并截断拼接为适合大模型上下文窗口的证据段落，同时保留每段证据的来源标识，用于输出引用。
+
+重排实现采用“粗排+精排”的两阶段策略：粗排阶段以召回通道得分与轻量特征（标题命中、关键词覆盖）进行线性加权，快速裁剪候选集合；精排阶段对裁剪后的候选计算更细粒度特征，例如query与slice的语义相似度、与标题/摘要的覆盖度、以及同一content的多样性约束，并输出最终topN证据。重排的关键实现片段如图\ref{fig:rag_rerank_key_code}所示。
+
+\begin{figure}[htbp]
+  \centering
+  \begin{minipage}{0.94\linewidth}
+    \begin{lstlisting}[basicstyle=\ttfamily\small,numbers=left,numberstyle=\tiny,frame=single,breaklines=true]
+public List<SliceHit> rank(String query, List<SliceHit> hits, int topn) {
+  for (SliceHit h : hits) {
+    double score = 0;
+    score += 0.5 * h.recallScore;
+    score += 0.3 * h.keywordCover;
+    score += 0.2 * h.titleHit;
+    h.finalScore = score;
+  }
+  List<SliceHit> sorted = sortByScore(hits);
+  return diversifyByContent(sorted, topn);
+}
+    \end{lstlisting}
+  \end{minipage}
+  \caption{重排关键代码}
+  \label{fig:rag_rerank_key_code}
+\end{figure}
 
 （4）关键实现片段。RAG召回与重排的关键实现片段如图\ref{fig:rag_recall_key_code}所示。
 
@@ -286,29 +466,32 @@ public void onContentPublished(ContentPublishedEvent e) {
 public EvidencePack retrieveEvidence(AskReq req) {
   Scope scope = scopeService.resolve(req.spaceId, req.appId, req.operator);
   authService.checkPermission(req.operator, req.appId, "QA_READ");
-
-  List<SliceHit> esHits = esClient.search(req.query, scope, req.topkEs);
-  List<SliceHit> vecHits = vectorClient.search(req.query, scope, req.topkVec);
-
+  String rewritten = rewriteService.rewrite(req.query);
+  String q = queryNorm.normalize(rewritten);
+  List<SliceHit> esHits = esClient.search(q, scope, req.topkEs, req.minScoreEs);
+  List<SliceHit> vecHits = vectorClient.search(q, scope, req.topkVec, req.minScoreVec);
   List<SliceHit> merged = mergeService.dedupAndMerge(esHits, vecHits);
-  List<SliceHit> reranked = rerankService.rank(req.query, merged, req.topn);
-
-  return evidenceBuilder.build(reranked); // 组织引用信息与上下文片段
+  List<SliceHit> reranked = rerankService.rank(q, merged, req.topn);
+  return evidenceBuilder.build(reranked);
 }
     \end{lstlisting}
   \end{minipage}
   \caption{RAG召回与重排关键代码}
   \label{fig:rag_recall_key_code}
 \end{figure}
-\subsection{重复度、歧义度与覆盖度检测}
-\subsection{治理任务线上化与闭环机制}
+
+\subsection{生成式问答流程实现}
 \label{subsec:impl_ca_qa}
 
-生成式问答流程将RAG检索得到的证据集合注入大模型提示词中生成回答，并在输出侧附带可追溯引用，形成“问答—引用—治理”的闭环入口。实现目标是：在保证回答准确性的前提下，降低幻觉风险，并通过引用定位到具体内容片段以支撑后续治理。问答流程实现可复用图\ref{fig:ca_rag_flow}中“证据组织—生成回答—返回引用”的后半段链路。
+生成式问答流程将RAG检索得到的证据集合注入提示词中生成回答，并在输出侧附带引用信息，形成“问答—证据—治理”的闭环入口。实现目标是：在保证回答准确性的前提下，降低幻觉风险，并通过引用定位到具体内容片段以支撑后续治理。
 
-（1）Prompt构造与上下文控制。系统在构造提示词时将用户问题、业务约束（如回答风格、禁止编造）、以及证据集合分段拼接，并对证据长度进行裁剪以适配上下文窗口。为保证引用可追溯，系统在证据段落中显式附带slice\_id与标题信息，使模型输出的引用能够映射回具体Slice。
+（1）Prompt构造与上下文控制。系统在构造提示词时将用户问题、业务约束与证据集合分段拼接，并对证据长度进行裁剪以适配上下文窗口。为保证引用可映射，系统在证据段落中附带slice\_id与标题信息，使引用能够回溯到具体slice。
+
+提示词结构在实现上通常包含三部分：系统约束（禁止编造、必须基于证据回答）、任务描述（回答风格、输出结构）、证据集合（按slice聚合并编号）。证据集合采用显式编号的方式组织，例如\texttt{[S1] ... [S2] ...}，并要求模型在回答末尾给出引用编号列表。该编号策略降低了引用解析的难度，也使得在回答失败时可以退化为直接返回证据摘要而不丢失溯源能力。
 
 （2）回答生成与引用解析。模型生成结果返回后，系统对回答文本中的引用标识进行解析，并转换为可展示的“内容标题+片段摘要+跳转链接”。当模型未给出引用或引用解析失败时，系统退化为按证据集合的topN进行引用补齐，保证每次回答都有最小可追溯集合。
+
+引用映射在实现上以slice\_id为桥梁：citationParser将模型输出的引用编号映射到证据集合中的slice\_id，并进一步根据slice\_id回溯到content\_id与可选的定位字段（课节序号、段落序号等），最终生成前端可展示的引用列表。为避免模型输出无效编号或重复编号，解析器对引用编号做合法性校验与去重，并限制最大引用数量，保证展示区域稳定。
 
 （3）异常退化与安全控制。当检索阶段未召回到足够证据时，系统返回“未命中/建议补充内容”的提示，并将该问题作为覆盖度治理的候选输入；当模型生成超时或失败时，系统退化为检索结果摘要返回，保证服务可用性。读链路全过程保留权限过滤与范围约束，避免越权证据进入提示词。
 
@@ -321,7 +504,7 @@ public EvidencePack retrieveEvidence(AskReq req) {
 public AskResp ask(AskReq req) {
   EvidencePack pack = retrieveEvidence(req);
   if (pack.isEmpty()) {
-    coverService.recordMiss(req); // 覆盖度治理候选
+    coverService.recordMiss(req);
     return AskResp.miss("未命中可用内容，建议补充知识");
   }
   String prompt = promptBuilder.build(req.query, pack);
@@ -336,11 +519,240 @@ public AskResp ask(AskReq req) {
 \end{figure}
 
 \section{内容治理模块的实现}
-\subsection{重复度、歧义度与覆盖度检测}
+\label{sec:impl_cg}
+
+内容治理模块面向内容规模化带来的质量问题，构建“自动检测—任务化分发—人工处理—复检回收”的闭环机制。实现上，平台以重复度、歧义度与覆盖度三类问题为核心，将离线分析结果转化为可流转的线上治理任务，并与内容管理的修订与发布流程打通，保证治理处理后可触发索引更新与指标回收。
+
+内容治理模块的关键服务端接口定义如表\ref{tab:cg_api}所示。
+
+\begin{table}[htbp]
+  \centering
+  \caption{内容治理模块接口表}
+  \label{tab:cg_api}
+  \begin{tabular}{c|c|p{9cm}}
+    \hline
+    服务名称 & 接口名称 & 功能描述 \\ \hline
+    任务管理 & createMainTask / getMainTaskDetail & 创建治理主任务并管理计算状态与配置。 \\ \hline
+    检测计算 & runDuplicateAmb / runCoverage & 执行重复/歧义检测与覆盖度检测，产出任务候选。 \\ \hline
+    任务流转 & claimTask / submitResult / markDone & 指派或认领任务，提交处理结论并更新状态。 \\ \hline
+    复检回收 & recheck / autoClose & 对任务范围周期复检，自动关闭已消除问题。 \\ \hline
+  \end{tabular}
+\end{table}
+
+治理任务线上化需要在存储层固化“主任务-子任务”的任务模型。主任务负责一次治理计算的配置与状态管理，子任务承载具体问题内容与处理结论。根据项目手册口径，治理任务相关表的核心字段如表\ref{tab:cg_tables}所示。
+
+\begin{table}[htbp]
+  \centering
+  \caption{治理任务数据表（核心字段）}
+  \label{tab:cg_tables}
+  \begin{tabular}{c|p{4.2cm}|p{7.2cm}}
+    \hline
+    表名 & 关键字段（示例） & 说明 \\ \hline
+    govern\_main\_task & id, name, space\_id, session\_period, recall\_threshold, status & 治理主任务，承载会话周期、阈值等参数与计算状态。 \\ \hline
+    govern\_dup\_amb\_task & id, main\_task\_id, app\_id, task\_type, content\_id\_a, content\_id\_b, status, assignee\_id, result & 重复/歧义子任务，描述内容对、任务类型与处理结果。 \\ \hline
+    govern\_coverage\_task & id, main\_task\_id, app\_id, item\_type, item\_value, score, status, assignee\_id & 覆盖度子任务，描述覆盖对象（类目/标签/概念/定义/query等）与覆盖评分。 \\ \hline
+  \end{tabular}
+\end{table}
+
+在线治理闭环包含“计算生成$\rightarrow$人工处理$\rightarrow$系统巡检回收”三类动作：主任务创建后进入计算中状态，计算完成后生成子任务列表；业务人员在任务页面对重复/歧义任务标记处理结果（下线/保留/合并等），对覆盖任务标记是否需要补充内容并完成处理；系统侧每天定时巡检自上次巡检以来发生内容变更、上线、下线或删除的内容，复用LLM判别与召回评估对关联任务进行复检，若问题已消除则自动将子任务标记为完成，从而避免任务长期堆积造成统计失真。
+
+\subsection{重复度与歧义度检测实现}
+\label{subsec:impl_cg_dup_amb}
+
+重复度与歧义度检测采用“候选召回+模型判别”的方式避免全量两两比较。首先以向量检索召回每条内容的TopK相似候选，形成候选对集合；随后对候选对构造判别提示词，使用大模型输出相似度与歧义度判断；最后将判别结果聚合为重复对与歧义对，并输出片段级定位信息供人工复核与任务化流转。
+
+重复度治理在业务侧需要可解释的分级口径，以便运营判断“是否需要合并/下线/保留”。平台按重复占比对重复程度进行分级，典型口径如表\ref{tab:cg_dup_level}所示。
+
+\begin{table}[htbp]
+  \centering
+  \caption{重复度分级口径示例}
+  \label{tab:cg_dup_level}
+  \begin{tabular}{c|c|p{7.4cm}}
+    \hline
+    分级 & 重复占比 & 说明 \\ \hline
+    完全重复 & 100\% & 两篇内容几乎完全一致，包括用词与顺序。 \\ \hline
+    极度重复 & 80\%--100\% & 主体相同，仅少量差异。 \\ \hline
+    中度重复 & 50\%--80\% & 主体相同，部分描述差异明显。 \\ \hline
+    轻微重复 & 25\%--50\% & 有一定重叠但存在较多差异。 \\ \hline
+    不重复 & $<25\%$ & 主体不同或重叠很少。 \\ \hline
+  \end{tabular}
+\end{table}
+
+（1）候选召回与降本。候选召回阶段仅在同一空间或同一应用范围内生成候选对，并对相似度设置阈值下限以控制候选规模。该策略能够将检测复杂度从$O(n^2)$降低到$O(nk)$，更适合在内容规模增长时持续运行。
+
+候选召回的关键在于确定“相似度比较的语义单元”。对于knowledge等长文内容，平台优先以切片为单位进行召回：先为每条内容聚合其切片向量（例如取topN切片均值或取标题/摘要向量），在内容粒度产生候选对；随后在判别阶段再定位到具体冲突片段。对于faq，候选召回以标准问题与相似问集合为主，使得不同问法能够被聚合到同一知识单元下，降低重复维护的概率。
+
+（2）判别提示词与结构化输出。判别阶段将“内容A+内容B+上下文约束”构造成统一的判别输入，并要求模型输出结构化字段（是否重复、是否歧义、冲突点摘要、建议处理方式等），便于后续落表与任务创建。
+
+判别提示词在实现上强调两点：其一是仅基于提供的内容进行判断，禁止引入外部知识；其二是输出结构化JSON，包含布尔判断与可解释字段，便于程序解析并落表。判别输出通常包含\texttt{duplicate/ambiguous}两类标记、冲突摘要、建议处理动作（合并/保留/下线/补充澄清）以及可选的冲突片段定位。判别流程的关键实现片段如图\ref{fig:cg_llm_judge_key_code}所示。
+
+\begin{figure}[htbp]
+  \centering
+  \begin{minipage}{0.94\linewidth}
+    \begin{lstlisting}[basicstyle=\ttfamily\small,numbers=left,numberstyle=\tiny,frame=single,breaklines=true]
+public LlmJudgeResp dupAmbJudge(Long a, Long b) {
+  String contentA = contentLoader.loadPlainText(a);
+  String contentB = contentLoader.loadPlainText(b);
+  String prompt = promptTpl.render(contentA, contentB);
+  String json = llmClient.generate(prompt);
+  return jsonParser.parse(json);
+}
+    \end{lstlisting}
+  \end{minipage}
+  \caption{重复度与歧义度判别关键代码}
+  \label{fig:cg_llm_judge_key_code}
+\end{figure}
+
+（3）结果聚合与任务生成。检测结果按内容对聚合，并与内容元信息、引用范围等字段拼装形成可流转的治理子任务。重复/歧义检测的关键实现片段如图\ref{fig:cg_dup_amb_key_code}所示。
+
+\begin{figure}[htbp]
+  \centering
+  \begin{minipage}{0.94\linewidth}
+    \begin{lstlisting}[basicstyle=\ttfamily\small,numbers=left,numberstyle=\tiny,frame=single,breaklines=true]
+public void runDupAmb(MainTask task) {
+  for (Long contentId : taskScopeDao.listContents(task.spaceId)) {
+    List<Long> candidates = vectorClient.topKSimilar(contentId, task.recallThreshold, task.topk);
+    for (Long otherId : candidates) {
+      LlmJudgeResp r = llmJudge.dupAmbJudge(contentId, otherId);
+      if (r.isDuplicate() || r.isAmbiguous()) {
+        dupAmbTaskDao.upsert(task.id, task.appId, r.toTask(contentId, otherId));
+      }
+    }
+  }
+}
+    \end{lstlisting}
+  \end{minipage}
+  \caption{重复度与歧义度检测关键代码}
+  \label{fig:cg_dup_amb_key_code}
+\end{figure}
+
+\subsection{覆盖度检测与缺口聚类实现}
+\label{subsec:impl_cg_coverage}
+
+覆盖度治理用于持续发现“缺知识”与薄弱领域，并将缺口转化为可闭环的补充任务。实现中覆盖度检测主要基于会话数据：在设定会话周期与召回阈值的前提下，对用户原声执行召回评估，召回结果未满足阈值要求的视为缺知识；对缺知识原声进行聚类生成覆盖任务，由业务人员补充内容或完善现有内容，并通过周期复检对任务范围进行回收。
+
+覆盖度检测在实现上通常包含两条互补路径：其一是知识体系驱动，对接广告与商业化知识体系（类目、标签、概念、定义等）作为覆盖对象集合，逐项执行RAG召回并用大模型判断“是否覆盖”并打分，得到覆盖度分布；其二是需求驱动，从用户query与未命中行为中抽取真实需求，按语义聚类形成覆盖任务并推动内容补充。本项目实现以需求驱动路径为主，并在主任务配置中保留召回阈值与会话周期等参数，便于与知识体系驱动结果在同一指标口径下对齐。
+
+（1）缺知识识别。系统将每条query按空间/应用范围进行召回评估，若top1相似度低于阈值或无有效证据，则将该query记录为缺知识候选。
+
+缺知识候选的来源既包括用户在智能问答中的原始query，也包括搜索框的查询词与未命中行为。实现中平台对缺知识候选进行基础清洗：去除纯噪声query、合并大小写与数字格式差异、过滤过短文本，并按空间/应用聚合以避免跨边界混淆。召回评估同时参考全文与向量两路结果，当两路均未达到阈值要求时才判定为缺知识，以降低单通道失误带来的误判。
+
+（2）缺口聚类与任务生成。对缺知识候选按语义相似聚类，并对每个聚类生成主题标题与代表性query集合，形成覆盖任务的任务描述与定位依据。
+
+缺口聚类采用基于语义相似图的聚类方法：将每条query向量化写入向量索引，设定最小相似度阈值\texttt{min\_score}，相似度$\ge$阈值的query之间建立边；从未归类query出发递归扩展其邻居集合，形成一个连通分量作为聚类。为便于人工处理，平台对每个聚类选取若干代表性query，并调用大模型生成聚类标题与补充建议。聚类构建的关键实现片段如图\ref{fig:cg_cluster_key_code}所示。
+
+\begin{figure}[htbp]
+  \centering
+  \begin{minipage}{0.94\linewidth}
+    \begin{lstlisting}[basicstyle=\ttfamily\small,numbers=left,numberstyle=\tiny,frame=single,breaklines=true]
+public List<Cluster> buildClusters(List<QueryItem> items, double minScore) {
+  Set<String> visited = new HashSet<>();
+  List<Cluster> clusters = new ArrayList<>();
+  for (QueryItem q : items) {
+    if (visited.contains(q.id)) continue;
+    Queue<String> queue = new ArrayDeque<>();
+    Cluster c = new Cluster();
+    queue.add(q.id);
+    visited.add(q.id);
+    while (!queue.isEmpty()) {
+      String cur = queue.poll();
+      c.add(cur);
+      for (Neighbor n : vectorIndex.neighbors(cur, minScore)) {
+        if (visited.add(n.id)) queue.add(n.id);
+      }
+    }
+    clusters.add(c);
+  }
+  return clusters;
+}
+    \end{lstlisting}
+  \end{minipage}
+  \caption{缺知识聚类关键代码}
+  \label{fig:cg_cluster_key_code}
+\end{figure}
+
+（3）复检回收。任务处理后，系统对原聚类代表query进行复检，若已能召回到满足阈值的证据则自动完成任务，避免“内容已补充但任务未更新”导致统计失真。
+
+复检回收以任务中沉淀的代表性query为输入，复用问答召回能力对其进行周期性评估；当top1证据满足阈值且引用内容处于已发布状态时，任务自动进入完成状态。对于重复/歧义类任务，复检回收则以内容对为输入，若内容被合并、下线或修订后不再判定为重复/歧义，则任务自动关闭，从而实现“治理处理$\rightarrow$复检验证$\rightarrow$任务闭环”的持续运营机制。
+
 \subsection{治理任务线上化与闭环机制}
+\label{subsec:impl_cg_task}
+
+治理任务线上化将检测结果以主任务与子任务两层结构落地。主任务负责一次治理计算的配置与状态管理，包含任务名称、空间、会话周期与召回阈值等上下文信息；子任务承载具体问题与处理结论。重复/歧义任务支持人工判断下线、保留或合并；覆盖任务支持标记“无需补充/需要补充”并填写说明，处理引发内容修订后可进入内容管理的提审与发布流程，发布后由索引构建服务消费发布事件完成增量索引更新。
+
+在任务状态设计上，主任务的状态通常包括“新建/计算中/计算完成”，子任务的状态包括“待处理/处理中/已完成/已关闭”。平台将任务处理与内容发布链路打通：当责任人根据覆盖任务补充内容或根据重复任务合并下线内容后，内容进入提审与审批发布；发布事件触发索引更新后，复检回收再对任务范围进行验证并更新任务状态。该设计将治理从一次性离线分析转化为可持续的线上闭环，使治理效果能够稳定反哺内容应用与数据洞察。
 
 \section{数据洞察模块的实现}
+\label{sec:impl_di}
+
+数据洞察模块面向业务与运营提供“可观测+可分析+可追溯”的闭环能力。整体实现上采用“前端埋点与服务端事件采集$\rightarrow$数仓统一加工与指标口径沉淀$\rightarrow$洞察服务查询与权限控制$\rightarrow$前端可视化与下钻明细”的链路。数据加工与口径沉淀由数仓侧负责，本项目侧重点在事件规范、采集链路、与数仓的对接与查询服务建设。
+
+数据洞察模块的关键服务端接口定义如表\ref{tab:di_api}所示。
+
+\begin{table}[htbp]
+  \centering
+  \caption{数据洞察模块接口表}
+  \label{tab:di_api}
+  \begin{tabular}{c|c|p{9cm}}
+    \hline
+    服务名称 & 接口名称 & 功能描述 \\ \hline
+    事件上报 & reportEvent & 统一事件模型上报与关键链路服务端埋点。 \\ \hline
+    指标查询 & queryPageMetrics / queryContentMetrics & 按时间范围与维度查询页面/内容指标宽表。 \\ \hline
+    会话分析 & querySessionCluster / querySessionDetail & 查询聚类指标并下钻会话明细。 \\ \hline
+  \end{tabular}
+\end{table}
+
 \subsection{内容应用数据采集机制}
+\label{subsec:impl_di_collect}
+
+数据采集需要覆盖页面化消费链路与智能问答链路两类场景。在页面化链路中，采集曝光、点击、搜索输入与结果点击等行为数据；在问答链路中，采集问题输入、召回证据、生成结果与转人工等链路数据。平台对事件名与字段进行统一定义，例如page\_view、click、query\_submit、rag\_recall、llm\_generate、handoff\_intent与handoff\_success等，并统一携带app\_id、space\_id、session\_id、trace\_id与content\_id等公共维度字段，便于端到端追踪与明细还原。
+
+为保证事件口径可复用且便于扩展，平台将每条事件抽象为“公共维度 + 事件特有扩展字段”的统一结构：公共维度用于跨事件关联与链路追踪，扩展字段用于承载不同事件的特有信息（例如检索关键词、召回通道、候选数量、引用列表等）。事件明细的核心字段设计如表\ref{tab:di_event_schema}所示。
+
+\begin{table}[htbp]
+  \centering
+  \caption{事件明细核心字段设计}
+  \label{tab:di_event_schema}
+  \begin{tabular}{c|c|p{8.2cm}}
+    \hline
+    字段名 & 类型 & 说明 \\ \hline
+    event\_name & string & 事件名（page\_view/click/query\_submit/rag\_recall/llm\_generate等） \\ \hline
+    app\_id / space\_id & bigint & 组织边界维度，用于范围过滤与聚合 \\ \hline
+    user\_id / visitor\_id & bigint/string & 用户标识（登录用户/匿名访客），用于UV与分群分析 \\ \hline
+    session\_id & string & 会话标识，用于多轮对话与漏斗分析 \\ \hline
+    trace\_id & string & 链路标识，用于端到端追踪与去重 \\ \hline
+    content\_id & bigint & 内容标识，可为空（例如曝光/点击未关联内容时为空） \\ \hline
+    timestamp & datetime & 事件发生时间 \\ \hline
+    channel / device & string & 渠道与设备维度，可为空 \\ \hline
+    ext & json & 扩展字段（query、召回通道、得分、引用列表等） \\ \hline
+  \end{tabular}
+\end{table}
+
+扩展字段ext用于承载不同事件的特有信息。以智能问答链路为例，rag\_recall事件会携带召回通道、TopK、MinScore、候选数量与最终证据集合摘要；llm\_generate事件会携带prompt长度、生成耗时、引用数量、是否触发退化等信息。表\ref{tab:di_event_ext}给出了典型事件的ext字段示例，用于支撑后续“链路分析$\rightarrow$问题定位$\rightarrow$策略优化”的闭环。
+
+\begin{table}[htbp]
+  \centering
+  \caption{ext字段示例（典型事件）}
+  \label{tab:di_event_ext}
+  \begin{tabular}{c|p{10cm}}
+    \hline
+    事件名 & ext字段示例 \\ \hline
+    rag\_recall & query, rewritten\_query, channels(es/vec), topk, min\_score, hit\_cnt, evidence\_ids \\ \hline
+    llm\_generate & model, prompt\_len, latency\_ms, token\_out, citation\_cnt, degraded(bool) \\ \hline
+    handoff\_intent & reason, confidence, stage(recall/generate) \\ \hline
+  \end{tabular}
+\end{table}
+
+采集链路上，前端埋点负责覆盖页面曝光、点击、搜索等用户侧行为；服务端埋点覆盖RAG召回、重排、生成与转人工等关键节点，保证链路关键事件不丢失。服务端在生成trace\_id后将其贯穿写入召回与生成事件，使得洞察侧可以按trace\_id还原单次问答的证据与决策链路。为避免重复上报导致的指标膨胀，平台在采集接入层对同一(trace\_id, event\_name)做幂等去重，并对异常流量进行限流保护，保证事件链路稳定。
+
 \subsection{会话分析与效果指标设计}
+\label{subsec:impl_di_metric}
+
+在指标体系设计上，平台从页面、会话与内容三个视角承接数仓侧产出的聚合指标：页面监控关注PV/UV/点击率；会话分析关注会话数量、模型识别解决率、意向转人工率与转人工率；内容分析关注内容被召回次数、被生成次数以及转人工相关指标。洞察服务提供按时间范围、空间/应用、渠道与页面等维度的只读查询接口，支持从聚合图表下钻到会话明细。
+
+会话分析在实现上以session\_id为主键组织多轮交互，并以trace\_id串联单轮问答的召回与生成事件。聚合视图以“会话级”与“聚类级”两种口径输出：会话级指标用于观察整体趋势与转化漏斗；聚类级指标用于定位高频问题簇并下钻到原始query与证据。聚类构建逻辑与第三章给出的语义相似图方法一致，洞察侧通过聚类ID为每条会话打标，从而实现“主题簇$\rightarrow$明细会话$\rightarrow$引用内容”的端到端下钻路径。
+
+指标查询接口在实现上遵循只读原则：洞察服务不直接参与指标计算，仅对接数仓侧沉淀的宽表与明细表。为支撑高频查询，洞察服务对热点维度（例如近7天、近30天、单空间TopN）使用缓存或物化视图降低延迟，并对查询接口增加时间范围与返回条数限制，避免明细下钻对后端与数仓造成过高压力。
 
 \section{本章小结}
+本章对内容管理、内容应用、内容治理与数据洞察四个模块的关键实现进行了说明。内容管理模块以统一内容模型与状态机约束实现多形态内容的规范化生产与发布口径控制，并通过引用与权限机制支撑跨应用复用与越权防护；内容应用模块在发布事件驱动下构建索引，提供页面化展示、检索与RAG问答能力，并在输出侧返回可映射的引用；内容治理模块将重复、歧义与覆盖问题线上化为治理任务并与发布链路打通，形成可闭环的质量改进机制；数据洞察模块通过统一事件采集与指标查询支撑效果评估与问题定位，为后续实验评估与治理收益分析提供数据基础。
