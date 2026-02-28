@@ -790,6 +790,46 @@ public void runDupAmb(MainTask task) {
 
 覆盖度检测在实现上通常包含两条互补路径：其一是知识体系驱动，对接广告与商业化知识体系（类目、标签、概念、定义等）作为覆盖对象集合，逐项执行RAG召回并用大模型判断“是否覆盖”并打分，得到覆盖度分布；其二是需求驱动，从用户query与未命中行为中抽取真实需求，按语义聚类形成覆盖任务并推动内容补充。本项目实现以需求驱动路径为主，并在主任务配置中保留召回阈值与会话周期等参数，便于与知识体系驱动结果在同一指标口径下对齐。
 
+覆盖度判断在工程实现上同样采用“召回+判别”的模式：先对覆盖对象（类目/概念/定义/query等）执行RAG召回得到TopK候选证据，再由大模型判断候选证据是否能够覆盖该覆盖对象，并输出覆盖结论与可解释字段用于落表。覆盖度判别提示词模板如图\ref{fig:cg_coverage_prompt_tpl}所示。
+
+\begin{figure}[htbp]
+  \centering
+  \begin{minipage}{0.94\linewidth}
+    \begin{lstlisting}[basicstyle=\ttfamily\small,numbers=left,numberstyle=\tiny,frame=single,breaklines=true]
+# 角色
+你是内容覆盖度评估专家，负责判断“目标知识点”是否被证据内容覆盖。
+
+# 输入
+<item>
+{item_type}: {item_value}
+</item>
+<query>
+{represent_query}
+</query>
+<docs>
+{topk_evidence_with_keys_and_text}
+</docs>
+
+# 规则
+1) 仅基于docs判断，禁止引入外部知识与推断
+2) 若docs中能直接回答/定义/说明该item，则判定为覆盖
+3) 若仅弱相关或无法支撑结论，则判定为未覆盖
+4) 输出必须为JSON，便于程序解析落表
+
+# 输出(JSON)
+{
+  "covered": true/false,
+  "score": 0.0-1.0,
+  "evidence": ["key1","key2"],
+  "reason": "覆盖/不覆盖的简要依据",
+  "suggestion": "若未覆盖，给出应补充的要点"
+}
+    \end{lstlisting}
+  \end{minipage}
+  \caption{覆盖度判别提示词模板}
+  \label{fig:cg_coverage_prompt_tpl}
+\end{figure}
+
 （1）缺知识识别。系统将每条query按空间/应用范围进行召回评估，若top1相似度低于阈值或无有效证据，则将该query记录为缺知识候选。
 
 缺知识候选的来源既包括用户在智能问答中的原始query，也包括搜索框的查询词与未命中行为。实现中平台对缺知识候选进行基础清洗：去除纯噪声query、合并大小写与数字格式差异、过滤过短文本，并按空间/应用聚合以避免跨边界混淆。召回评估同时参考全文与向量两路结果，当两路均未达到阈值要求时才判定为缺知识，以降低单通道失误带来的误判。

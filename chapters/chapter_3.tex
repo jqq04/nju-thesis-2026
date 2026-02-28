@@ -597,7 +597,14 @@
   \label{fig:cm_space_app_seq}
 \end{figure}
 
-（2）统一内容模型与多形态内容。平台在内容层引入统一内容模型，使用content\_type区分knowledge、faq、course与case四类内容形态，并由一张内容表（content）维护所有内容的公共元数据字段（内容ID、类型、标题、摘要、正文引用、创建时间、更新时间、状态等）。不同内容类型的具体属性存储在对应的子表中，如knowledge、faq、course等；其中case为适配结构化字段灵活演进，其详情存储在MongoDB中。该设计保证了多形态内容在管理侧具备一致的生命周期操作，同时又允许不同内容形态按需扩展字段。
+（2）统一内容模型与多形态内容。平台在内容层引入统一内容模型，使用content\_type区分knowledge、faq、course与case四类内容形态，并由一张内容表（content）维护所有内容的公共元数据字段（内容ID、类型、标题、摘要、正文引用、创建时间、更新时间、状态等）。不同内容类型的具体属性存储在对应的子表中，如knowledge、faq、course等；其中case为适配结构化字段灵活演进，其详情存储在MongoDB中。该设计保证了多形态内容在管理侧具备一致的生命周期操作，同时又允许不同内容形态按需扩展字段。平台核心领域对象及其关联关系可用类图表达，如图\ref{fig:cm_domain_class}所示。
+
+\begin{figure}[htbp]
+  \centering
+  \fbox{\parbox{0.92\linewidth}{\vspace{18mm}\centering 平台核心领域模型类图占位（待补充）\vspace{18mm}}}
+  \caption{平台核心领域模型类图}
+  \label{fig:cm_domain_class}
+\end{figure}
 
 \begin{figure}[htbp]
   \centering
@@ -628,6 +635,15 @@
   \end{tabular}
 \end{table}
 
+权限体系在工程实现中由RBAC与content\_auth两部分叠加组成：RBAC负责模块与操作级的基础权限，content\_auth负责内容对象级的策略授权。两类对象及其关系可用类图表达，如图\ref{fig:cm_auth_class}所示。
+
+\begin{figure}[htbp]
+  \centering
+  \fbox{\parbox{0.92\linewidth}{\vspace{18mm}\centering 权限与授权领域类图占位（待补充）\vspace{18mm}}}
+  \caption{权限与授权领域类图}
+  \label{fig:cm_auth_class}
+\end{figure}
+
 \begin{figure}[htbp]
   \centering
   \fbox{\parbox{0.92\linewidth}{\vspace{14mm}\centering 内容权限鉴权流程图占位（待补充）\vspace{14mm}}}
@@ -642,6 +658,15 @@
   \includegraphics[width=1.0\linewidth]{./figure/figures-内容发布事件时序图.png}
   \caption{内容发布流程时序图}
   \label{fig:content_publish}
+\end{figure}
+
+审批与发布链路涉及内容状态、审批记录与发布事件等核心对象，其数据关系与状态约束可用类图表达，如图\ref{fig:cm_publish_class}所示。
+
+\begin{figure}[htbp]
+  \centering
+  \fbox{\parbox{0.92\linewidth}{\vspace{18mm}\centering 审批与发布领域类图占位（待补充）\vspace{18mm}}}
+  \caption{审批与发布领域类图}
+  \label{fig:cm_publish_class}
 \end{figure}
 
 （4）内容组织与应用引用。为提升内容可发现性与复用效果，平台提供类目管理、标签管理与应用引用内容机制。类目以树状层级构建稳定导航入口，标签以扁平维度实现横向聚合；应用引用内容用于表达应用可使用哪些已发布内容，使权威口径能够在多个应用复用并保持一致。应用引用内容的关键交互过程如图\ref{fig:cm_app_content_ref_seq}所示。
@@ -680,6 +705,15 @@
 
 为保证索引与内容状态的一致性，索引构建过程需要以已发布内容为输入，并在构建完成后对外刷新可用索引，避免出现检索结果与内容展示不一致的问题。
 
+索引构建涉及切片（Slice）、全文索引文档、向量索引向量与索引元信息等关键对象，并需要携带空间、应用与权限元数据以支撑范围过滤与权限校验，其对象关系可用类图表达，如图\ref{fig:ca_index_class}所示。
+
+\begin{figure}[htbp]
+  \centering
+  \fbox{\parbox{0.92\linewidth}{\vspace{18mm}\centering 切片与索引领域类图占位（待补充）\vspace{18mm}}}
+  \caption{切片与索引领域类图}
+  \label{fig:ca_index_class}
+\end{figure}
+
 \begin{figure}[htbp]
   \centering
   \fbox{\parbox{0.92\linewidth}{\vspace{14mm}\centering 索引构建流程示意图占位（待补充）\vspace{14mm}}}
@@ -690,6 +724,15 @@
 （4）生成式问答。为支撑智能问答场景，平台提供面向生成模型的可控内容支撑能力，其关键在于将内容转化为可检索的语义单元（切片）并在结果中返回可定位的来源信息。平台在索引构建阶段对不同内容形态执行切片策略：文章按固定长度切分并尽量保持段落语义完整；问答以问题与答案作为完整语义单元分别入库并建索引；课程可将每个课节作为一个切片；案例以每个案例作为一个切片。对于图片类内容，使用多模态Embedding模型并结合大模型生成文本化理解结果入库；对于表格类内容，避免纯文本切分并按行保持语义完整，同时在切片中携带表头信息。切片索引时携带所属内容ID、应用ID与内容权限等元数据，用于召回阶段的权限过滤与范围控制。索引侧同时构建全文检索索引与语义向量索引，两条通道互补以兼顾精准匹配与语义召回。
 
 在问答阶段，平台采用多通道召回与重排流程：首先对用户问题进行改写以提升召回质量；随后分别在全文检索（ES）与语义向量索引通道召回候选切片，并结合TopK与最小相似度阈值（MinScore）进行过滤；最后对候选切片去重、重排并输出证据集合供大模型生成回答。为便于后续治理与评估，问答链路记录召回通道、得分、排序依据与引用来源，并在返回结果中携带内容标识与片段定位信息。生成式问答的召回与重排过程如图\ref{fig:ca_rag_flow}所示。
+
+生成式问答链路涉及问题输入、证据集合与引用结果等核心对象，例如AskReq、EvidencePack、SliceHit与Citation等，其对象关系与关键字段约束可用类图表达，如图\ref{fig:ca_qa_class}所示。
+
+\begin{figure}[htbp]
+  \centering
+  \fbox{\parbox{0.92\linewidth}{\vspace{18mm}\centering 生成式问答领域类图占位（待补充）\vspace{18mm}}}
+  \caption{生成式问答领域类图}
+  \label{fig:ca_qa_class}
+\end{figure}
 
 \begin{figure}[htbp]
   \centering
@@ -725,6 +768,15 @@
   \label{fig:cg_task_flow}
 \end{figure}
 
+治理任务线上化涉及主任务、覆盖任务、重复/歧义任务以及任务处理记录等对象，并需表达任务状态机与关联关系，其领域模型类图如图\ref{fig:cg_task_class}所示。
+
+\begin{figure}[htbp]
+  \centering
+  \fbox{\parbox{0.92\linewidth}{\vspace{18mm}\centering 治理任务领域类图占位（待补充）\vspace{18mm}}}
+  \caption{治理任务领域类图}
+  \label{fig:cg_task_class}
+\end{figure}
+
 （5）复检回收与链路一致性。治理任务处理通常会引发内容修订与再次发布，平台需要保证“内容资产—索引—问答结果”在治理后保持一致。对于需要修订的内容，治理处理应与内容管理的提审与发布流程打通，发布后由索引构建服务消费发布事件完成增量索引更新；随后对任务范围执行复检回收，确认质量问题是否消除，并将复检结果与指标变化回收至数据洞察体系，用于形成治理前后对比与策略迭代。跨域协同链路示意如图\ref{fig:cg_fix_publish_seq}所示。
 
 \begin{figure}[htbp]
@@ -745,6 +797,15 @@
 \end{figure}
 
 （1）数据采集。数据采集需要覆盖页面化消费链路与智能问答链路两类场景。在页面化链路中，平台采集曝光、点击、搜索输入与结果点击等行为数据；在问答链路中，平台采集问题输入、召回证据、生成结果与转人工等链路数据。为避免采集口径不一致导致分析偏差，平台对埋点事件与字段进行统一定义，例如page\_view、click、query\_submit、rag\_recall、llm\_generate、handoff\_intent与handoff\_success等，并统一携带app\_id、space\_id、session\_id、trace\_id与content\_id等公共维度字段，便于端到端追踪与明细还原。
+
+为支撑事件的可扩展与跨链路关联，平台将事件抽象为“公共维度 + ext扩展字段”的统一模型，并以trace\_id与session\_id建立会话与链路关联。事件数据模型与关键维度关系如图\ref{fig:di_event_class}所示。
+
+\begin{figure}[htbp]
+  \centering
+  \fbox{\parbox{0.92\linewidth}{\vspace{18mm}\centering 事件采集与维度模型类图占位（待补充）\vspace{18mm}}}
+  \caption{事件采集与维度模型类图}
+  \label{fig:di_event_class}
+\end{figure}
 
 （2）指标对接与查询服务。在指标体系设计上，平台从页面、会话与内容三个视角承接数仓侧产出的聚合指标：页面数据监控关注PV/UV/点击率；会话维度分析关注会话数量、模型识别解决率、意向转人工率与转人工率；内容维度分析关注内容被召回次数、被生成次数以及转人工相关指标。平台在洞察服务中提供按时间范围、空间/应用、渠道与页面等维度的只读查询接口，支持从聚合图表下钻到会话明细，并通过RBAC与字段脱敏控制明细可见范围。
 
