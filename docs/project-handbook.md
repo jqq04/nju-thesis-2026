@@ -60,6 +60,100 @@
 
 数据库层上，由一张内容表（Content）维护所有内容的元数据，包括内容 ID、类型、标题、摘要、内容体、创建时间、更新时间、状态等字段。不同内容类型的具体属性则存储在对应的子表中，如文章（Knowledge）、问答（Faq）、课程（Course）、案例（Case）等。其中案例较为特殊，对应子表在 MongoDB 中（以适应结构化数据）。
 
+##### 数据库表结构（核心字段）
+
+以下表结构用于固化论文写作的字段口径（不包含索引侧 ES/向量库的存储结构）。
+
+空间表（`space`）：
+
+| 字段名 | 描述 | 类型 | 备注 |
+|---|---|---|---|
+| id | 空间 ID | bigint | 主键 |
+| name | 空间名称 | varchar(255) | 业务标识 |
+| owner_id | 负责人 ID | bigint | 平台用户标识 |
+| status | 状态 | varchar(50) | ENABLED/DISABLED |
+| create_time | 创建时间 | datetime |  |
+| modify_time | 更新时间 | datetime |  |
+
+应用表（`application`）：
+
+| 字段名 | 描述 | 类型 | 备注 |
+|---|---|---|---|
+| id | 应用 ID | bigint | 主键 |
+| space_id | 空间 ID | bigint | 外键 |
+| name | 应用名称 | varchar(255) | 业务标识 |
+| type | 应用类型 | varchar(50) | 门户/智能助手等 |
+| status | 状态 | varchar(50) | ENABLED/DISABLED |
+| create_time | 创建时间 | datetime |  |
+| modify_time | 更新时间 | datetime |  |
+
+内容表（`content`）：
+
+| 字段名 | 描述 | 类型 | 备注 |
+|---|---|---|---|
+| id | 内容 ID | bigint | 主键 |
+| space_id | 空间 ID | bigint | 外键 |
+| app_id | 归属应用 ID | bigint | 内容创建所在应用 |
+| content_type | 内容类型 | varchar(50) | knowledge/faq/course/case |
+| title | 标题 | varchar(255) |  |
+| summary | 摘要 | varchar(1024) |  |
+| status | 状态 | varchar(50) | DRAFT/PENDING_REVIEW/PUBLISHED/OFFLINE/DELETED |
+| create_time | 创建时间 | datetime |  |
+| modify_time | 更新时间 | datetime |  |
+
+知识内容表（`knowledge`）：
+
+| 字段名 | 描述 | 类型 | 备注 |
+|---|---|---|---|
+| id | 主键 ID | bigint | 主键 |
+| content_id | 内容 ID | bigint | 外键 |
+| body | 正文 | longtext | 富文本/Markdown 等 |
+
+问答内容表（`faq`）：
+
+| 字段名 | 描述 | 类型 | 备注 |
+|---|---|---|---|
+| id | 主键 ID | bigint | 主键 |
+| content_id | 内容 ID | bigint | 外键 |
+| question | 标准问题 | varchar(1024) |  |
+| answer | 答案 | longtext |  |
+
+相似问表（`faq_similar_question`）：
+
+| 字段名 | 描述 | 类型 | 备注 |
+|---|---|---|---|
+| id | 主键 ID | bigint | 主键 |
+| faq_id | 问答 ID | bigint | 外键，关联 faq |
+| question | 相似问 | varchar(1024) |  |
+| create_time | 创建时间 | datetime |  |
+
+课程内容表（`course`）：
+
+| 字段名 | 描述 | 类型 | 备注 |
+|---|---|---|---|
+| id | 主键 ID | bigint | 主键 |
+| content_id | 内容 ID | bigint | 外键 |
+| cover_url | 封面 | varchar(1024) | 可选 |
+| level | 难度等级 | varchar(50) | 可选 |
+
+课节表（`course_lesson`）：
+
+| 字段名 | 描述 | 类型 | 备注 |
+|---|---|---|---|
+| id | 主键 ID | bigint | 主键 |
+| course_id | 课程 ID | bigint | 外键，关联 course |
+| title | 课节标题 | varchar(255) |  |
+| lesson_no | 课节序号 | int | 课程内排序 |
+| content | 课节内容 | longtext | 文本/字幕等 |
+
+案例详情集合（MongoDB：`case_detail`）：
+
+| 字段名 | 描述 | 类型 | 备注 |
+|---|---|---|---|
+| _id | 主键 ID | ObjectId | MongoDB 主键 |
+| content_id | 内容 ID | bigint | 关联 content.id |
+| detail | 详情字段 | json | 其余结构化/非结构化字段 |
+
 #### 权限管理
 
 平台权限分为两类：平台管理权限与内容权限。
@@ -68,6 +162,49 @@
 
 平台采用“角色-权限-作用域”三元组 RBAC 模型，MySQL 五张表即可落地：`user`、`role`、`permission`、`role_permission`、`user_role_binding`（含 `GLOBAL` / `SPACE` / `APP` 作用域）。
 
+RBAC 表结构（核心字段）：
+
+用户表（`user`）：
+
+| 字段名 | 描述 | 类型 | 备注 |
+|---|---|---|---|
+| id | 用户 ID | bigint | 主键 |
+| name | 用户名 | varchar(255) |  |
+| status | 状态 | varchar(50) | ENABLED/DISABLED |
+
+角色表（`role`）：
+
+| 字段名 | 描述 | 类型 | 备注 |
+|---|---|---|---|
+| id | 角色 ID | bigint | 主键 |
+| name | 角色名称 | varchar(255) | 平台负责人/业务负责人/业务运营等 |
+
+权限表（`permission`）：
+
+| 字段名 | 描述 | 类型 | 备注 |
+|---|---|---|---|
+| id | 权限 ID | bigint | 主键 |
+| code | 权限码 | varchar(255) | 如 SPACE_CREATE、CONTENT_PUBLISH |
+| name | 权限名称 | varchar(255) | 可读描述 |
+
+角色-权限关联表（`role_permission`）：
+
+| 字段名 | 描述 | 类型 | 备注 |
+|---|---|---|---|
+| id | 主键 ID | bigint | 主键 |
+| role_id | 角色 ID | bigint | 外键 |
+| permission_id | 权限 ID | bigint | 外键 |
+
+用户-角色绑定表（`user_role_binding`）：
+
+| 字段名 | 描述 | 类型 | 备注 |
+|---|---|---|---|
+| id | 主键 ID | bigint | 主键 |
+| user_id | 用户 ID | bigint | 外键 |
+| role_id | 角色 ID | bigint | 外键 |
+| scope_type | 作用域类型 | varchar(20) | GLOBAL/SPACE/APP |
+| scope_id | 作用域 ID | bigint | 空间 ID / 应用 ID，可为空 |
+
 内置三种角色：
 
 - 平台负责人（GLOBAL）：全局配置、空间创建、应急处置。
@@ -75,6 +212,19 @@
 - 业务运营（APP|SPACE）：内容增删改、提审、类目标签维护。
 
 权限码按“模块_操作”命名（如 `SPACE_CREATE`、`CONTENT_PUBLISH`），统一拦截器按 `user_id + scope + code` 做缓存鉴权，关键操作写审计日志。
+
+审计日志表（`audit_log`）：
+
+| 字段名 | 描述 | 类型 | 备注 |
+|---|---|---|---|
+| id | 主键 ID | bigint | 主键 |
+| user_id | 操作人 | bigint | 平台用户标识 |
+| action | 操作类型 | varchar(100) | 如 CONTENT_PUBLISH 等 |
+| scope_type | 作用域类型 | varchar(20) | GLOBAL/SPACE/APP |
+| scope_id | 作用域 ID | bigint | 可为空 |
+| target_type | 目标类型 | varchar(50) | content/space/app 等 |
+| target_id | 目标 ID | bigint | 可为空 |
+| create_time | 创建时间 | datetime |  |
 
 创建空间/应用时自动初始化角色并绑定创建人；后续成员变更由空间负责人自助分配角色，平台负责人可跨空间处理异常。
 
@@ -117,19 +267,84 @@
 7. 审批服务回调内容服务。
 8. 内容服务更新内容状态为已发布，更新相关信息，同时发布更新事件到 MQ。
 
+审批表（`content_approval`）：
+
+| 字段名 | 描述 | 类型 | 备注 |
+|---|---|---|---|
+| id | 审批单 ID | bigint | 主键 |
+| content_id | 内容 ID | bigint | 外键 |
+| submitter_id | 提交人 ID | bigint | 平台用户标识 |
+| reviewer_id | 审批人 ID | bigint | 平台用户标识 |
+| status | 审批状态 | varchar(50) | PENDING/APPROVED/REJECTED |
+| comment | 审批意见 | varchar(1024) | 可选 |
+| create_time | 创建时间 | datetime |  |
+| modify_time | 更新时间 | datetime |  |
+
 #### 其他功能（非核心）
 
 ##### 标签管理
 
 对内容进行标签化管理，支持标签的创建、编辑、删除、查询等操作。标签可以应用于不同类型的内容（如文章、问答、课程等），并通过标签关联实现内容的分类、组织与检索。
 
+标签表（`tag`）：
+
+| 字段名 | 描述 | 类型 | 备注 |
+|---|---|---|---|
+| id | 标签 ID | bigint | 主键 |
+| app_id | 应用 ID | bigint | 标签所属应用 |
+| name | 标签名称 | varchar(255) | 唯一性按应用约束 |
+| status | 状态 | varchar(50) | ENABLED/DISABLED |
+| create_time | 创建时间 | datetime |  |
+| modify_time | 更新时间 | datetime |  |
+
+内容-标签关联表（`content_tag_ref`）：
+
+| 字段名 | 描述 | 类型 | 备注 |
+|---|---|---|---|
+| id | 主键 ID | bigint | 主键 |
+| content_id | 内容 ID | bigint | 外键，关联 content |
+| tag_id | 标签 ID | bigint | 外键，关联 tag |
+| create_time | 创建时间 | datetime |  |
+
 ##### 类目管理
 
 对内容进行类目化管理，支持类目树的创建、编辑、删除、查询等操作。内容可以通过类目进行分类与组织，同时支持类目树的可视化展示。
 
+类目表（`category`）：
+
+| 字段名 | 描述 | 类型 | 备注 |
+|---|---|---|---|
+| id | 类目 ID | bigint | 主键 |
+| app_id | 应用 ID | bigint | 类目所属应用 |
+| parent_id | 父类目 ID | bigint | 根节点为 0 或空 |
+| name | 类目名称 | varchar(255) |  |
+| path | 路径 | varchar(1024) | 祖先链路编码，可选 |
+| status | 状态 | varchar(50) | ENABLED/DISABLED |
+| create_time | 创建时间 | datetime |  |
+| modify_time | 更新时间 | datetime |  |
+
+内容-类目关联表（`content_category_ref`）：
+
+| 字段名 | 描述 | 类型 | 备注 |
+|---|---|---|---|
+| id | 主键 ID | bigint | 主键 |
+| content_id | 内容 ID | bigint | 外键，关联 content |
+| category_id | 类目 ID | bigint | 外键，关联 category |
+| create_time | 创建时间 | datetime |  |
+
 ##### 内容引用机制
 
 为方便内容复用，支持不同应用之间的内容引用，即一个应用可以引用另一个应用中的内容。引用关系通过 `content_app_ref` 表维护，记录引用源应用、引用目标应用、引用内容 ID 等信息。
+
+应用引用表（`content_app_ref`）：
+
+| 字段名 | 描述 | 类型 | 备注 |
+|---|---|---|---|
+| id | 主键 ID | bigint | 主键 |
+| source_app_id | 引用源应用 ID | bigint | 外键 |
+| target_app_id | 引用目标应用 ID | bigint | 外键 |
+| content_id | 内容 ID | bigint | 外键 |
+| create_time | 创建时间 | datetime |  |
 
 ### 内容应用模块
 
@@ -241,6 +456,52 @@
 - 人工标记处理结果：对缺失知识人工判断是否需要内容补充并完成任务标记；若需补充，可在平台新增相关内容。
 - 系统自动巡检：系统每天定时巡检，检查自上次巡检之后发生内容变更/上线的内容；LLM 判断是否补充了缺失知识，若已补充则系统自动将任务标记为已完成状态。
 
+治理任务相关表（核心字段）：
+
+主任务表（`govern_main_task`）：
+
+| 字段名 | 描述 | 类型 | 备注 |
+|---|---|---|---|
+| id | 主任务 ID | bigint | 主键 |
+| name | 任务名称 | varchar(255) |  |
+| space_id | 业务空间 | bigint | 外键，关联 space |
+| session_period | 会话周期 | varchar(50) | 天/周/月等 |
+| recall_threshold | 召回阈值 | decimal(10,4) | 相似度/覆盖阈值 |
+| status | 状态 | varchar(50) | 计算中/计算完成/已完成等 |
+| create_time | 创建时间 | datetime |  |
+| modify_time | 更新时间 | datetime |  |
+
+重复歧义任务表（`govern_dup_amb_task`）：
+
+| 字段名 | 描述 | 类型 | 备注 |
+|---|---|---|---|
+| id | 任务 ID | bigint | 主键 |
+| main_task_id | 主任务 ID | bigint | 外键，关联 govern_main_task |
+| app_id | 应用 ID | bigint | 外键，关联 application |
+| task_type | 子任务类型 | varchar(50) | DUPLICATE/AMBIGUOUS |
+| content_id_a | 内容 A | bigint | 外键，关联 content |
+| content_id_b | 内容 B | bigint | 外键，关联 content |
+| status | 状态 | varchar(50) | TODO/DONE 等 |
+| assignee_id | 责任人 | bigint | 平台用户标识 |
+| result | 处理结果 | varchar(255) | 下线/保留/合并等 |
+| create_time | 创建时间 | datetime |  |
+| modify_time | 更新时间 | datetime |  |
+
+覆盖度任务表（`govern_coverage_task`）：
+
+| 字段名 | 描述 | 类型 | 备注 |
+|---|---|---|---|
+| id | 任务 ID | bigint | 主键 |
+| main_task_id | 主任务 ID | bigint | 外键，关联 govern_main_task |
+| app_id | 应用 ID | bigint | 外键，关联 application |
+| item_type | 覆盖对象类型 | varchar(50) | 类目/标签/概念/定义/query 等 |
+| item_value | 覆盖对象值 | varchar(1024) | 名称或标识 |
+| score | 覆盖得分 | decimal(10,4) | 可选 |
+| status | 状态 | varchar(50) | TODO/DONE 等 |
+| assignee_id | 责任人 | bigint | 平台用户标识 |
+| create_time | 创建时间 | datetime |  |
+| modify_time | 更新时间 | datetime |  |
+
 ### 数据洞察模块
 
 本模块面向业务/运营提供“可观测 + 可分析 + 可追溯”的闭环能力。整体实现上采用“前端埋点与服务端事件采集 → 数仓统一加工与指标口径沉淀 → 洞察服务查询与权限控制 → 前端可视化与下钻明细”的链路。数据加工与口径沉淀由数仓侧负责，本项目侧重点在事件规范、采集链路、与数仓/BI 的对接与查询服务建设。
@@ -251,6 +512,84 @@
 - 采集链路：前端 SDK 埋点 + 服务端关键节点埋点（RAG 召回、生成、转人工等），通过日志/消息队列进入数仓侧 ODS；服务端埋点负责保证关键业务事件不丢失，并与 `trace_id` 关联，支持端到端追踪与明细还原。
 - 指标查询：洞察服务提供只读 API（按天/小时聚合、按空间/渠道/页面过滤、下钻明细），对接数仓侧提供的宽表或指标层；热点查询使用缓存/物化视图减少延迟，查询侧做口径校验与限流。
 - 权限与合规：沿用空间/应用维度的 RBAC 权限校验；对用户标识做脱敏/哈希与最小化采集，明细查询按权限控制字段可见性与导出能力。
+
+数据表口径（数仓侧宽表/明细表）：
+
+事件明细表（ODS：`di_event_ods`）：
+
+| 字段名 | 描述 | 类型 | 备注 |
+|---|---|---|---|
+| event_name | 事件名 | string | page_view/click/query_submit/rag_recall 等 |
+| app_id | 应用 ID | bigint |  |
+| space_id | 空间 ID | bigint |  |
+| user_id | 用户 ID | bigint | 可为空 |
+| visitor_id | 匿名访客 | string | 可为空 |
+| session_id | 会话 ID | string |  |
+| trace_id | 链路标识 | string |  |
+| content_id | 内容 ID | bigint | 可为空 |
+| timestamp | 时间戳 | datetime |  |
+| channel | 渠道 | string | 可为空 |
+| device | 设备 | string | 可为空 |
+| ext | 扩展字段 | json | 事件特有字段 |
+
+页面指标宽表（DWS：`di_page_metric_d`）：
+
+| 字段名 | 描述 | 类型 | 备注 |
+|---|---|---|---|
+| dt | 统计日期 | date | 分区字段 |
+| app_id | 应用 ID | bigint |  |
+| space_id | 空间 ID | bigint |  |
+| page_id | 页面 ID | string |  |
+| pv | PV | bigint |  |
+| uv | UV | bigint |  |
+| click_cnt | 点击数 | bigint |  |
+| ctr | 点击率 | decimal(10,4) | 可选 |
+
+会话聚类指标宽表（DWS：`di_session_cluster_d`）：
+
+| 字段名 | 描述 | 类型 | 备注 |
+|---|---|---|---|
+| dt | 统计日期 | date | 分区字段 |
+| app_id | 应用 ID | bigint |  |
+| space_id | 空间 ID | bigint |  |
+| cluster_id | 聚类 ID | string |  |
+| cluster_title | 聚类标题 | string |  |
+| session_cnt | 会话数 | bigint |  |
+| query_cnt | Query 数 | bigint |  |
+| solve_rate | 模型识别解决率 | decimal(10,4) |  |
+| handoff_intent_rate | 意向转人工率 | decimal(10,4) |  |
+| handoff_rate | 实际转人工率 | decimal(10,4) |  |
+
+内容指标宽表（DWS：`di_content_metric_d`）：
+
+| 字段名 | 描述 | 类型 | 备注 |
+|---|---|---|---|
+| dt | 统计日期 | date | 分区字段 |
+| app_id | 应用 ID | bigint |  |
+| space_id | 空间 ID | bigint |  |
+| content_id | 内容 ID | bigint |  |
+| content_type | 内容类型 | string | knowledge/faq/course/case |
+| category_id | 类目 ID | bigint | 可为空 |
+| recall_session_cnt | 被召回会话数 | bigint |  |
+| generate_session_cnt | 被生成会话数 | bigint |  |
+| handoff_intent_session_cnt | 意向转人工会话数 | bigint |  |
+| handoff_session_cnt | 转人工会话数 | bigint |  |
+
+会话明细表（DWD：`di_session_detail`）：
+
+| 字段名 | 描述 | 类型 | 备注 |
+|---|---|---|---|
+| session_id | 会话 ID | string | 主键之一 |
+| cluster_id | 聚类 ID | string | 可为空 |
+| raw_query | 用户原声 | string | 可脱敏 |
+| rewritten_query | 改写 Query | string | 可脱敏 |
+| recalled_contents | 召回内容 | json | 含 content_id&title 等 |
+| answer | 回复内容 | string | 可脱敏 |
+| handoff_intent | 意向转人工 | tinyint | 0/1 |
+| handoff_success | 是否转人工 | tinyint | 0/1 |
+| user_id | 用户 ID | bigint | 可脱敏 |
+| user_type | 用户类型 | string | 内部/外部/匿名等 |
+| session_time | 会话时间 | datetime |  |
 
 #### 页面数据监控
 
