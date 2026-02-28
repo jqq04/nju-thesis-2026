@@ -1,6 +1,193 @@
 
 \chapter{内容管理、应用与治理平台测试}
+
+本章参考师兄论文第五章的组织方式，从测试环境、单元测试与功能测试三个角度，对内容管理、应用与治理平台进行测试说明。测试目标包括：验证平台核心功能满足第三章需求分析中定义的业务用例；验证关键技术链路（发布口径、权限过滤、事件驱动索引、RAG问答与治理闭环）在典型场景下能够稳定运行；并通过单元测试降低回归成本，提升迭代效率。
+
 \section{系统测试环境}
+
+平台在实现上由内容管理、内容应用、内容治理与数据洞察等模块构成，依赖关系型数据库与文档数据库存储内容资产，并在内容发布后构建全文索引与向量索引以支撑检索与智能问答。由于论文工程无法直接提供企业内部真实部署细节，本节从“部署形态+关键依赖组件+测试工具链”三个维度描述测试环境口径，便于复现测试结论。平台测试环境描述如表\ref{tab:test_env}所示。
+
+\begin{table}[htbp]
+  \centering
+  \caption{测试环境描述表}
+  \label{tab:test_env}
+  \begin{tabular}{c|p{10.2cm}}
+    \hline
+    项目 & 说明 \\ \hline
+    部署形态 & 服务以容器化方式部署于Linux环境，按模块拆分并独立扩缩容。 \\ \hline
+    开发环境 & 开发与调试环境为macOS或Linux，使用浏览器与接口调试工具完成联调。 \\ \hline
+    数据存储 & 关系型数据库用于内容元数据、权限与任务数据；文档数据库用于案例详情等灵活结构字段。 \\ \hline
+    检索与向量索引 & 全文检索索引用于关键词召回与高亮展示；向量索引用于语义召回与长尾覆盖，二者共同支撑RAG。 \\ \hline
+    消息通知与异步链路 & 内容发布后通过消息队列触发索引增量更新与数据回收等异步任务。 \\ \hline
+    外部能力 & 智能问答与治理判别依赖大模型服务，图文与图片类检索依赖多模态embedding能力。 \\ \hline
+    测试工具 & 前端功能测试使用Chrome；接口与链路测试使用Postman或同类HTTP工具；必要时结合日志与trace\_id进行链路定位。 \\ \hline
+  \end{tabular}
+\end{table}
+
 \section{单元测试}
+
+单元测试用于在最小可控范围内验证模块内部逻辑正确性，并通过Mock隔离外部依赖以降低测试不稳定因素。平台的单元测试重点覆盖三类逻辑：第一类是权限裁决与状态机约束（例如RBAC与content\_auth匹配、审批状态流转）；第二类是内容处理与索引构建的可重复性（例如切片构建规则、slice\_id稳定生成）；第三类是治理与洞察的关键算法单元（例如TopK候选生成、任务幂等upsert与复检回收）。
+
+单元测试的基本原则如下：
+（1）边界清晰。对外部服务（数据库、索引服务、消息队列与大模型服务）通过Mock替身模拟输入输出，仅验证当前模块的业务逻辑与异常处理。
+（2）可重复执行。对时间、随机数与外部依赖进行固定化处理，避免测试随运行环境变化而不稳定。
+（3）覆盖关键分支。对成功路径、非法状态、权限拒绝、幂等重试与异常退化等关键分支分别构造用例，降低线上故障风险。
+
+以content\_auth的“动作优先”裁决为例，单元测试需要覆盖不同auth\_tactic与auth\_code组合下的匹配结果，并验证“命中任一规则即放行、无规则命中则拒绝”的裁决逻辑。单元测试用例示例如图\ref{fig:unit_test_example}所示。
+
+\begin{figure}[htbp]
+  \centering
+  \begin{minipage}{0.94\linewidth}
+    \begin{lstlisting}[basicstyle=\ttfamily\small,numbers=left,numberstyle=\tiny,frame=single,breaklines=true]
+def "test_content_auth_action_first"() {
+  given: "构造访问者属性与授权规则集合"
+  def visitor = new Visitor(isInternal: true, employeeId: 1001, deptPath: ["d1","d2"])
+  def rules = [
+    new AuthRule(authTactic: "department", authVariable: "d2", authCode: "r"),
+    new AuthRule(authTactic: "employee", authVariable: "1002", authCode: "w")
+  ]
+  authDao.listRules(contentId) >> rules
+
+  expect: "读动作命中部门规则放行，写动作不命中则拒绝"
+  service.checkContentAuth(contentId, "r", visitor) == true
+  service.checkContentAuth(contentId, "w", visitor) == false
+}
+    \end{lstlisting}
+  \end{minipage}
+  \caption{单元测试用例示例}
+  \label{fig:unit_test_example}
+\end{figure}
+
 \section{功能测试}
+
+功能测试用于验证平台对外可见能力与关键链路在真实交互下满足预期。本节基于第三章的核心用例集合，对内容管理、内容应用、内容治理与数据洞察模块设计功能测试用例。测试用例采用“步骤-预期结果”形式描述，覆盖正常流程、非法状态、权限约束、异步一致性与退化策略等场景。
+
+\subsection{内容管理功能测试}
+
+创建空间与应用是平台组织与权限的起点，用例用于验证空间隔离与应用边界能够正确生效。创建空间/应用的测试用例如表\ref{tab:tc01}所示。
+
+\begin{table}[htbp]
+  \centering
+  \caption{创建空间/应用测试用例}
+  \label{tab:tc01}
+  \begin{tabular}{c|p{10.2cm}}
+    \hline
+    用例编号 & TC01 \\ \hline
+    测试内容 & 创建空间与应用 \\ \hline
+    测试步骤 & 1) 进入空间管理创建空间并填写负责人。2) 在空间内创建应用并选择支持的内容形态与组织方式。3) 进入成员与角色页面绑定默认角色。 \\ \hline
+    预期结果 & 1) 空间与应用创建成功并可查询详情。2) 默认角色初始化完成且创建人具备对应权限。3) 不同空间的数据互相隔离。 \\ \hline
+  \end{tabular}
+\end{table}
+
+内容生产链路覆盖创建、编辑、提审、审批与发布等过程，且要求读链路对外仅展示已发布内容。内容发布审批的测试用例如表\ref{tab:tc02}所示。
+
+\begin{table}[htbp]
+  \centering
+  \caption{内容提审与审批发布测试用例}
+  \label{tab:tc02}
+  \begin{tabular}{c|p{10.2cm}}
+    \hline
+    用例编号 & TC02 \\ \hline
+    测试内容 & 内容提审、审批通过/驳回与发布口径 \\ \hline
+    测试步骤 & 1) 创建一条knowledge内容并保存草稿。2) 发起提审进入待审批状态。3) 审批人执行驳回并填写意见。4) 再次提审并审批通过，内容进入已发布状态。5) 在门户与检索侧分别访问该内容。 \\ \hline
+    预期结果 & 1) 草稿状态不对外可见。2) 驳回后内容回到可编辑状态并保留意见。3) 审批通过后内容对外可见，门户与检索均仅返回已发布口径。 \\ \hline
+  \end{tabular}
+\end{table}
+
+跨应用引用用于复用权威内容并控制可见范围，用例用于验证“仅可引用已发布内容”与“引用幂等”约束。应用引用内容测试用例如表\ref{tab:tc03}所示。
+
+\begin{table}[htbp]
+  \centering
+  \caption{应用引用内容测试用例}
+  \label{tab:tc03}
+  \begin{tabular}{c|p{10.2cm}}
+    \hline
+    用例编号 & TC03 \\ \hline
+    测试内容 & 应用引用已发布内容 \\ \hline
+    测试步骤 & 1) 在源应用发布一条内容。2) 在目标应用发起引用该内容。3) 重复执行引用操作验证幂等。4) 在目标应用的列表与检索中查看引用内容。 \\ \hline
+    预期结果 & 1) 未发布内容禁止被引用，已发布内容可引用。2) 重复引用不产生重复记录。3) 目标应用仅可见其引用集合内的内容且权限过滤生效。 \\ \hline
+  \end{tabular}
+\end{table}
+
+\subsection{内容应用功能测试}
+
+内容检索用于验证多字段召回、高亮与过滤逻辑是否正确。内容检索测试用例如表\ref{tab:tc04}所示。
+
+\begin{table}[htbp]
+  \centering
+  \caption{内容检索测试用例}
+  \label{tab:tc04}
+  \begin{tabular}{c|p{10.2cm}}
+    \hline
+    用例编号 & TC04 \\ \hline
+    测试内容 & 内容检索与高亮展示 \\ \hline
+    测试步骤 & 1) 在应用内准备多条不同类型内容并发布。2) 使用关键词分别命中title、summary与正文切片。3) 设置类目/标签/类型过滤并分页查询。4) 对不同权限用户重复检索。 \\ \hline
+    预期结果 & 1) 关键词命中不同字段均可召回且排序合理。2) 返回结果包含高亮片段与摘要。3) 结构化过滤与分页生效。4) 越权内容不会出现在检索结果中。 \\ \hline
+  \end{tabular}
+\end{table}
+
+智能问答用于验证“问题改写+多通道召回+重排+引用输出”的端到端链路，以及未命中与超时场景下的退化策略。智能问答测试用例如表\ref{tab:tc05}所示。
+
+\begin{table}[htbp]
+  \centering
+  \caption{智能问答测试用例}
+  \label{tab:tc05}
+  \begin{tabular}{c|p{10.2cm}}
+    \hline
+    用例编号 & TC05 \\ \hline
+    测试内容 & RAG智能问答端到端链路 \\ \hline
+    测试步骤 & 1) 输入口语化问题触发问题改写。2) 观察ES与向量两路召回候选数量与MinScore过滤。3) 检查重排后TopN证据集合与content聚合情况。4) 生成回答并检查引用映射到content与slice。5) 构造未命中与大模型超时场景。 \\ \hline
+    预期结果 & 1) 改写后召回稳定性提升且不改变问题语义。2) 证据集合与问题强相关并包含可追溯引用。3) 未命中返回补充建议并进入覆盖度候选。4) 超时退化为检索摘要返回，且权限过滤始终生效。 \\ \hline
+  \end{tabular}
+\end{table}
+
+\subsection{内容治理与数据洞察功能测试}
+
+重复/歧义治理用于验证候选召回、LLM判别与任务生成的闭环过程。重复/歧义治理测试用例如表\ref{tab:tc06}所示。
+
+\begin{table}[htbp]
+  \centering
+  \caption{重复/歧义治理测试用例}
+  \label{tab:tc06}
+  \begin{tabular}{c|p{10.2cm}}
+    \hline
+    用例编号 & TC06 \\ \hline
+    测试内容 & 重复/歧义检测与子任务生成 \\ \hline
+    测试步骤 & 1) 在空间内准备两条高度相似内容并发布。2) 创建治理主任务并触发重复/歧义检测计算。3) 查看生成的重复/歧义子任务与内容对。4) 修改其中一条内容并重新发布，等待日巡检复检。 \\ \hline
+    预期结果 & 1) 候选召回能够命中相似内容对并生成子任务。2) 子任务幂等写入，不重复生成。3) 内容修订后复检能够关闭已消除问题的子任务。 \\ \hline
+  \end{tabular}
+\end{table}
+
+覆盖度治理用于验证“洞察聚类筛选薄弱主题$\rightarrow$生成覆盖任务$\rightarrow$补充内容$\rightarrow$复检回收”的闭环。覆盖度治理测试用例如表\ref{tab:tc07}所示。
+
+\begin{table}[htbp]
+  \centering
+  \caption{覆盖度治理测试用例}
+  \label{tab:tc07}
+  \begin{tabular}{c|p{10.2cm}}
+    \hline
+    用例编号 & TC07 \\ \hline
+    测试内容 & 覆盖度任务生成与复检回收 \\ \hline
+    测试步骤 & 1) 在问答链路制造未命中问题并沉淀为会话数据。2) 在洞察侧聚类生成低解决率主题。3) 在治理侧创建主任务并生成覆盖子任务。4) 补充相关内容并发布。5) 等待巡检复检回收。 \\ \hline
+    预期结果 & 1) 覆盖任务能够以cluster\_id或代表性query定位问题主题。2) 内容补充发布后复检能够将覆盖任务自动关闭。3) 任务状态与处理人记录完整可追溯。 \\ \hline
+  \end{tabular}
+\end{table}
+
+数据洞察用于验证事件规范、trace\_id链路追踪与下钻能力。数据洞察测试用例如表\ref{tab:tc08}所示。
+
+\begin{table}[htbp]
+  \centering
+  \caption{数据洞察链路测试用例}
+  \label{tab:tc08}
+  \begin{tabular}{c|p{10.2cm}}
+    \hline
+    用例编号 & TC08 \\ \hline
+    测试内容 & trace\_id链路追踪与会话下钻 \\ \hline
+    测试步骤 & 1) 发起一次问答请求并记录trace\_id。2) 校验rag\_recall与llm\_generate等事件明细携带相同trace\_id与session\_id。3) 在洞察侧按聚类主题下钻到会话明细。4) 按trace\_id还原证据集合与引用内容。 \\ \hline
+    预期结果 & 1) 关键事件均被采集且字段口径一致。2) 可按trace\_id复现单次问答的召回与生成链路。3) 聚类下钻可定位高频主题与薄弱点，为治理任务生成提供输入。 \\ \hline
+  \end{tabular}
+\end{table}
+
 \section{本章小结}
+
+本章对内容管理、应用与治理平台的测试环境、单元测试与功能测试进行了说明。测试结果表明：平台在组织与权限边界、内容发布口径、事件驱动索引更新、RAG问答引用可追溯、以及治理任务线上化闭环等关键链路上能够满足预期；数据洞察侧通过统一事件模型与trace\_id关联实现链路还原与主题聚类下钻，为覆盖度治理与持续优化提供了数据基础。
