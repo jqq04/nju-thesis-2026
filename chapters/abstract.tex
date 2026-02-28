@@ -10,15 +10,19 @@
 实际应用结果表明，本文所设计和实现的平台在广告与商业化业务场景中有效提升了内容管理效率与应用效果，降低了内容治理的人力成本，对面向广告与商业化内容的内容平台建设具有一定的工程实践价值和参考意义。
 
 % 中文关键词。关键词之间用中文全角分号隔开，末尾无标点符号。
-\keywords{广告与商业化内容；内容管理平台；检索增强生成（RAG）；内容治理；智能问答}
+\keywords{广告与商业化内容；统一内容模型；检索增强生成（RAG）；内容治理闭环；数据洞察}
 \end{abstract}
 
 % 论文的英文摘要
 \begin{englishabstract}
-\lipsum[2]
+With the rapid growth of Internet advertising and commercialization businesses, product forms, business rules, and operational strategies have become increasingly complex. A large volume of professional content has been accumulated around ad delivery, product documentation, business specifications, and operational practices, serving scenarios such as internal training, operational decision-making, and customer support. However, as both business lines and content scale up, existing content platforms increasingly suffer from fragmented content sources, limited reuse across scenarios, high maintenance costs, and insufficient capability for quality evaluation and governance.
+
+To address these challenges, this thesis designs and implements a management, application, and governance platform for advertising and commercial content in an enterprise environment. Centered on the content lifecycle, the platform adopts a hierarchical organization model based on spaces and applications to achieve isolation and unified management across business lines, and supports multiple content types including articles, FAQs, courses, and cases. It further integrates taxonomy and tagging, fine-grained access control, and an approval-and-publishing workflow to improve consistency and reuse of content assets.
+
+For content consumption, the platform provides both page-based browsing and search, and introduces retrieval-augmented generation (RAG) for intelligent question answering through content slicing, vector indexing, multi-channel retrieval, and reranking, enabling upstream intelligent applications to obtain highly relevant and traceable evidence. For content quality assurance, the platform establishes an automated governance mechanism focusing on duplication, ambiguity, and coverage, combining vector retrieval with large language models and operationalizing the results as online governance tasks. In addition, a data insight module aggregates usage and governance metrics to support iterative optimization of content and governance strategies.
 
 %Rate adaptation can be implemented by adjusting the number of subflows on each path.
 
 % 英文关键词。关键词之间用英文半角逗号隔开，末尾无符号。
-\englishkeywords{keyword1\quad keyword2}
+\englishkeywords{advertising and commercial content, unified content model, retrieval-augmented generation (RAG), content governance, data insight}
 \end{englishabstract}
