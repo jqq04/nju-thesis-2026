@@ -377,6 +377,46 @@ public SearchResp search(SearchReq req) {
 
 在切片结构上，平台将每个切片建模为包含\texttt{slice\_id、content\_id、space\_id、app\_id、content\_type、text}等字段的最小证据单元，并可选携带\texttt{position}用于表示在正文中的定位信息（例如段落序号或课节序号）。该设计使得召回结果既能用于生成式问答的证据输入，也能在输出侧映射为“内容标题+片段摘要+定位信息”的引用，降低用户在溯源时的跳转成本。
 
+为保证切片可稳定更新，slice\_id采用可重复生成的规则：以\texttt{content\_id}为前缀，拼接切片类型与position构成业务唯一键，例如\texttt{<content\_id>\#P\_<para\_no>}、\texttt{<content\_id>\#L\_<lesson\_no>}或\texttt{<content\_id>\#T\_<row\_no>}。当内容发布触发索引增量更新时，同一content\_id的切片可以按slice\_id覆盖写入，从而在无需全量重建索引的前提下实现稳定更新。
+
+切片生成的工程实现可以拆分为“内容提取$\rightarrow$文本规范化$\rightarrow$按类型切片$\rightarrow$补充元信息”四步。内容提取阶段按content\_type从对应子表或文档库加载正文或结构字段；文本规范化阶段对HTML标签、富文本标记、空白与不可见字符做清洗，并统一标点与换行以减少embedding噪声；按类型切片阶段根据不同形态选择不同的语义单元；最后补充元信息阶段将标题、摘要、类目、标签、权限等字段写入切片结构，便于召回与过滤。切片构建的关键实现片段如图\ref{fig:ca_slice_build_key_code}所示。
+
+\begin{figure}[htbp]
+  \centering
+  \begin{minipage}{0.94\linewidth}
+    \begin{lstlisting}[basicstyle=\ttfamily\small,numbers=left,numberstyle=\tiny,frame=single,breaklines=true]
+public List<Slice> buildSlices(Content c) {
+  if ("knowledge".equals(c.type)) {
+    String body = normalize(knowledgeDao.getBody(c.id));
+    return splitByParagraphOrLen(c, body); // 段落优先，必要时按长度切分
+  } else if ("faq".equals(c.type)) {
+    Faq f = faqDao.get(c.id);
+    return buildFaqSlices(c, f.question, f.answer); // question/answer 两个语义单元
+  } else if ("course".equals(c.type)) {
+    List<Lesson> lessons = courseDao.listLessons(c.id);
+    return buildLessonSlices(c, lessons); // 一课节一切片，字幕由LLM提取
+  } else if ("case".equals(c.type)) {
+    String json = caseDao.getDetail(c.id);
+    String text = normalize(caseExtractor.toText(json)); // 字段抽取与拼接
+    return listOf(slice(c, "C_0", text));
+  } else if ("image".equals(c.type)) {
+    ImageMeta m = imageDao.get(c.id);
+    String caption = llmClient.caption(m.url);
+    return listOf(slice(c, "I_0", caption + " " + m.url));
+  } else if ("table".equals(c.type)) {
+    Table t = tableDao.get(c.id);
+    return buildTableRowSlices(c, t.header, t.rows); // 每行拼接表头，保证行语义完整
+  }
+  return emptyList();
+}
+    \end{lstlisting}
+  \end{minipage}
+  \caption{切片构建关键代码}
+  \label{fig:ca_slice_build_key_code}
+\end{figure}
+
+图片与表格属于需要特殊处理的信息载体。图片切片的核心在于“可检索化”：通过多模态embedding模型将图片与文本映射到同一向量空间，并通过大模型生成caption/要点作为文本化理解结果参与索引；切片同时携带图片URL与必要上下文信息，便于在回答中返回可点击溯源。表格切片的核心在于“保留结构语义”：按行切片并在每行切片中拼接表头字段，使得单行在脱离原表格时仍可被理解；对于列值较长的表格，按列优先级截断或做摘要，避免单切片超出上下文窗口。
+
 （2）元信息绑定与权限下推。切片索引时携带content\_id、modify\_time、space\_id、app\_id与content\_auth相关元信息，用于召回阶段的范围确定与权限过滤。通过元信息绑定，可以保证任意召回结果都能回溯到具体内容及其发布时间点，并在服务侧做对象级可见性判断。索引同时构建ES与embedding两套索引：ES侧侧重字面匹配与可解释高亮，embedding侧侧重语义相似与长尾覆盖，两条通道互补并为后续RAG提供更稳健的候选集合。
 
 索引侧采用\texttt{content\_id + modify\_time}作为发布口径标识：当内容发布后触发索引更新事件，索引构建服务拉取当前已发布内容及其更新时间戳，作为索引写入的幂等与覆盖依据。召回阶段以space\_id、app\_id与内容状态作为粗过滤条件，并在服务侧对候选内容执行content\_auth对象级校验，避免复杂授权策略直接下推到索引侧导致表达困难。
@@ -410,6 +450,8 @@ public void onContentPublished(ContentPublishedEvent e) {
 \label{subsec:impl_ca_rag}
 
 基于RAG的多通道召回与重排用于在生成式问答场景下提供高质量证据集合，并在可控成本下兼顾召回率与精度。实现层面，平台采用“多通道召回—融合去重—重排—证据组织”的流水线结构：全文通道负责精准关键词召回，向量通道负责语义相似召回，两者融合后进行去重与重排，最终输出与问题最相关的slice集合。
+
+整体链路包含“问题改写$\rightarrow$多通道召回$\rightarrow$融合去重$\rightarrow$重排$\rightarrow$证据组织”五个关键步骤。问题改写位于召回之前：系统将用户输入改写为更标准化的表达，并结合词典归一化与停用词处理生成用于检索的query，从而提升在同义改写、口语化表达与长尾问法场景下的召回稳定性；随后分别在ES与向量索引上执行TopK召回并施加MinScore阈值过滤；融合阶段对两路候选去重并合并召回来源信息；重排阶段综合召回分数与多特征输出TopN证据；最后将证据按content聚合并组织为适配上下文窗口的引用片段集合，供后续生成回答使用。
 
 （1）多通道召回。全文召回基于ES的BM25与字段权重，支持标题、摘要与正文多字段匹配；向量召回基于embedding相似度检索，覆盖同义改写与长尾问法。为控制延迟，系统对两路召回设置topK上限，并在召回阶段尽量下推范围与权限过滤条件，减少后续候选规模。
 
@@ -626,7 +668,7 @@ public void runDupAmb(MainTask task) {
   \label{fig:cg_dup_amb_key_code}
 \end{figure}
 
-\subsection{覆盖度检测与缺口聚类实现}
+\subsection{覆盖度检测实现}
 \label{subsec:impl_cg_coverage}
 
 覆盖度治理用于持续发现“缺知识”与薄弱领域，并将缺口转化为可闭环的补充任务。实现中覆盖度检测主要基于会话数据：在设定会话周期与召回阈值的前提下，对用户原声执行召回评估，召回结果未满足阈值要求的视为缺知识；对缺知识原声进行聚类生成覆盖任务，由业务人员补充内容或完善现有内容，并通过周期复检对任务范围进行回收。
@@ -637,39 +679,9 @@ public void runDupAmb(MainTask task) {
 
 缺知识候选的来源既包括用户在智能问答中的原始query，也包括搜索框的查询词与未命中行为。实现中平台对缺知识候选进行基础清洗：去除纯噪声query、合并大小写与数字格式差异、过滤过短文本，并按空间/应用聚合以避免跨边界混淆。召回评估同时参考全文与向量两路结果，当两路均未达到阈值要求时才判定为缺知识，以降低单通道失误带来的误判。
 
-（2）缺口聚类与任务生成。对缺知识候选按语义相似聚类，并对每个聚类生成主题标题与代表性query集合，形成覆盖任务的任务描述与定位依据。
+（2）覆盖任务生成。覆盖度治理的目标是将“缺知识候选”转化为可闭环的补充任务。在工程实现中，query的语义聚类属于数据洞察模块会话分析的前置步骤：洞察侧将历史query聚类并产出聚类指标宽表，治理侧复用该聚类结果进行任务生成与分发。
 
-缺口聚类采用基于语义相似图的聚类方法：将每条query向量化写入向量索引，设定最小相似度阈值\texttt{min\_score}，相似度$\ge$阈值的query之间建立边；从未归类query出发递归扩展其邻居集合，形成一个连通分量作为聚类。为便于人工处理，平台对每个聚类选取若干代表性query，并调用大模型生成聚类标题与补充建议。聚类构建的关键实现片段如图\ref{fig:cg_cluster_key_code}所示。
-
-\begin{figure}[htbp]
-  \centering
-  \begin{minipage}{0.94\linewidth}
-    \begin{lstlisting}[basicstyle=\ttfamily\small,numbers=left,numberstyle=\tiny,frame=single,breaklines=true]
-public List<Cluster> buildClusters(List<QueryItem> items, double minScore) {
-  Set<String> visited = new HashSet<>();
-  List<Cluster> clusters = new ArrayList<>();
-  for (QueryItem q : items) {
-    if (visited.contains(q.id)) continue;
-    Queue<String> queue = new ArrayDeque<>();
-    Cluster c = new Cluster();
-    queue.add(q.id);
-    visited.add(q.id);
-    while (!queue.isEmpty()) {
-      String cur = queue.poll();
-      c.add(cur);
-      for (Neighbor n : vectorIndex.neighbors(cur, minScore)) {
-        if (visited.add(n.id)) queue.add(n.id);
-      }
-    }
-    clusters.add(c);
-  }
-  return clusters;
-}
-    \end{lstlisting}
-  \end{minipage}
-  \caption{缺知识聚类关键代码}
-  \label{fig:cg_cluster_key_code}
-\end{figure}
+具体而言，平台从洞察侧筛选低解决率或高转人工的聚类主题，结合召回评估结果判定为覆盖薄弱点，并生成覆盖任务。覆盖任务以\texttt{cluster\_id}或代表性query作为定位依据：一方面，cluster\_id用于在洞察侧下钻到明细会话与原始query集合；另一方面，代表性query用于在治理侧做复检回收。该设计将“发现问题（洞察）”与“解决问题（治理）”解耦，使覆盖度治理能够持续从真实用户需求中获得输入而不重复建设聚类能力。
 
 （3）复检回收。任务处理后，系统对原聚类代表query进行复检，若已能召回到满足阈值的证据则自动完成任务，避免“内容已补充但任务未更新”导致统计失真。
 
@@ -681,6 +693,53 @@ public List<Cluster> buildClusters(List<QueryItem> items, double minScore) {
 治理任务线上化将检测结果以主任务与子任务两层结构落地。主任务负责一次治理计算的配置与状态管理，包含任务名称、空间、会话周期与召回阈值等上下文信息；子任务承载具体问题与处理结论。重复/歧义任务支持人工判断下线、保留或合并；覆盖任务支持标记“无需补充/需要补充”并填写说明，处理引发内容修订后可进入内容管理的提审与发布流程，发布后由索引构建服务消费发布事件完成增量索引更新。
 
 在任务状态设计上，主任务的状态通常包括“新建/计算中/计算完成”，子任务的状态包括“待处理/处理中/已完成/已关闭”。平台将任务处理与内容发布链路打通：当责任人根据覆盖任务补充内容或根据重复任务合并下线内容后，内容进入提审与审批发布；发布事件触发索引更新后，复检回收再对任务范围进行验证并更新任务状态。该设计将治理从一次性离线分析转化为可持续的线上闭环，使治理效果能够稳定反哺内容应用与数据洞察。
+
+（1）主任务创建与计算执行。主任务创建由空间维度入口发起：用户填写任务名称、选择业务空间、设置会话周期与召回阈值，提交后主任务进入“计算中”。计算任务由后台异步执行，避免在前台请求中长时间阻塞。实现上主任务包含两类计算：重复/歧义任务计算以空间内已发布内容为输入，按TopK召回生成候选对并调用LLM判别；覆盖任务计算以洞察侧产出的会话聚类为输入，筛选低解决率主题并结合召回评估生成覆盖子任务。计算完成后主任务状态更新为“计算完成”，并生成子任务列表供责任人处理。
+
+为保证计算可重复触发且不产生重复任务，子任务写入采用幂等upsert：重复/歧义子任务以(main\_task\_id, task\_type, content\_id\_a, content\_id\_b)作为业务唯一键，覆盖子任务以(main\_task\_id, app\_id, item\_type, item\_value)作为业务唯一键。主任务的计算过程以批处理方式推进，并周期性写入进度与耗时信息，便于前端展示计算状态与失败定位。
+
+（2）任务分发与处理流程。子任务分发支持“指派”与“认领”两种方式：指派模式由空间负责人按业务域将任务分配到具体责任人；认领模式允许运营人员从任务池领取处理。重复/歧义任务的处理动作通常包括下线、保留与合并：下线用于消除重复入口，保留用于确认差异合理，合并用于将多个内容统一为权威内容并调整引用关系；覆盖任务的处理动作通常是补充内容或标记无需补充，并填写说明。任务处理会记录处理结果与处理人，并推动必要的内容修订进入“提审$\rightarrow$审批$\rightarrow$发布”链路。
+
+任务状态机在实现上需要满足幂等与并发安全：同一子任务只允许一个责任人进入处理中状态，避免多方同时处理导致冲突；子任务完成后不可回退到待处理，除非被复检回收重新打开。表\ref{tab:cg_task_status}给出了主任务与子任务的状态口径示例。
+
+\begin{table}[htbp]
+  \centering
+  \caption{治理任务状态口径示例}
+  \label{tab:cg_task_status}
+  \begin{tabular}{c|c|p{8.8cm}}
+    \hline
+    任务类型 & 状态 & 含义 \\ \hline
+    主任务 & NEW/RUNNING/FINISHED & 新建、计算中、计算完成 \\ \hline
+    子任务 & TODO/DOING/DONE/CLOSED & 待处理、处理中、已完成、已关闭（复检确认问题消除） \\ \hline
+  \end{tabular}
+\end{table}
+
+（3）系统巡检与复检回收。为避免“内容已变更但任务未更新”导致任务长期堆积，平台增加定时巡检：每天扫描自上次巡检以来发生上线、下线、删除或内容修订的内容，定位关联的重复/歧义子任务并重新执行判别；对覆盖子任务则复用召回评估对代表性query进行复检。若重复/歧义问题已消除或覆盖已达标，则系统自动将子任务标记为已关闭或已完成。
+
+巡检实现的关键在于“只重算受影响范围”。平台以content\_id为索引维护子任务的反向引用，内容变更时仅查出关联子任务进行重算，避免对全量任务重复计算。复检回收的关键实现片段如图\ref{fig:cg_recheck_key_code}所示。
+
+\begin{figure}[htbp]
+  \centering
+  \begin{minipage}{0.94\linewidth}
+    \begin{lstlisting}[basicstyle=\ttfamily\small,numbers=left,numberstyle=\tiny,frame=single,breaklines=true]
+public void dailyRecheck(Date since) {
+  List<Long> changed = contentDao.listChangedPublishedContents(since);
+  for (Long contentId : changed) {
+    for (DupAmbTask t : dupAmbTaskDao.listByContent(contentId)) {
+      LlmJudgeResp r = llmJudge.dupAmbJudge(t.contentIdA, t.contentIdB);
+      if (!r.isDuplicate() && !r.isAmbiguous()) dupAmbTaskDao.close(t.id);
+    }
+  }
+  for (CoverageTask t : coverageTaskDao.listOpenTasks()) {
+    boolean ok = recallEvaluator.covered(t.representQuery, t.threshold);
+    if (ok) coverageTaskDao.close(t.id);
+  }
+}
+    \end{lstlisting}
+  \end{minipage}
+  \caption{治理任务复检回收关键代码}
+  \label{fig:cg_recheck_key_code}
+\end{figure}
 
 \section{数据洞察模块的实现}
 \label{sec:impl_di}
@@ -750,7 +809,39 @@ public List<Cluster> buildClusters(List<QueryItem> items, double minScore) {
 
 在指标体系设计上，平台从页面、会话与内容三个视角承接数仓侧产出的聚合指标：页面监控关注PV/UV/点击率；会话分析关注会话数量、模型识别解决率、意向转人工率与转人工率；内容分析关注内容被召回次数、被生成次数以及转人工相关指标。洞察服务提供按时间范围、空间/应用、渠道与页面等维度的只读查询接口，支持从聚合图表下钻到会话明细。
 
-会话分析在实现上以session\_id为主键组织多轮交互，并以trace\_id串联单轮问答的召回与生成事件。聚合视图以“会话级”与“聚类级”两种口径输出：会话级指标用于观察整体趋势与转化漏斗；聚类级指标用于定位高频问题簇并下钻到原始query与证据。聚类构建逻辑与第三章给出的语义相似图方法一致，洞察侧通过聚类ID为每条会话打标，从而实现“主题簇$\rightarrow$明细会话$\rightarrow$引用内容”的端到端下钻路径。
+会话分析在实现上以session\_id为主键组织多轮交互，并以trace\_id串联单轮问答的召回与生成事件。聚合视图以“会话级”与“聚类级”两种口径输出：会话级指标用于观察整体趋势与转化漏斗；聚类级指标用于定位高频问题簇并下钻到原始query与证据。洞察侧通过聚类ID为每条会话打标，从而实现“主题簇$\rightarrow$明细会话$\rightarrow$引用内容”的端到端下钻路径。
+
+会话聚类用于将大量历史query归并为有限的主题簇，便于从统计视角识别高频问题与薄弱点。聚类构建采用基于语义相似图的连通分量方法：将每条query向量化写入向量索引，设定最小相似度阈值\texttt{min\_score}，相似度$\ge$阈值的query之间建立边；从未归类query出发递归扩展其邻居集合，形成一个连通分量作为聚类。聚类构建的关键实现片段如图\ref{fig:di_cluster_key_code}所示。
+
+\begin{figure}[htbp]
+  \centering
+  \begin{minipage}{0.94\linewidth}
+    \begin{lstlisting}[basicstyle=\ttfamily\small,numbers=left,numberstyle=\tiny,frame=single,breaklines=true]
+public List<Cluster> buildClusters(List<QueryItem> items, double minScore) {
+  Set<String> visited = new HashSet<>();
+  List<Cluster> clusters = new ArrayList<>();
+  for (QueryItem q : items) {
+    if (visited.contains(q.id)) continue;
+    Queue<String> queue = new ArrayDeque<>();
+    Cluster c = new Cluster();
+    queue.add(q.id);
+    visited.add(q.id);
+    while (!queue.isEmpty()) {
+      String cur = queue.poll();
+      c.add(cur);
+      for (Neighbor n : vectorIndex.neighbors(cur, minScore)) {
+        if (visited.add(n.id)) queue.add(n.id);
+      }
+    }
+    clusters.add(c);
+  }
+  return clusters;
+}
+    \end{lstlisting}
+  \end{minipage}
+  \caption{会话聚类关键代码}
+  \label{fig:di_cluster_key_code}
+\end{figure}
 
 指标查询接口在实现上遵循只读原则：洞察服务不直接参与指标计算，仅对接数仓侧沉淀的宽表与明细表。为支撑高频查询，洞察服务对热点维度（例如近7天、近30天、单空间TopN）使用缓存或物化视图降低延迟，并对查询接口增加时间范围与返回条数限制，避免明细下钻对后端与数仓造成过高压力。
 
