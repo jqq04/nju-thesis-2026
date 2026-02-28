@@ -457,6 +457,47 @@ public void onContentPublished(ContentPublishedEvent e) {
 
 为降低长尾问法与口语化输入对召回的影响，平台在召回前引入“问题改写+query规整”的预处理步骤：问题改写将用户输入改写为更标准化的表达以提升召回质量；query规整则对改写后的文本进行分词与停用词处理，并对包含业务术语与缩写的词典进行归一化。对于低质量输入（过短、纯符号、无有效词），系统直接触发未命中返回并进入覆盖度候选。预处理后的query同时用于全文检索与向量检索，以保证多通道召回输入一致。
 
+问题改写在实现上以提示词约束输出结构，避免模型自由发挥导致关键信息丢失。提示词要求模型在结合对话上下文的前提下抽取“对象、场景、诉求”三要素，并输出“完整表述”和更接近知识标题的“主要问题”，用于后续召回。问题改写提示词模板如图\ref{fig:rag_rewrite_prompt}所示。
+
+\begin{figure}[htbp]
+  \centering
+  \begin{minipage}{0.94\linewidth}
+    \begin{lstlisting}[basicstyle=\ttfamily\small,numbers=left,numberstyle=\tiny,frame=single,breaklines=true]
+# 角色
+你是商业化业务知识助手，负责将用户问题改写为更易检索的表达。
+
+# 输入
+<context>
+{history_messages}
+</context>
+<query>
+{raw_query}
+</query>
+
+# 定义
+对象：问题围绕的主体/概念（名词为主）
+场景：问题发生的背景/条件/状态（可包含多个限定）
+诉求：用户希望获取的信息或完成的动作（是什么/为什么/怎么办等）
+
+# 任务
+1) 结合上下文抽取对象/场景/诉求三要素，若缺失可用上下文补全
+2) 若query包含错别字或拼音，先修正再改写
+3) 严格基于query与上下文，禁止引入未提及的新要素与操作
+4) 生成两种表达：
+   - 完整表述：必须包含对象/场景/诉求，用于问答理解
+   - 主要问题：更接近知识库标题，更书面精炼，用于召回
+5) 字数限制：每行不超过30字；句尾不使用任何标点
+6) 输出格式必须严格为两行
+
+# 输出格式
+【完整表述】：{full_query}
+【主要问题】：{main_question}
+    \end{lstlisting}
+  \end{minipage}
+  \caption{问题改写提示词模板}
+  \label{fig:rag_rewrite_prompt}
+\end{figure}
+
 召回阶段的关键参数包括TopK与MinScore：TopK用于控制返回候选切片数量，MinScore用于设置最小相似度阈值以过滤低相关候选。表\ref{tab:rag_params}给出了关键参数的工程含义。
 
 \begin{table}[htbp]
@@ -529,7 +570,38 @@ public EvidencePack retrieveEvidence(AskReq req) {
 
 （1）Prompt构造与上下文控制。系统在构造提示词时将用户问题、业务约束与证据集合分段拼接，并对证据长度进行裁剪以适配上下文窗口。为保证引用可映射，系统在证据段落中附带slice\_id与标题信息，使引用能够回溯到具体slice。
 
-提示词结构在实现上通常包含三部分：系统约束（禁止编造、必须基于证据回答）、任务描述（回答风格、输出结构）、证据集合（按slice聚合并编号）。证据集合采用显式编号的方式组织，例如\texttt{[S1] ... [S2] ...}，并要求模型在回答末尾给出引用编号列表。该编号策略降低了引用解析的难度，也使得在回答失败时可以退化为直接返回证据摘要而不丢失溯源能力。
+提示词结构在实现上通常包含三部分：系统约束（禁止编造、必须基于证据回答）、任务描述（回答风格、输出结构）、证据集合（按slice聚合并编号）。证据集合为每条证据分配key（可使用S1/S2等序号，也可直接使用slice\_id），并要求模型在回答中以固定引用标记声明知识来源，例如\texttt{[引用]<key1,key2>}。该设计降低了引用解析难度，也使得在回答失败时可以退化为返回证据摘要而不丢失溯源能力。生成回答提示词模板如图\ref{fig:qa_prompt_tpl}所示。
+
+\begin{figure}[htbp]
+  \centering
+  \begin{minipage}{0.94\linewidth}
+    \begin{lstlisting}[basicstyle=\ttfamily\small,numbers=left,numberstyle=\tiny,frame=single,breaklines=true]
+# system prompt (excerpt)
+你是商业化业务知识问答专家，擅长解答广告/电商/商业化相关问题。
+回答必须遵守：
+1) 必须基于参考资料作答，禁止编造数据、结论与规则，禁止出现矛盾结论
+2) 禁止偏袒篇幅较长或位置靠前的资料，需要综合判断相关性
+3) 答案使用中文，markdown输出，结构清晰，字数不超过500字
+4) 若答案使用了任意参考资料的知识点，必须在相关位置插入引用标记：
+   [引用]<key1,key2,...>  (key来自证据集合中的ID或序号，逗号分隔)
+5) 禁止出现“文档/参考资料/根据xxx”等暴露资料来源的字眼
+6) 参考资料可能包含图片占位：![desc](http...)，若使用图片信息可原样输出该图片
+7) 若参考资料不足以回答，给出保守回答并提示进一步确认或补充信息
+
+# user prompt (template)
+禁止创造公式！
+<question>
+{raw_query}
+{rewritten_query}
+</question>
+<doc>
+{evidence_documents_with_keys}
+</doc>
+    \end{lstlisting}
+  \end{minipage}
+  \caption{生成回答提示词模板}
+  \label{fig:qa_prompt_tpl}
+\end{figure}
 
 （2）回答生成与引用解析。模型生成结果返回后，系统对回答文本中的引用标识进行解析，并转换为可展示的“内容标题+片段摘要+跳转链接”。当模型未给出引用或引用解析失败时，系统退化为按证据集合的topN进行引用补齐，保证每次回答都有最小可追溯集合。
 
@@ -627,6 +699,49 @@ public AskResp ask(AskReq req) {
 （2）判别提示词与结构化输出。判别阶段将“内容A+内容B+上下文约束”构造成统一的判别输入，并要求模型输出结构化字段（是否重复、是否歧义、冲突点摘要、建议处理方式等），便于后续落表与任务创建。
 
 判别提示词在实现上强调两点：其一是仅基于提供的内容进行判断，禁止引入外部知识；其二是输出结构化JSON，包含布尔判断与可解释字段，便于程序解析并落表。判别输出通常包含\texttt{duplicate/ambiguous}两类标记、冲突摘要、建议处理动作（合并/保留/下线/补充澄清）以及可选的冲突片段定位。判别流程的关键实现片段如图\ref{fig:cg_llm_judge_key_code}所示。
+
+重复度与歧义度的判别提示词需要在“可解释”与“可解析”之间取得平衡：既要提供足够的对比信息与裁决规则以降低误判，也要保证输出为机器可解析的结构化JSON，便于任务生成与后续复检。判别提示词模板如图\ref{fig:cg_judge_prompt_tpl}所示。
+
+\begin{figure}[htbp]
+  \centering
+  \begin{minipage}{0.94\linewidth}
+    \begin{lstlisting}[basicstyle=\ttfamily\small,numbers=left,numberstyle=\tiny,frame=single,breaklines=true]
+# 重复度判别（template）
+你的任务是判断两篇内容的重复程度，分级为：完全重复/极度重复/中度重复/轻微重复/不重复。
+<title1>{title1}</title1>
+<content1>{content1}</content1>
+<title2>{title2}</title2>
+<content2>{content2}</content2>
+请按步骤判断：
+1) 参考标题提炼两篇内容的主体对象与描述点
+2) 判断主体是否一致；若一致，逐一对比描述点并估算重复占比（取占比更高的一侧）
+3) 按分级标准输出最终结论
+输出必须为JSON（不要输出其他说明）：
+{"analysis":"主体与描述点对比、重复占比依据","decision":"重复度分级"}
+
+# 歧义度判别（template）
+你的任务是判断两组内容在“相同主体”下的描述是否存在冲突。
+<business1>{business1}</business1>
+<title1>{title1}</title1>
+<content1>{content1}</content1>
+<business2>{business2}</business2>
+<title2>{title2}</title2>
+<content2>{content2}</content2>
+规则：
+1) 先识别主体并判断是否为同一主体（需结合业务场景、限定词、活动/行业等，不可模糊联想）
+2) 若无相同主体，直接判定为一致
+3) 若主体相同，仅基于文本中“直接、明确、无歧义”的事实判断是否冲突，禁止推断
+4) 冲突示例：支持/不支持、时间点或覆盖范围不一致、数值口径或公式组成不一致
+5) 示例/URL/举例可忽略，不作为冲突依据
+输出必须为JSON（不要输出其他说明）：
+{"entity":"存在不一致的主体(无则为空)","consistency":"一致/不一致",
+ "conflicts":[{"description_A":"不一致描述A","description_B":"不一致描述B"}],
+ "conflict_summary":"判定依据与命中的规则"}
+    \end{lstlisting}
+  \end{minipage}
+  \caption{重复度与歧义度判别提示词模板}
+  \label{fig:cg_judge_prompt_tpl}
+\end{figure}
 
 \begin{figure}[htbp]
   \centering
@@ -841,6 +956,35 @@ public List<Cluster> buildClusters(List<QueryItem> items, double minScore) {
   \end{minipage}
   \caption{会话聚类关键代码}
   \label{fig:di_cluster_key_code}
+\end{figure}
+
+会话聚类完成后需要生成可读的主题标题与关键词，便于在洞察看板与治理覆盖任务中定位问题簇。平台在实现中使用大模型对同一聚类的代表性query集合进行总结，输出摘要、关键词与代表query列表，并将摘要作为cluster\_title写入聚类指标宽表。聚类主题总结提示词模板如图\ref{fig:di_cluster_prompt_tpl}所示。
+
+\begin{figure}[htbp]
+  \centering
+  \begin{minipage}{0.94\linewidth}
+    \begin{lstlisting}[basicstyle=\ttfamily\small,numbers=left,numberstyle=\tiny,frame=single,breaklines=true]
+# 任务
+你是文本总结专家。给定一组语义相近的query，提炼共性并生成主题信息。
+
+# 输入
+句子用两个竖线分隔：
+<sentences>
+{q1 || q2 || q3 ...}
+</sentences>
+
+# 输出要求
+1) summary：30-50字主题摘要，直接给结论，不以“这些句子...”开头
+2) keyword：5-7个关键词，避免过于宽泛的词，需加具体场景限定
+3) represent：1-15条代表性query
+4) 仅输出JSON，不要输出任何解释
+
+# 输出(JSON)
+{"summary":"...","keyword":["kw1","kw2"],"represent":["q1","q2"]}
+    \end{lstlisting}
+  \end{minipage}
+  \caption{聚类主题总结提示词模板}
+  \label{fig:di_cluster_prompt_tpl}
 \end{figure}
 
 指标查询接口在实现上遵循只读原则：洞察服务不直接参与指标计算，仅对接数仓侧沉淀的宽表与明细表。为支撑高频查询，洞察服务对热点维度（例如近7天、近30天、单空间TopN）使用缓存或物化视图降低延迟，并对查询接口增加时间范围与返回条数限制，避免明细下钻对后端与数仓造成过高压力。
