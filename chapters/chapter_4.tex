@@ -166,11 +166,11 @@ public void addReference(AddRefReq req) {
 
 内容管理模块同时面向管理后台与对外消费链路提供能力，因此权限体系需要同时覆盖“后台可操作范围”与“内容可见/可操作范围”。平台采用“RBAC + content\_auth”的组合实现：RBAC用于在空间与应用维度进行角色授权与模块级/操作级控制，content\_auth用于在内容粒度表达更细的策略约束，以支撑跨应用引用、精细化可见范围以及合规要求。
 
-（1）RBAC权限控制实现。RBAC以用户—角色—权限项映射为基础，角色在空间或应用维度生效，权限项覆盖空间/应用配置、内容创建编辑、删除、提审、审批、上下线与查看检索等操作。实现中，接口层在处理请求时首先完成身份校验与RBAC权限校验，确保调用方具备对应操作能力，再进入后续对象级策略判断，避免越权调用对系统造成影响。
+（1）RBAC权限控制实现。RBAC以用户—角色—权限项映射为基础，角色在空间或应用维度生效，权限项覆盖空间/应用配置、内容创建编辑、删除、提审、审批、上下线与查看检索等后台操作。实现中，管理后台接口在处理请求时首先完成身份校验与RBAC权限校验，确保调用方具备对应操作能力，再进入后续对象级策略判断，避免越权调用对系统造成影响。对外消费链路以“内容可见性”为核心，主要依赖content\_auth进行对象级裁决，不引入RBAC模块/操作级校验。
 
 在鉴权决策上，平台将请求解析为\texttt{user\_id + scope\_type + scope\_id + permission\_code}四元组：scope用于表达授权生效范围（GLOBAL/SPACE/APP），permission\_code用于表达具体操作。鉴权时先根据请求携带的space\_id、app\_id解析出作用域，再判断用户在该作用域下是否绑定了包含目标权限码的角色，从而实现跨空间隔离与空间内精细授权。
 
-为降低鉴权对高并发读链路的额外开销，平台在接入层对RBAC结果进行缓存：以\texttt{user\_id + scope\_type + scope\_id + permission\_code}作为缓存键，缓存值为鉴权是否通过及可选的角色信息。缓存更新遵循“写后失效”的原则：当空间负责人变更成员角色、或平台负责人调整角色-权限关系时，管理侧接口同步触发对应用户的缓存失效，保证权限变更能够在可接受延迟内生效。对于未命中缓存的请求，服务端从\texttt{user\_role\_binding}与\texttt{role\_permission}表加载关系并完成裁决，再回填缓存。
+为降低鉴权对管理后台高频访问的额外开销，平台在接入层对RBAC结果进行缓存：以\texttt{user\_id + scope\_type + scope\_id + permission\_code}作为缓存键，缓存值为鉴权是否通过及可选的角色信息。缓存更新遵循“写后失效”的原则：当空间负责人变更成员角色、或平台负责人调整角色-权限关系时，管理侧接口同步触发对应用户的缓存失效，保证权限变更能够在可接受延迟内生效。对于未命中缓存的请求，服务端从\texttt{user\_role\_binding}与\texttt{role\_permission}表加载关系并完成裁决，再回填缓存。
 
 （2）content\_auth策略授权实现。针对内容可见性与细粒度动作控制，平台以“内容+策略+变量+权限码”的模型表达策略：策略通过auth\_tactic与auth\_variable描述可见范围或动作约束，auth\_code表达具体权限项。鉴权决策流程在实现上以“策略加载—变量解析—动作匹配—结果裁决”为主线，并在读链路对召回候选进行二次过滤，保证检索与问答场景下不会返回越权结果。
 
@@ -189,29 +189,45 @@ public void addReference(AddRefReq req) {
   \end{tabular}
 \end{table}
 
-在策略匹配层，平台支持免登录可见、所有外部用户可见、所有内部员工可见、员工匹配、部门匹配、角色匹配与自定义表达式匹配等策略。以部门匹配为例，系统将访问者的部门ID沿组织树向上回溯得到祖先链路集合，只要规则的auth\_variable命中该集合即视为命中。策略裁决的关键实现片段如图\ref{fig:cm_content_auth_match_key_code}所示。
+在策略匹配层，平台支持免登录可见、外部登录用户可见、内部员工可见、员工匹配、部门匹配、角色匹配与自定义表达式匹配等策略。一条内容可同时配置多条content\_auth规则，且同一动作码（例如读权限r）允许存在多条并行生效的规则（如“员工匹配”与“部门匹配”同时配置），命中任意一条规则即可视为授权通过。实现上，服务端先将访问者信息解析为可用于授权判断的“权限标签集合”（例如internal、employee:123、department:xxx、role:yyy等），再将content\_auth记录映射为对应的标签匹配条件并执行集合包含判断。这种设计解耦了规则配置与匹配逻辑，使得策略扩展无需修改核心校验代码。策略裁决的关键实现片段如图\ref{fig:cm_content_auth_match_key_code}所示。
 
 \begin{figure}[htbp]
   \centering
   \begin{minipage}{0.94\linewidth}
     \begin{lstlisting}[basicstyle=\ttfamily\small,numbers=left,numberstyle=\tiny,frame=single,breaklines=true]
 public boolean checkContentAuth(long contentId, String actionCode, Visitor v) {
+  Set<String> grants = buildGrants(v);
   List<AuthRule> rules = authDao.listRules(contentId);
   for (AuthRule r : rules) {
     if (!r.authCode.contains(actionCode)) continue;
-    if (matchTactic(r.authTactic, r.authVariable, v)) return true;
+    if (matchRule(r, grants, v)) return true;
   }
   return false;
 }
 
-private boolean matchTactic(String tactic, String var, Visitor v) {
-  if ("public".equals(tactic)) return true;
-  if ("internal".equals(tactic)) return v.isInternal;
-  if ("employee".equals(tactic)) return String.valueOf(v.employeeId).equals(var);
-  if ("department".equals(tactic)) return v.deptPath.contains(var);
-  if ("role".equals(tactic)) return v.roleIds.contains(var);
-  if ("custom".equals(tactic)) return exprEngine.eval(var, v.attrs);
-  return false;
+private Set<String> buildGrants(Visitor v) {
+  Set<String> grants = new HashSet<>();
+  // 基础身份标签
+  if (v.userId == null) grants.add("anonymous");
+  else if (!v.isInternal) grants.add("external");
+  else grants.add("internal");
+  
+  // 组织架构与角色标签
+  if (v.employeeId != null) grants.add("employee:" + v.employeeId);
+  for (String deptId : v.deptIds) grants.add("department:" + deptId);
+  for (String roleId : v.roleIds) grants.add("role:" + roleId);
+  return grants;
+}
+
+private boolean matchRule(AuthRule r, Set<String> grants, Visitor v) {
+  if ("custom".equals(r.authTactic)) {
+    return exprEngine.eval(r.authVariable, v.attrs);
+  }
+  // 统一构建规则Key：无参策略直接匹配类型，有参策略匹配 类型:值
+  String key = r.authVariable == null || r.authVariable.isEmpty() 
+      ? r.authTactic 
+      : r.authTactic + ":" + r.authVariable;
+  return grants.contains(key);
 }
     \end{lstlisting}
   \end{minipage}
@@ -280,7 +296,7 @@ public void approve(ApproveReq req) {
 
 （2）发布口径读取与一致性约束。展示链路统一以发布口径为准：列表页仅读取内容元数据与必要摘要；详情页在校验权限后读取发布版本正文。该策略保证展示、检索与问答链路对外一致，避免草稿内容在门户侧被提前可见。
 
-（3）权限过滤与越权防护。展示链路在返回结果前执行权限过滤：先做RBAC的模块/操作级校验，再按content\_auth策略对具体内容进行对象级判断。对于列表页，服务端在查询阶段尽量将权限条件下推；对于详情页，服务端在读取正文前进行强校验，避免越权内容被渲染或被前端缓存。
+（3）权限过滤与越权防护。展示链路在返回结果前执行权限过滤：对外消费页面以content\_auth的对象级可见性裁决为主；管理后台在此基础上叠加RBAC的模块/操作级校验，用于约束后台可操作范围。对于列表页，服务端在查询阶段尽量将content\_auth可见性条件下推以降低结果集；对于详情页，服务端在读取发布正文前执行对象级强校验，避免越权内容被渲染或被前端缓存。
 
 （4）关键实现片段。页面化展示的关键在于“范围确定$\rightarrow$权限过滤$\rightarrow$发布口径读取”的顺序约束。其核心实现片段如图\ref{fig:ca_display_key_code}所示。
 
@@ -290,12 +306,17 @@ public void approve(ApproveReq req) {
     \begin{lstlisting}[basicstyle=\ttfamily\small,numbers=left,numberstyle=\tiny,frame=single,breaklines=true]
 public Page<ContentItemDTO> listContents(ListReq req) {
   Scope scope = scopeService.resolve(req.spaceId, req.appId, req.operator);
-  authService.checkPermission(req.operator, req.appId, "CONTENT_READ");
-  return contentQueryDao.queryPublished(scope, req.categoryId, req.tags, req.page, req.size);
+  if ("ADMIN".equals(req.source)) {
+    authService.checkPermission(req.operator, req.appId, "CONTENT_READ");
+  }
+  return contentQueryDao.queryPublishedVisible(scope, req.categoryId, req.tags, req.page, req.size);
 }
 
 public ContentDetailDTO getDetail(DetailReq req) {
   Scope scope = scopeService.resolve(req.spaceId, req.appId, req.operator);
+  if ("ADMIN".equals(req.source)) {
+    authService.checkPermission(req.operator, req.appId, "CONTENT_READ");
+  }
   Content c = contentDao.get(req.contentId);
   authService.checkContentVisible(req.operator, scope, c.id);
   if ("knowledge".equals(c.type)) {
