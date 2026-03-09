@@ -681,64 +681,60 @@
 
 \subsection{内容应用模块设计}
 
-内容应用模块面向内容消费场景提供统一的展示、检索与问答能力，对应需求分析中的“内容应用功能需求”部分。该模块以内容管理模块产出的上线状态内容作为输入，一方面为内容门户与管理后台提供页面化的内容展示与搜索能力；另一方面为上游智能助手提供生成式问答接口，实现“检索增强生成（RAG）+引用可追溯”的智能问答能力。以下对内容应用模块的主要功能子模块进行详细设计。
+内容应用模块负责将管理好的内容资产转化为可被消费的服务，支持“页面化展示”与“生成式问答”两大核心场景。
 
-（1）内容展示。内容展示能力主要服务于内容门户与管理后台等页面化场景。平台基于空间与应用提供内容目录导航、列表聚合与详情页展示能力。目录导航以类目树为主干，配合标签体系提供横向聚合入口；列表聚合支持按时间、热度与业务规则进行排序；详情页展示需呈现内容来源与关联内容，保证用户能够理解当前口径并快速跳转至相关内容。内容展示的主要交互过程如图\ref{fig:ca_display_flow}所示。
+（1）多形态内容前置处理与索引构建。为支撑高效检索与问答，内容在发布后需经过前置处理与索引构建流程。对于页面化展示与搜索，系统构建基于ES的全文索引（包含标题、摘要、元数据与权限信息）；对于生成式问答，系统构建基于向量数据库的切片索引（将正文切分为语义完整的片段并向量化）。该过程由MQ消息驱动，确保索引与数据库状态准实时一致。
+
+（2）页面化内容应用机制。面向门户与管理后台，提供基于ES索引的统一内容展示服务，包括类目导航、标签筛选、列表分页与全文检索。系统利用ES的倒排索引能力实现全量字段过滤（含权限控制），并结合数据库回查机制保障详情页的强一致性。
+
+（3）多通道召回。面向生成式问答场景，系统采用“ES全文检索 + Embedding向量召回”的双路架构。全文通道侧重精确关键词匹配与元数据过滤，向量通道侧重语义理解与长尾问法覆盖。两路召回结果经融合去重与重排后，输出TopN高质量切片作为回答依据。
+
+（4）生成式问答流程。系统将召回的证据切片注入大模型Prompt，结合业务约束生成回答，并在输出中附带可溯源的引用标记。该流程实现了“问答-证据-治理”的闭环，有效降低了模型幻觉风险。
+
+内容应用模块的关键交互流程如图\ref{fig:index_build_flow}、图\ref{fig:ca_display_flow}、图\ref{fig:ca_search_flow}与图\ref{fig:ca_rag_flow}所示。
 
 \begin{figure}[htbp]
   \centering
-  \fbox{\parbox{0.92\linewidth}{\vspace{14mm}\centering 内容展示流程/页面效果图占位（待补充）\vspace{14mm}}}
-  \caption{内容展示流程示意图}
+  \fbox{\parbox{0.9\linewidth}{\vspace{2cm}\centering 索引构建流程图占位（待补充）\vspace{2cm}}}
+  \caption{索引构建流程图}
+  \label{fig:index_build_flow}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \fbox{\parbox{0.9\linewidth}{\vspace{2cm}\centering 页面化内容展示流程图占位（待补充）\vspace{2cm}}}
+  \caption{页面化内容展示流程图}
   \label{fig:ca_display_flow}
 \end{figure}
 
-（2）内容检索。内容检索能力主要服务于关键词检索与结构化筛选。平台支持对标题、摘要、正文与结构化字段进行组合检索，并保证检索结果严格受空间、应用与content\_auth的权限控制。检索链路由请求解析、范围确定、权限过滤、召回与排序、结果组装与高亮等步骤构成；其中范围确定负责将“空间/应用配置”与“调用方身份”映射为可搜索范围，权限过滤负责对召回候选进行二次过滤以避免越权结果暴露。内容检索的链路示意如图\ref{fig:ca_search_flow}所示。
-
 \begin{figure}[htbp]
   \centering
-  \fbox{\parbox{0.92\linewidth}{\vspace{14mm}\centering 内容搜索链路示意图占位（待补充）\vspace{14mm}}}
-  \caption{内容搜索链路示意图}
+  \fbox{\parbox{0.9\linewidth}{\vspace{2cm}\centering 内容检索流程图占位（待补充）\vspace{2cm}}}
+  \caption{内容检索流程图}
   \label{fig:ca_search_flow}
 \end{figure}
 
-（3）索引构建。索引构建是连接内容管理与内容应用的关键环节，其目标是在内容发布后将可用内容同步为面向检索与问答的索引结构。平台在发布事件驱动下触发索引构建流程，并针对不同内容形态生成可检索的语义单元（切片）并携带必要元数据。对于页面检索场景，平台构建ES全文检索索引以支持关键词匹配；对于生成式问答场景，平台基于切片构建Embedding向量索引以支持语义召回。索引构建流程如图\ref{fig:index_build_flow}所示。
+\begin{figure}[htbp]
+  \centering
+  \fbox{\parbox{0.9\linewidth}{\vspace{2cm}\centering 生成式问答流程图占位（待补充）\vspace{2cm}}}
+  \caption{生成式问答流程图}
+  \label{fig:ca_rag_flow}
+\end{figure}
 
-为保证索引与内容状态的一致性，索引构建过程需要以已发布内容为输入，并在构建完成后对外刷新可用索引，避免出现检索结果与内容展示不一致的问题。
-
-索引构建涉及切片（Slice）、全文索引文档、向量索引向量与索引元信息等关键对象，并需要携带空间、应用与权限元数据以支撑范围过滤与权限校验，其对象关系可用类图表达，如图\ref{fig:ca_index_class}所示。
+内容应用模块涉及的关键类图如图\ref{fig:ca_index_class}与图\ref{fig:ca_qa_class}所示。
 
 \begin{figure}[htbp]
   \centering
-  \fbox{\parbox{0.92\linewidth}{\vspace{18mm}\centering 切片与索引领域类图占位（待补充）\vspace{18mm}}}
+  \fbox{\parbox{0.9\linewidth}{\vspace{2cm}\centering 切片与索引领域类图占位（待补充）\vspace{2cm}}}
   \caption{切片与索引领域类图}
   \label{fig:ca_index_class}
 \end{figure}
 
 \begin{figure}[htbp]
   \centering
-  \fbox{\parbox{0.92\linewidth}{\vspace{14mm}\centering 索引构建流程示意图占位（待补充）\vspace{14mm}}}
-  \caption{索引构建流程示意图}
-  \label{fig:index_build_flow}
-\end{figure}
-
-（4）生成式问答。为支撑智能问答场景，平台提供面向生成模型的可控内容支撑能力，其关键在于将内容转化为可检索的语义单元（切片）并在结果中返回可定位的来源信息。平台在索引构建阶段对不同内容形态执行切片策略：文章按固定长度切分并尽量保持段落语义完整；问答以问题与答案作为完整语义单元分别入库并建索引；课程可将每个课节作为一个切片；案例以每个案例作为一个切片。对于图片类内容，使用多模态Embedding模型并结合大模型生成文本化理解结果入库；对于表格类内容，避免纯文本切分并按行保持语义完整，同时在切片中携带表头信息。切片索引时携带所属内容ID、应用ID与内容权限等元数据，用于召回阶段的权限过滤与范围控制。索引侧同时构建全文检索索引与语义向量索引，两条通道互补以兼顾精准匹配与语义召回。
-
-在问答阶段，平台采用多通道召回与重排流程：首先对用户问题进行改写以提升召回质量；随后分别在全文检索（ES）与语义向量索引通道召回候选切片，并结合TopK与最小相似度阈值（MinScore）进行过滤；最后对候选切片去重、重排并输出证据集合供大模型生成回答。为便于后续治理与评估，问答链路记录召回通道、得分、排序依据与引用来源，并在返回结果中携带内容标识与片段定位信息。生成式问答的召回与重排过程如图\ref{fig:ca_rag_flow}所示。
-
-生成式问答链路涉及问题输入、证据集合与引用结果等核心对象，例如AskReq、EvidencePack、SliceHit与Citation等，其对象关系与关键字段约束可用类图表达，如图\ref{fig:ca_qa_class}所示。
-
-\begin{figure}[htbp]
-  \centering
-  \fbox{\parbox{0.92\linewidth}{\vspace{18mm}\centering 生成式问答领域类图占位（待补充）\vspace{18mm}}}
+  \fbox{\parbox{0.9\linewidth}{\vspace{2cm}\centering 生成式问答领域类图占位（待补充）\vspace{2cm}}}
   \caption{生成式问答领域类图}
   \label{fig:ca_qa_class}
-\end{figure}
-
-\begin{figure}[htbp]
-  \centering
-  \fbox{\parbox{0.92\linewidth}{\vspace{14mm}\centering RAG召回与重排流程示意图占位（待补充）\vspace{14mm}}}
-  \caption{内容召回与重排流程示意图}
-  \label{fig:ca_rag_flow}
 \end{figure}
 
 

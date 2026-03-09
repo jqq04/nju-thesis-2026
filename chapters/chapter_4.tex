@@ -3,7 +3,7 @@
 \section{内容管理模块的实现}
 \label{sec:impl_cm}
 
-内容管理模块是平台的内容资产底座，承担内容生产、组织、权限与发布等职责，是后续内容应用与内容治理的数据输入来源。实现层面，模块围绕统一内容模型构建空间与应用组织、内容与版本管理、类目与标签组织、跨应用引用、权限控制与审批发布等能力，并通过事件机制在发布后驱动索引构建与数据回收，保证“发布版本”口径在展示、检索、问答与治理链路中的一致性。
+内容管理模块是平台的内容资产底座，承担内容生产、组织、权限与发布等职责，是后续内容应用与内容治理的数据输入来源。实现层面，模块围绕统一内容模型构建空间与应用组织、内容与版本管理、类目与标签组织、跨应用引用、权限控制与审批发布等能力，并通过统一的变更事件驱动ES全量索引同步，保证内容资产在展示、检索、问答与治理链路中的一致性与时效性。
 
 为便于阐述实现细节，本节首先给出内容管理模块对外提供的关键接口概览，随后按子模块展开说明其核心实现机制。内容管理模块的关键服务端接口定义如表\ref{tab:cm_api}所示。
 
@@ -98,11 +98,7 @@ public Long saveDraft(SaveDraftReq req) {
   \label{fig:cm_version_key_code}
 \end{figure}
 
-页面化展示在实现上采用“元数据轻量返回、正文按需加载”的策略：列表与目录页仅返回content表中的title、summary、content\_type等元数据字段，并携带类目、标签等用于前端渲染筛选项；详情页在完成对象级权限校验后再读取对应形态子表的正文或结构字段，避免大字段在高频列表请求中被重复加载。对于course与case等结构型内容，详情页由服务端将多条课节记录或MongoDB detail(json)聚合为统一的渲染模型，保证前端消费一致。
-
-在性能层面，内容列表查询以space\_id与app\_id作为强过滤条件，并结合状态字段仅返回已发布内容；类目与标签维度通过关联表或索引字段进行过滤与排序。对于高频访问的应用目录树与标签集合，服务端可按(app\_id)维度做短期缓存，以减少重复构建树结构带来的CPU开销；当类目或标签发生变更时，更新接口同步触发缓存失效，保证读链路与配置链路一致。
-
-（3）多形态差异字段落地。不同内容形态的差异不仅体现在“是否有正文”，更体现在内容结构、编辑方式与召回粒度上。knowledge以长文为主，正文用于页面渲染与段落切片；faq以问答对为主，并通过faq\_similar\_question维护相似问集合以覆盖不同问法；course以课节为基本单元，lesson\_no用于稳定排序与学习路径展示；case字段结构随业务演进变化较快，采用文档存储承载detail(json)以降低关系型表结构频繁变更成本。
+（3）内容与元数据管理。不同内容形态在实现上采用“元数据轻量返回、正文按需加载”的策略：列表与目录页仅返回content表中的title、summary、content\_type等元数据字段，并携带类目、标签等用于前端渲染筛选项；详情页在完成对象级权限校验后再读取对应形态子表的正文或结构字段，避免大字段在高频列表请求中被重复加载。对于course与case等结构型内容，详情页由服务端将多条课节记录或MongoDB detail(json)聚合为统一的渲染模型，保证前端消费一致。
 
 （4）状态与发布口径约束。内容生命周期至少包含草稿、待审批、已发布、已下线等状态，平台在状态机约束下实现编辑、提审、审批、发布与下线等操作。实现中，读链路对外仅返回已发布状态内容；写链路在提审时冻结变更并进入待审批状态，审批通过后更新内容状态为已发布并触发发布事件，驱动下游索引更新与数据回收，避免“草稿可见”导致的口径漂移。
 
@@ -235,7 +231,7 @@ private boolean matchRule(AuthRule r, Set<String> grants, Visitor v) {
   \label{fig:cm_content_auth_match_key_code}
 \end{figure}
 
-为降低读链路开销，列表与检索场景尽量在查询阶段做粗过滤（例如按内容状态、空间/应用、引用集合），再对召回候选执行对象级授权校验，避免将复杂策略下推到检索引擎导致表达困难或泄露风险。
+为降低读链路开销，列表与检索场景均将权限校验逻辑下推至检索引擎（ES）：服务端在构建查询时，将访问者的权限集合（如dept\_id、role\_id）转化为ES的Term或Terms条件，与索引中的content\_auth字段进行匹配。这利用了ES对BitSet的高效处理能力，避免了传统模式下先召回大量ID再逐条鉴权带来的性能瓶颈，同时保证了分页结果的准确性。
 
 （3）审批与发布流程实现。为保证内容对外可用前的准确性与合规性，平台将发布动作纳入流程化审批控制：提审接口会创建审批记录并将内容状态置为待审批；审批通过后更新内容状态为已发布，同时产生内容发布事件驱动下游异步链路；审批驳回则回写拒绝原因并将内容退回可编辑状态。发布与下线接口会在保证幂等性的前提下触发事件，以驱动索引增量更新与统计回收，确保内容资产、索引与问答结果在发布前后保持一致。
 
@@ -285,20 +281,110 @@ public void approve(ApproveReq req) {
   \end{tabular}
 \end{table}
 
-本节按“链路机制$\rightarrow$关键实现片段$\rightarrow$与流程图对应”的结构展开：首先说明页面化内容应用的范围确定与读口径，其次介绍多形态内容前置处理与索引构建，再说明RAG多通道召回与重排机制，最后给出生成式问答链路的实现与引用映射方式。
+本节按“多形态内容索引$\rightarrow$页面化内容应用$\rightarrow$多通道召回$\rightarrow$生成式问答”的逻辑顺序展开，依次阐述内容应用模块在写入、读取、检索与生成四个关键环节的实现机制。
+
+\subsection{多形态内容前置处理与索引构建}
+\label{subsec:impl_ca_index}
+
+为支持“页面化展示/搜索”与“RAG生成”两大核心场景，平台构建了基于ES的全文索引与基于向量数据库的切片索引。该链路由统一的MQ消息（content\_update/publish）驱动：当内容发生更新或发布时，索引服务消费消息，执行“数据同步$\rightarrow$切片处理$\rightarrow$双路分发”的流程，确保索引状态与数据库保持准实时一致。
+
+（1）索引同步与分发链路。索引构建服务作为MQ消费端，在收到变更消息后，首先回查数据库拉取最新的全量业务信息（含正文、权限规则、标签、类目等）。随后并行执行两条分发逻辑：
+\begin{itemize}
+\item \textbf{同步到ES（全文/元数据索引）}：构建包含title、summary、content\_auth、status等字段的扁平化文档，写入ES。此索引服务于管理后台列表、前端展示与全文检索，侧重“全量字段过滤”与“实时性”。
+\item \textbf{同步到向量索引（RAG切片）}：仅当内容状态为“已发布”时触发。对正文进行切片处理与Embedding向量化，写入向量数据库（如Milvus）。此索引服务于智能问答，侧重“语义召回”与“发布态口径”。
+\end{itemize}
+
+（2）切片处理策略。不同内容形态在RAG链路中需统一为可检索的最小语义单元（切片）。根据项目口径，切片策略如下：
+\begin{enumerate}
+\item \textbf{文章（knowledge）}：以固定长度为基础切片，并尽量保持段落语义完整性，避免跨段切分导致上下文断裂；切片携带文章标题、摘要、类目、标签等元数据。
+\item \textbf{问答（faq）}：问题与答案作为完整语义单元不做切片处理，可分别入库并建立索引；召回阶段按场景组合使用（例如仅对question检索或对question+answer联合检索）。
+\item \textbf{课程（course）}：考虑到成本，一个课节作为一个切片；实现中通过大模型提取课节字幕或要点文本作为课节内容，以保证索引侧为可检索的文本。
+\item \textbf{案例（case）}：每个案例作为一个切片；切片携带案例标题、摘要、类目、标签等元数据。
+\end{enumerate}
+
+此外，图片与表格类内容在切片时需要特殊处理：图片使用多模态embedding模型实现“图文同空间”检索，并通过大模型生成文本化理解结果与图片链接一起入库；表格避免纯文本切分，按行保持语义完整并携带表头信息，以提升表格类知识在问答中的可用性。前置处理阶段对富文本标记、无意义噪声进行清洗，并保留必要结构信息以便后续组织引用。
+
+在切片结构上，平台将每个切片建模为包含\texttt{slice\_id、content\_id、space\_id、app\_id、content\_type、text}等字段的最小证据单元，并可选携带\texttt{position}用于表示在正文中的定位信息（例如段落序号或课节序号）。该设计使得召回结果既能用于生成式问答的证据输入，也能在输出侧映射为“内容标题+片段摘要+定位信息”的引用，降低用户在溯源时的跳转成本。
+
+为保证切片可稳定更新，slice\_id采用可重复生成的规则：以\texttt{content\_id}为前缀，拼接切片类型与position构成业务唯一键，例如\texttt{<content\_id>\#P\_<para\_no>}。当内容发布触发索引增量更新时，同一content\_id的切片可以按slice\_id覆盖写入，从而在无需全量重建索引的前提下实现稳定更新。
+
+切片生成的工程实现可以拆分为“内容提取$\rightarrow$文本规范化$\rightarrow$按类型切片$\rightarrow$补充元信息”四步。内容提取阶段按content\_type从对应子表或文档库加载正文或结构字段；文本规范化阶段对HTML标签、富文本标记、空白与不可见字符做清洗，并统一标点与换行以减少embedding噪声；按类型切片阶段根据不同形态选择不同的语义单元；最后补充元信息阶段将标题、摘要、类目、标签、权限等字段写入切片结构，便于召回与过滤。切片构建的关键实现片段如图\ref{fig:ca_slice_build_key_code}所示。
+
+\begin{figure}[htbp]
+  \centering
+  \begin{minipage}{0.94\linewidth}
+    \begin{lstlisting}[basicstyle=\ttfamily\small,numbers=left,numberstyle=\tiny,frame=single,breaklines=true]
+public List<Slice> buildSlices(Content c) {
+  if ("knowledge".equals(c.type)) {
+    String body = normalize(knowledgeDao.getBody(c.id));
+    return splitByParagraphOrLen(c, body); // 段落优先，必要时按长度切分
+  } else if ("faq".equals(c.type)) {
+    Faq f = faqDao.get(c.id);
+    return buildFaqSlices(c, f.question, f.answer); // question/answer 两个语义单元
+  } else if ("course".equals(c.type)) {
+    List<Lesson> lessons = courseDao.listLessons(c.id);
+    return buildLessonSlices(c, lessons); // 一课节一切片，字幕由LLM提取
+  } else if ("case".equals(c.type)) {
+    String json = caseDao.getDetail(c.id);
+    String text = normalize(caseExtractor.toText(json)); // 字段抽取与拼接
+    return listOf(slice(c, "C_0", text));
+  } else if ("image".equals(c.type)) {
+    ImageMeta m = imageDao.get(c.id);
+    String caption = llmClient.caption(m.url);
+    return listOf(slice(c, "I_0", caption + " " + m.url));
+  } else if ("table".equals(c.type)) {
+    Table t = tableDao.get(c.id);
+    return buildTableRowSlices(c, t.header, t.rows); // 每行拼接表头，保证行语义完整
+  }
+  return emptyList();
+}
+    \end{lstlisting}
+  \end{minipage}
+  \caption{切片构建关键代码}
+  \label{fig:ca_slice_build_key_code}
+\end{figure}
+
+（3）全量元信息绑定与权限前置过滤。为支撑统一过滤，索引构建时不仅写入文本切片，更全量携带content\_id、status、category\_id、tag\_ids以及用于权限控制的content\_auth规则集合。这一设计使得ES能够独立承担所有筛选职责：召回阶段将用户的权限特征（Dept/Role）转化为Filter子句直接参与倒排索引的交集运算，实现了“权限前置过滤”，避免了服务侧后置过滤带来的性能损耗与分页结果不准的问题。
+
+索引更新采用“DB主导、ES跟随”的最终一致性策略：当MQ消费端收到变更消息时，总是回查数据库获取最新状态覆盖写入ES，以此消除消息乱序或重试可能导致的数据不一致。
+
+（4）增量更新与幂等控制。索引构建消费发布事件后进行增量更新：同一content\_id的旧索引会被覆盖或标记过期，查询侧只命中最新发布口径。为避免重复消费导致的脏写，索引构建服务以(content\_id, modify\_time, index\_type)作为幂等键，并在写入前检查已处理记录，从而在“至少一次投递”语义下实现最终一致。
+
+索引构建在工程实现上通常以\texttt{content\_id}为主键进行覆盖更新：全文索引将切片作为文档写入，并携带content\_id用于聚合与删除；向量索引将embedding向量与slice\_id绑定，并在更新时先按content\_id删除旧切片或标记旧切片不可见，再写入新切片。为降低峰值写入压力，索引构建服务对批量发布采用分批处理，并对失败批次进行重试；在重试过程中仍以幂等键约束写入，避免重复写入造成索引膨胀。
+
+（5）关键实现片段。索引构建核心在于“事件消费$\rightarrow$拉取发布版本$\rightarrow$切片$\rightarrow$双索引写入”。其关键实现片段如图\ref{fig:index_build_key_code}所示。
+
+\begin{figure}[htbp]
+  \centering
+  \begin{minipage}{0.94\linewidth}
+    \begin{lstlisting}[basicstyle=\ttfamily\small,numbers=left,numberstyle=\tiny,frame=single,breaklines=true]
+public void onContentPublished(ContentPublishedEvent e) {
+  Content c = contentDao.get(e.contentId);
+  if (!c.isPublished()) return;
+  if (indexMetaDao.exists(e.contentId, c.modifyTime, "FULLTEXT")) return;
+  List<Slice> slices = sliceService.buildSlices(c);
+  esClient.upsertDocuments(c.spaceId, c.appId, c.id, c.modifyTime, slices);
+  vectorClient.upsertEmbeddings(c.spaceId, c.appId, c.id, c.modifyTime, slices);
+  indexMetaDao.markDone(e.contentId, c.modifyTime);
+}
+    \end{lstlisting}
+  \end{minipage}
+  \caption{索引构建关键代码}
+  \label{fig:index_build_key_code}
+\end{figure}
 
 \subsection{页面化内容应用机制}
 \label{subsec:impl_ca_page}
 
-页面化内容应用机制用于支撑内容门户与管理后台的通用展示场景，包括目录、列表与详情页等典型页面形态。其实现目标是将“空间/应用边界、组织方式（类目/标签）、发布口径、权限过滤”在读链路中统一起来，从而在不同入口下保持一致的可见范围与展示效果。
+页面化内容应用机制用于支撑内容门户与管理后台的通用展示场景，包括目录、列表、详情页以及基于ES的关键词搜索。其核心架构采用了“ES统一索引过滤 + DB实时详情回查”的读写分离模式。
 
-（1）范围确定与请求规约。页面化展示请求通常携带space\_id、app\_id、category\_id、tag等参数。服务端在接入层首先完成身份校验，并根据调用方来源（门户/后台）与应用配置确定内容范围：以space\_id与app\_id作为强边界过滤条件，并在应用启用“引用内容”时将引用关系作为可见集合约束，从而限定仅展示被引用且已发布的内容。
+（1）统一索引与过滤。列表、类目、标签页与内容搜索页不再依赖数据库的复杂查询，而是优先查询ES宽表索引。服务端利用ES的Filter子句完成状态、类目、标签及权限的快速过滤与分页，获取目标内容ID集合。这种模式利用了倒排索引的高效性，避免了数据库全表扫描。对于搜索场景，在Filter基础上叠加Match/MultiMatch子句进行全文相关性算分与高亮处理。
 
-（2）发布口径读取与一致性约束。展示链路统一以发布口径为准：列表页仅读取内容元数据与必要摘要；详情页在校验权限后读取发布版本正文。该策略保证展示、检索与问答链路对外一致，避免草稿内容在门户侧被提前可见。
+（2）权限前置过滤。权限控制直接参与倒排索引的交集运算。服务端将用户的权限特征（如Dept/Role）转化为ES查询条件，与索引中的content\_auth字段进行匹配，确保分页结果中的每一条记录都是用户有权访问的，解决了应用层后置过滤导致的分页空洞问题。
 
-（3）权限过滤与越权防护。展示链路在返回结果前执行权限过滤：对外消费页面以content\_auth的对象级可见性裁决为主；管理后台在此基础上叠加RBAC的模块/操作级校验，用于约束后台可操作范围。对于列表页，服务端在查询阶段尽量将content\_auth可见性条件下推以降低结果集；对于详情页，服务端在读取发布正文前执行对象级强校验，避免越权内容被渲染或被前端缓存。
+（3）实时详情回查。获得ID列表后，服务端通过主键批量回查数据库（或缓存）获取最新的标题、摘要与状态信息。详情页则在完成对象级权限校验后，根据内容形态读取对应子表的正文或结构字段（如knowledge的body、course的lessons）。这种“索引圈选+DB兜底”的策略既保证了筛选性能，又确保了最终展示内容的强一致性。
 
-（4）关键实现片段。页面化展示的关键在于“范围确定$\rightarrow$权限过滤$\rightarrow$发布口径读取”的顺序约束。其核心实现片段如图\ref{fig:ca_display_key_code}所示。
+页面化展示的关键实现片段如图\ref{fig:ca_display_key_code}所示。
 
 \begin{figure}[htbp]
   \centering
@@ -340,18 +426,7 @@ public ContentDetailDTO getDetail(DetailReq req) {
   \label{fig:ca_display_key_code}
 \end{figure}
 
-\subsection{内容检索服务实现}
-\label{subsec:impl_ca_search}
-
-内容检索服务为门户与管理后台提供统一的关键词检索能力，并作为智能问答链路的基础召回通道之一。实现目标包括：多字段匹配（标题、摘要、正文等）、结构化过滤（类目、标签、内容类型）、分页与高亮展示，以及在空间/应用边界与权限约束下保证结果可控。
-
-（1）索引字段与映射设计。检索索引以切片为基本文档粒度，并携带用于过滤与聚合的元信息字段：content\_id、space\_id、app\_id、content\_type、category\_id、tag\_ids、modify\_time等。文本字段按业务语义拆分为title、summary与text，分别配置不同权重：title用于精准命中提升排序稳定性，summary用于概览召回，text用于正文覆盖。对于FAQ类内容，question与answer可分别入索引并设置差异化权重，以支持“只检索问题”或“问题+答案一起检索”等场景配置。
-
-（2）查询构造与排序策略。查询侧采用“过滤优先、匹配其次”的策略：先用term/range过滤固定边界（space\_id、app\_id、状态为已发布、引用集合约束等），再对文本字段做multi\_match；排序以BM25为主，并叠加标题命中、更新时间、新鲜度等轻量特征。检索结果在返回前进行对象级权限校验，保证越权切片不会被返回。
-
-（3）高亮与摘要生成。为提升可读性，检索服务对title与text开启高亮，并在无法高亮时退化为返回summary或对text做截断摘要。对于长正文切片，摘要以“命中片段前后窗口”形式生成，避免在列表页返回过长内容导致传输与渲染开销增大。
-
-检索查询构造的关键实现片段如图\ref{fig:ca_search_key_code}所示。
+内容检索服务的查询构造关键实现片段如图\ref{fig:ca_search_key_code}所示。
 
 \begin{figure}[htbp]
   \centering
@@ -382,103 +457,70 @@ public SearchResp search(SearchReq req) {
   \label{fig:ca_search_key_code}
 \end{figure}
 
-\subsection{多形态内容前置处理与索引构建}
-\label{subsec:impl_ca_index}
+\subsection{多通道召回}
+\label{subsec:impl_ca_search}
 
-为支持高效检索与生成式问答，平台在内容发布后对多形态内容进行前置处理，并构建全文索引与向量索引。该链路由内容发布事件驱动：内容管理模块在审批通过后触发ContentPublished事件，索引构建服务消费事件并完成文档化、切片与索引写入。
+多通道召回用于在生成式问答场景下提供高质量证据集合。实现层面，平台采用“ES全文检索+Embedding语义召回”的双路并行架构，融合去重后进行重排，最终输出与问题最相关的TopN切片。
 
-（1）多形态前置处理与切片策略。不同内容形态在索引侧的目标是统一为可检索的最小证据单元（切片），并保证切片本身包含足够上下文信息以便被独立理解。根据项目口径，切片策略如下：
+（1）双路召回机制。平台并行执行两条召回链路：
+\begin{itemize}
+\item \textbf{全文检索通道}：基于ES的Match/MultiMatch查询，利用BM25算法对Title、Summary、Text进行相关性算分。此通道优势在于精确关键词命中（如错误码、专有名词），且天然支持类目、标签与权限的Filter过滤。
+\item \textbf{向量召回通道}：基于Embedding模型将用户Query转化为向量，在向量数据库中检索TopK相似切片。此通道优势在于语义理解与跨词匹配（如“如何退款”匹配“退货流程”），且同样支持基于元数据（如权限、类目、标签）的Filter过滤，弥补了关键词匹配的不足。
+\end{itemize}
 
-1. 文章（knowledge）：以固定长度为基础切片，并尽量保持段落语义完整性，避免跨段切分导致上下文断裂；切片携带文章标题、摘要、类目、标签等元数据。
-2. 问答（faq）：问题与答案作为完整语义单元不做切片处理，可分别入库并建立索引；召回阶段按场景组合使用（例如仅对question检索或对question+answer联合检索）。
-3. 课程（course）：考虑到成本，一个课节作为一个切片；实现中通过大模型提取课节字幕或要点文本作为课节内容，以保证索引侧为可检索的文本。
-4. 案例（case）：每个案例作为一个切片；切片携带案例标题、摘要、类目、标签等元数据。
+（2）融合与重排。两路召回结果在服务层进行加权融合与去重，保留得分最高的切片版本。融合后的候选集进入重排阶段（可选Cross-Encoder精排或规则排序），综合相关性分数、发布时间与点击热度等特征输出最终TopN。
 
-此外，图片与表格类内容在切片时需要特殊处理：图片使用多模态embedding模型实现“图文同空间”检索，并通过大模型生成文本化理解结果与图片链接一起入库；表格避免纯文本切分，按行保持语义完整并携带表头信息，以提升表格类知识在问答中的可用性。前置处理阶段对富文本标记、无意义噪声进行清洗，并保留必要结构信息以便后续组织引用。
+（3）关键参数与实现。召回阶段的关键参数包括TopK与MinScore：TopK用于控制返回候选切片数量，MinScore用于设置最小相似度阈值以过滤低相关候选。表\ref{tab:rag_params}给出了关键参数的工程含义。
 
-在切片结构上，平台将每个切片建模为包含\texttt{slice\_id、content\_id、space\_id、app\_id、content\_type、text}等字段的最小证据单元，并可选携带\texttt{position}用于表示在正文中的定位信息（例如段落序号或课节序号）。该设计使得召回结果既能用于生成式问答的证据输入，也能在输出侧映射为“内容标题+片段摘要+定位信息”的引用，降低用户在溯源时的跳转成本。
+\begin{table}[htbp]
+  \centering
+  \caption{RAG召回关键参数}
+  \label{tab:rag_params}
+  \begin{tabular}{c|p{10cm}}
+    \hline
+    参数 & 含义 \\ \hline
+    TopK & 单通道召回的候选上限，用于控制延迟与后续重排开销 \\ \hline
+    MinScore & 最小相似度阈值，低于阈值的候选直接丢弃以提升精度与可解释性 \\ \hline
+    TopN & 重排后最终用于证据组织的切片数量，受上下文窗口与引用展示限制 \\ \hline
+  \end{tabular}
+\end{table}
 
-为保证切片可稳定更新，slice\_id采用可重复生成的规则：以\texttt{content\_id}为前缀，拼接切片类型与position构成业务唯一键，例如\texttt{<content\_id>\#P\_<para\_no>}、\texttt{<content\_id>\#L\_<lesson\_no>}或\texttt{<content\_id>\#T\_<row\_no>}。当内容发布触发索引增量更新时，同一content\_id的切片可以按slice\_id覆盖写入，从而在无需全量重建索引的前提下实现稳定更新。
-
-切片生成的工程实现可以拆分为“内容提取$\rightarrow$文本规范化$\rightarrow$按类型切片$\rightarrow$补充元信息”四步。内容提取阶段按content\_type从对应子表或文档库加载正文或结构字段；文本规范化阶段对HTML标签、富文本标记、空白与不可见字符做清洗，并统一标点与换行以减少embedding噪声；按类型切片阶段根据不同形态选择不同的语义单元；最后补充元信息阶段将标题、摘要、类目、标签、权限等字段写入切片结构，便于召回与过滤。切片构建的关键实现片段如图\ref{fig:ca_slice_build_key_code}所示。
+重排实现采用“粗排+精排”的两阶段策略：粗排阶段以召回通道得分与轻量特征（标题命中、关键词覆盖）进行线性加权，快速裁剪候选集合；精排阶段对裁剪后的候选计算更细粒度特征，例如query与slice的语义相似度、与标题/摘要的覆盖度、以及同一content的多样性约束，并输出最终topN证据。重排的关键实现片段如图\ref{fig:rag_rerank_key_code}所示。
 
 \begin{figure}[htbp]
   \centering
   \begin{minipage}{0.94\linewidth}
     \begin{lstlisting}[basicstyle=\ttfamily\small,numbers=left,numberstyle=\tiny,frame=single,breaklines=true]
-public List<Slice> buildSlices(Content c) {
-  if ("knowledge".equals(c.type)) {
-    String body = normalize(knowledgeDao.getBody(c.id));
-    return splitByParagraphOrLen(c, body); // 段落优先，必要时按长度切分
-  } else if ("faq".equals(c.type)) {
-    Faq f = faqDao.get(c.id);
-    return buildFaqSlices(c, f.question, f.answer); // question/answer 两个语义单元
-  } else if ("course".equals(c.type)) {
-    List<Lesson> lessons = courseDao.listLessons(c.id);
-    return buildLessonSlices(c, lessons); // 一课节一切片，字幕由LLM提取
-  } else if ("case".equals(c.type)) {
-    String json = caseDao.getDetail(c.id);
-    String text = normalize(caseExtractor.toText(json)); // 字段抽取与拼接
-    return listOf(slice(c, "C_0", text));
-  } else if ("image".equals(c.type)) {
-    ImageMeta m = imageDao.get(c.id);
-    String caption = llmClient.caption(m.url);
-    return listOf(slice(c, "I_0", caption + " " + m.url));
-  } else if ("table".equals(c.type)) {
-    Table t = tableDao.get(c.id);
-    return buildTableRowSlices(c, t.header, t.rows); // 每行拼接表头，保证行语义完整
+public List<SliceHit> rank(String query, List<SliceHit> hits, int topn) {
+  for (SliceHit h : hits) {
+    double score = 0;
+    score += 0.5 * h.recallScore;
+    score += 0.3 * h.keywordCover;
+    score += 0.2 * h.titleHit;
+    h.finalScore = score;
   }
-  return emptyList();
+  List<SliceHit> sorted = sortByScore(hits);
+  return diversifyByContent(sorted, topn);
 }
     \end{lstlisting}
   \end{minipage}
-  \caption{切片构建关键代码}
-  \label{fig:ca_slice_build_key_code}
+  \caption{重排关键代码}
+  \label{fig:rag_rerank_key_code}
 \end{figure}
 
-图片与表格属于需要特殊处理的信息载体。图片切片的核心在于“可检索化”：通过多模态embedding模型将图片与文本映射到同一向量空间，并通过大模型生成caption/要点作为文本化理解结果参与索引；切片同时携带图片URL与必要上下文信息，便于在回答中返回可点击溯源。表格切片的核心在于“保留结构语义”：按行切片并在每行切片中拼接表头字段，使得单行在脱离原表格时仍可被理解；对于列值较长的表格，按列优先级截断或做摘要，避免单切片超出上下文窗口。
-
-（2）元信息绑定与权限下推。切片索引时携带content\_id、modify\_time、space\_id、app\_id与content\_auth相关元信息，用于召回阶段的范围确定与权限过滤。通过元信息绑定，可以保证任意召回结果都能回溯到具体内容及其发布时间点，并在服务侧做对象级可见性判断。索引同时构建ES与embedding两套索引：ES侧侧重字面匹配与可解释高亮，embedding侧侧重语义相似与长尾覆盖，两条通道互补并为后续RAG提供更稳健的候选集合。
-
-索引侧采用\texttt{content\_id + modify\_time}作为发布口径标识：当内容发布后触发索引更新事件，索引构建服务拉取当前已发布内容及其更新时间戳，作为索引写入的幂等与覆盖依据。召回阶段以space\_id、app\_id与内容状态作为粗过滤条件，并在服务侧对候选内容执行content\_auth对象级校验，避免复杂授权策略直接下推到索引侧导致表达困难。
-
-（3）增量更新与幂等控制。索引构建消费发布事件后进行增量更新：同一content\_id的旧索引会被覆盖或标记过期，查询侧只命中最新发布口径。为避免重复消费导致的脏写，索引构建服务以(content\_id, modify\_time, index\_type)作为幂等键，并在写入前检查已处理记录，从而在“至少一次投递”语义下实现最终一致。
-
-索引构建在工程实现上通常以\texttt{content\_id}为主键进行覆盖更新：全文索引将切片作为文档写入，并携带content\_id用于聚合与删除；向量索引将embedding向量与slice\_id绑定，并在更新时先按content\_id删除旧切片或标记旧切片不可见，再写入新切片。为降低峰值写入压力，索引构建服务对批量发布采用分批处理，并对失败批次进行重试；在重试过程中仍以幂等键约束写入，避免重复写入造成索引膨胀。
-
-（4）关键实现片段。索引构建核心在于“事件消费$\rightarrow$拉取发布版本$\rightarrow$切片$\rightarrow$双索引写入”。其关键实现片段如图\ref{fig:index_build_key_code}所示。
-
-\begin{figure}[htbp]
-  \centering
-  \begin{minipage}{0.94\linewidth}
-    \begin{lstlisting}[basicstyle=\ttfamily\small,numbers=left,numberstyle=\tiny,frame=single,breaklines=true]
-public void onContentPublished(ContentPublishedEvent e) {
-  Content c = contentDao.get(e.contentId);
-  if (!c.isPublished()) return;
-  if (indexMetaDao.exists(e.contentId, c.modifyTime, "FULLTEXT")) return;
-  List<Slice> slices = sliceService.buildSlices(c);
-  esClient.upsertDocuments(c.spaceId, c.appId, c.id, c.modifyTime, slices);
-  vectorClient.upsertEmbeddings(c.spaceId, c.appId, c.id, c.modifyTime, slices);
-  indexMetaDao.markDone(e.contentId, c.modifyTime);
-}
-    \end{lstlisting}
-  \end{minipage}
-  \caption{索引构建关键代码}
-  \label{fig:index_build_key_code}
-\end{figure}
-
-\subsection{基于RAG的多通道召回与重排}
+\subsection{生成式问答流程实现}
 \label{subsec:impl_ca_rag}
 
-基于RAG的多通道召回与重排用于在生成式问答场景下提供高质量证据集合，并在可控成本下兼顾召回率与精度。实现层面，平台采用“多通道召回—融合去重—重排—证据组织”的流水线结构：全文通道负责精准关键词召回，向量通道负责语义相似召回，两者融合后进行去重与重排，最终输出与问题最相关的slice集合。
+生成式问答流程复用了前述的“多通道召回”结果，将其转化为结构化的Prompt证据，注入大模型以生成最终回答。该链路侧重于证据的组织、Prompt的构建以及引用的回溯。
 
-整体链路包含“问题改写$\rightarrow$多通道召回$\rightarrow$融合去重$\rightarrow$重排$\rightarrow$证据组织”五个关键步骤。问题改写位于召回之前：系统将用户输入改写为更标准化的表达，并结合词典归一化与停用词处理生成用于检索的query，从而提升在同义改写、口语化表达与长尾问法场景下的召回稳定性；随后分别在ES与向量索引上执行TopK召回并施加MinScore阈值过滤；融合阶段对两路候选去重并合并召回来源信息；重排阶段综合召回分数与多特征输出TopN证据；最后将证据按content聚合并组织为适配上下文窗口的引用片段集合，供后续生成回答使用。
+（1）证据组织与Prompt构建。
+\begin{itemize}
+\item \textbf{证据聚合}：将重排后的TopN切片按Content维度聚合，避免同一内容的多个片段重复占用Prompt空间。
+\item \textbf{Prompt注入}：将聚合后的证据拼接为标准格式（含Title、Text片段、来源URL），填入System Prompt的Context区域。
+\item \textbf{引用要求}：在Prompt中显式约束模型必须基于提供的Context回答，并在输出中通过`[引用ID]`标记来源。
+\end{itemize}
 
-（1）多通道召回。全文召回基于ES的BM25与字段权重，支持标题、摘要与正文多字段匹配；向量召回基于embedding相似度检索，覆盖同义改写与长尾问法。为控制延迟，系统对两路召回设置topK上限，并在召回阶段尽量下推范围与权限过滤条件，减少后续候选规模。
-
-为降低长尾问法与口语化输入对召回的影响，平台在召回前引入“问题改写+query规整”的预处理步骤：问题改写将用户输入改写为更标准化的表达以提升召回质量；query规整则对改写后的文本进行分词与停用词处理，并对包含业务术语与缩写的词典进行归一化。对于低质量输入（过短、纯符号、无有效词），系统直接触发未命中返回并进入覆盖度候选。预处理后的query同时用于全文检索与向量检索，以保证多通道召回输入一致。
-
-问题改写在实现上以提示词约束输出结构，避免模型自由发挥导致关键信息丢失。提示词要求模型在结合对话上下文的前提下抽取“对象、场景、诉求”三要素，并输出“完整表述”和更接近知识标题的“主要问题”，用于后续召回。问题改写提示词模板如图\ref{fig:rag_rewrite_prompt}所示。
+（2）问题改写。为了提升召回的准确性，在执行多通道召回前，系统会先调用LLM对用户原始Query进行改写。通过Prompt约束，模型需提取“对象、场景、诉求”三要素，并输出“完整表述”和更接近知识标题的“主要问题”。问题改写提示词模板如图\ref{fig:rag_rewrite_prompt}所示。
 
 \begin{figure}[htbp]
   \centering
@@ -518,50 +560,6 @@ public void onContentPublished(ContentPublishedEvent e) {
   \caption{问题改写提示词模板}
   \label{fig:rag_rewrite_prompt}
 \end{figure}
-
-召回阶段的关键参数包括TopK与MinScore：TopK用于控制返回候选切片数量，MinScore用于设置最小相似度阈值以过滤低相关候选。表\ref{tab:rag_params}给出了关键参数的工程含义。
-
-\begin{table}[htbp]
-  \centering
-  \caption{RAG召回关键参数}
-  \label{tab:rag_params}
-  \begin{tabular}{c|p{10cm}}
-    \hline
-    参数 & 含义 \\ \hline
-    TopK & 单通道召回的候选上限，用于控制延迟与后续重排开销 \\ \hline
-    MinScore & 最小相似度阈值，低于阈值的候选直接丢弃以提升精度与可解释性 \\ \hline
-    TopN & 重排后最终用于证据组织的切片数量，受上下文窗口与引用展示限制 \\ \hline
-  \end{tabular}
-\end{table}
-
-（2）融合去重与候选裁剪。多通道返回的候选以slice\_id为主键融合去重，并对同一content\_id的多个候选进行聚合，避免证据过度集中在单一内容上。融合阶段会根据召回来源与初排分数进行粗排裁剪，为后续重排降低成本。
-
-（3）重排与证据组织。重排阶段以多特征排序，包括语义相似分、关键词覆盖、标题命中、内容新鲜度等，并对候选进行多样性约束。证据组织阶段将topN的slice按文档聚合，并截断拼接为适合大模型上下文窗口的证据段落，同时保留每段证据的来源标识，用于输出引用。
-
-重排实现采用“粗排+精排”的两阶段策略：粗排阶段以召回通道得分与轻量特征（标题命中、关键词覆盖）进行线性加权，快速裁剪候选集合；精排阶段对裁剪后的候选计算更细粒度特征，例如query与slice的语义相似度、与标题/摘要的覆盖度、以及同一content的多样性约束，并输出最终topN证据。重排的关键实现片段如图\ref{fig:rag_rerank_key_code}所示。
-
-\begin{figure}[htbp]
-  \centering
-  \begin{minipage}{0.94\linewidth}
-    \begin{lstlisting}[basicstyle=\ttfamily\small,numbers=left,numberstyle=\tiny,frame=single,breaklines=true]
-public List<SliceHit> rank(String query, List<SliceHit> hits, int topn) {
-  for (SliceHit h : hits) {
-    double score = 0;
-    score += 0.5 * h.recallScore;
-    score += 0.3 * h.keywordCover;
-    score += 0.2 * h.titleHit;
-    h.finalScore = score;
-  }
-  List<SliceHit> sorted = sortByScore(hits);
-  return diversifyByContent(sorted, topn);
-}
-    \end{lstlisting}
-  \end{minipage}
-  \caption{重排关键代码}
-  \label{fig:rag_rerank_key_code}
-\end{figure}
-
-（4）关键实现片段。RAG召回与重排的关键实现片段如图\ref{fig:rag_recall_key_code}所示。
 
 \begin{figure}[htbp]
   \centering
