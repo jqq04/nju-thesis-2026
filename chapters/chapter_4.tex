@@ -985,7 +985,12 @@ public void dailyRecheck(Date since) {
 
 会话分析在实现上以session\_id为主键组织多轮交互，并以trace\_id串联单轮问答的召回与生成事件。聚合视图以“会话级”与“聚类级”两种口径输出：会话级指标用于观察整体趋势与转化漏斗；聚类级指标用于定位高频问题簇并下钻到原始query与证据。洞察侧通过聚类ID为每条会话打标，从而实现“主题簇$\rightarrow$明细会话$\rightarrow$引用内容”的端到端下钻路径。
 
-会话聚类用于将大量历史query归并为有限的主题簇，便于从统计视角识别高频问题与薄弱点。聚类构建采用基于语义相似图的连通分量方法：将每条query向量化写入向量索引，设定最小相似度阈值\texttt{min\_score}，相似度$\ge$阈值的query之间建立边；从未归类query出发递归扩展其邻居集合，形成一个连通分量作为聚类。聚类构建的关键实现片段如图\ref{fig:di_cluster_key_code}所示。
+\subsection{会话聚类与主题总结}
+\label{subsec:impl_di_cluster}
+
+会话聚类用于将大量零散的历史Query归并为有限的语义主题簇，其核心动机在于“从统计视角识别高频问题与薄弱点”。单纯的会话列表难以暴露共性问题，而聚类可以将语义相似的Query（如“怎么退款”、“退货流程”、“钱什么时候退回”）聚合为一个主题（如“售后退款咨询”），从而帮助运营快速发现高频诉求或未覆盖的知识盲区。
+
+（1）聚类构建机制。聚类构建采用基于语义相似图的连通分量方法：将每条Query向量化写入向量索引，设定最小相似度阈值\texttt{min\_score}，相似度$\ge$阈值的Query之间建立边；从未归类Query出发递归扩展其邻居集合，形成一个连通分量作为聚类。聚类构建的关键实现片段如图\ref{fig:di_cluster_key_code}所示。
 
 \begin{figure}[htbp]
   \centering
@@ -1017,7 +1022,7 @@ public List<Cluster> buildClusters(List<QueryItem> items, double minScore) {
   \label{fig:di_cluster_key_code}
 \end{figure}
 
-会话聚类完成后需要生成可读的主题标题与关键词，便于在洞察看板与治理覆盖任务中定位问题簇。平台在实现中使用大模型对同一聚类的代表性query集合进行总结，输出摘要、关键词与代表query列表，并将摘要作为cluster\_title写入聚类指标宽表。聚类主题总结提示词模板如图\ref{fig:di_cluster_prompt_tpl}所示。
+（2）主题总结。会话聚类完成后需要生成可读的主题标题与关键词，便于在洞察看板与治理覆盖任务中定位问题簇。平台在实现中使用大模型对同一聚类的代表性Query集合进行总结，输出摘要、关键词与代表Query列表，并将摘要作为cluster\_title写入聚类指标宽表。聚类主题总结提示词模板如图\ref{fig:di_cluster_prompt_tpl}所示。
 
 \begin{figure}[htbp]
   \centering
