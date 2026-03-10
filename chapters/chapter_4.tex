@@ -494,16 +494,9 @@ public List<SliceHit> rank(String query, List<SliceHit> hits, int topn) {
 \subsection{生成式问答流程实现}
 \label{subsec:impl_ca_rag}
 
-生成式问答流程复用了前述的“多通道召回”结果，将其转化为结构化的Prompt证据，注入大模型以生成最终回答。该链路侧重于证据的组织、Prompt的构建以及引用的回溯。
+生成式问答流程将RAG检索得到的证据集合注入提示词中生成回答，并在输出侧附带引用信息，形成“问答—证据—治理”的闭环入口。实现目标是：在保证回答准确性的前提下，降低幻觉风险，并通过引用定位到具体内容片段以支撑后续治理。
 
-（1）证据组织与Prompt构建。
-\begin{itemize}
-\item \textbf{证据聚合}：将重排后的TopN切片按Content维度聚合，避免同一内容的多个片段重复占用Prompt空间。
-\item \textbf{Prompt注入}：将聚合后的证据拼接为标准格式（含Title、Text片段、来源URL），填入System Prompt的Context区域。
-\item \textbf{引用要求}：在Prompt中显式约束模型必须基于提供的Context回答，并在输出中通过`[引用ID]`标记来源。
-\end{itemize}
-
-（2）问题改写。为了提升召回的准确性，在执行多通道召回前，系统会先调用LLM对用户原始Query进行改写。通过Prompt约束，模型需提取“对象、场景、诉求”三要素，并输出“完整表述”和更接近知识标题的“主要问题”。问题改写提示词模板如图\ref{fig:rag_rewrite_prompt}所示。
+（1）问题改写。为了提升召回的准确性，在执行召回前，系统先调用LLM对用户原始Query进行改写。通过Prompt约束，模型需提取“对象、场景、诉求”三要素，并输出“完整表述”和更接近知识标题的“主要问题”。问题改写提示词模板如图\ref{fig:rag_rewrite_prompt}所示。
 
 \begin{figure}[!ht]
   \centering
@@ -544,6 +537,8 @@ public List<SliceHit> rank(String query, List<SliceHit> hits, int topn) {
   \label{fig:rag_rewrite_prompt}
 \end{figure}
 
+（2）证据检索与组织。系统执行“改写后Query $\rightarrow$ 双路召回 $\rightarrow$ 融合重排”的链路获取TopN切片。随后进行证据聚合：将重排后的切片按Content维度聚合，避免同一内容的多个片段重复占用Prompt空间，并为每条证据分配唯一Key（如S1、S2），便于模型引用。证据检索关键代码如图\ref{fig:rag_recall_key_code}所示。
+
 \begin{figure}[!ht]
   \centering
   \begin{minipage}{0.94\linewidth}
@@ -565,14 +560,13 @@ public EvidencePack retrieveEvidence(AskReq req) {
   \label{fig:rag_recall_key_code}
 \end{figure}
 
-\subsection{生成式问答流程实现}
-\label{subsec:impl_ca_qa}
-
-生成式问答流程将RAG检索得到的证据集合注入提示词中生成回答，并在输出侧附带引用信息，形成“问答—证据—治理”的闭环入口。实现目标是：在保证回答准确性的前提下，降低幻觉风险，并通过引用定位到具体内容片段以支撑后续治理。
-
-（1）Prompt构造与上下文控制。系统在构造提示词时将用户问题、业务约束与证据集合分段拼接，并对证据长度进行裁剪以适配上下文窗口。为保证引用可映射，系统在证据段落中附带slice\_id与标题信息，使引用能够回溯到具体slice。
-
-提示词结构在实现上通常包含三部分：系统约束（禁止编造、必须基于证据回答）、任务描述（回答风格、输出结构）、证据集合（按slice聚合并编号）。证据集合为每条证据分配key（可使用S1/S2等序号，也可直接使用slice\_id），并要求模型在回答中以固定引用标记声明知识来源，例如\texttt{[引用]<key1,key2>}。该设计降低了引用解析难度，也使得在回答失败时可以退化为返回证据摘要而不丢失溯源能力。生成回答提示词模板如图\ref{fig:qa_prompt_tpl}所示。
+（3）Prompt构造与上下文控制。系统将用户问题、业务约束与聚合后的证据集合拼装为提示词。提示词结构包含：
+\begin{itemize}
+\item \textbf{系统约束}：禁止编造、必须基于证据回答、禁止偏袒长文。
+\item \textbf{任务描述}：规定Markdown输出格式与引用标记样式（如\texttt{[引用]<key1,key2>}）。
+\item \textbf{证据集合}：填入聚合后的标准格式证据（含Title、Text、Key）。
+\end{itemize}
+生成回答提示词模板如图\ref{fig:qa_prompt_tpl}所示。
 
 \begin{figure}[!ht]
   \centering
@@ -605,13 +599,9 @@ public EvidencePack retrieveEvidence(AskReq req) {
   \label{fig:qa_prompt_tpl}
 \end{figure}
 
-（2）回答生成与引用解析。模型生成结果返回后，系统对回答文本中的引用标识进行解析，并转换为可展示的“内容标题+片段摘要+跳转链接”。当模型未给出引用或引用解析失败时，系统退化为按证据集合的topN进行引用补齐，保证每次回答都有最小可追溯集合。
+（4）回答生成与引用解析。模型生成回答后，系统解析文本中的引用标记，通过citationParser将其映射回slice\_id，并进一步回溯到content\_id与定位字段，最终生成前端可展示的“标题+摘要+跳转链接”引用列表。
 
-引用映射在实现上以slice\_id为桥梁：citationParser将模型输出的引用编号映射到证据集合中的slice\_id，并进一步根据slice\_id回溯到content\_id与可选的定位字段（课节序号、段落序号等），最终生成前端可展示的引用列表。为避免模型输出无效编号或重复编号，解析器对引用编号做合法性校验与去重，并限制最大引用数量，保证展示区域稳定。
-
-（3）异常退化与安全控制。当检索阶段未召回到足够证据时，系统返回“未命中/建议补充内容”的提示，并将该问题作为覆盖度治理的候选输入；当模型生成超时或失败时，系统退化为检索结果摘要返回，保证服务可用性。读链路全过程保留权限过滤与范围约束，避免越权证据进入提示词。
-
-（4）关键实现片段。生成式问答的关键实现片段如图\ref{fig:qa_flow_key_code}所示。
+（5）安全风控。仅依靠Prompt对模型输出进行约束并不可靠，系统引入了独立的安全风控服务对模型生成内容进行后置检查。该服务基于敏感词库与安全分类模型，拦截涉政、涉黄、暴力等违规内容；若风控校验未通过，系统将屏蔽生成结果并返回默认兜底文本，确保对外输出的合规性。生成式问答关键代码如图\ref{fig:qa_flow_key_code}所示。
 
 \begin{figure}[!ht]
   \centering
