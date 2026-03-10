@@ -72,10 +72,9 @@ public Long createContent(CreateReq req) {
     knowledgeDao.insert(contentId, req.body);
   } else if ("faq".equals(req.type)) {
     faqDao.insert(contentId, req.question, req.answer);
-  } else if ("course".equals(req.type)) {
-    courseDao.insert(contentId, req.courseMeta);
-  } else if ("case".equals(req.type)) {
-    caseDao.insertDetail(contentId, req.detailJson);
+  } else {
+    // 委托给其他形态的DAO处理 (course, case, etc.)
+    contentExtensionService.saveExtension(req.type, contentId, req.extensionData);
   }
   return contentId;
 }
@@ -231,7 +230,7 @@ private boolean matchRule(AuthRule r, Set<String> grants, Visitor v) {
   \label{fig:cm_content_auth_match_key_code}
 \end{figure}
 
-为降低读链路开销，列表与检索场景均将权限校验逻辑下推至检索引擎（ES）：服务端在构建查询时，将访问者的权限集合（如dept\_id、role\_id）转化为ES的Term或Terms条件，与索引中的content\_auth字段进行匹配。这利用了ES对BitSet的高效处理能力，避免了传统模式下先召回大量ID再逐条鉴权带来的性能瓶颈，同时保证了分页结果的准确性。
+为降低读链路开销，列表与检索场景均将权限校验逻辑前置至检索引擎（ES）：服务端在构建查询时，将访问者的权限集合（如dept\_id、role\_id）转化为ES的Term或Terms条件，与索引中的content\_auth字段进行匹配。这利用了ES对BitSet的高效处理能力，避免了传统模式下先召回大量ID再逐条鉴权带来的性能瓶颈，同时保证了分页结果的准确性。
 
 （3）审批与发布流程实现。为保证内容对外可用前的准确性与合规性，平台将发布动作纳入流程化审批控制：提审接口会创建审批记录并将内容状态置为待审批；审批通过后更新内容状态为已发布，同时产生内容发布事件驱动下游异步链路；审批驳回则回写拒绝原因并将内容退回可编辑状态。发布与下线接口会在保证幂等性的前提下触发事件，以驱动索引增量更新与统计回收，确保内容资产、索引与问答结果在发布前后保持一致。
 
@@ -321,22 +320,10 @@ public List<Slice> buildSlices(Content c) {
   } else if ("faq".equals(c.type)) {
     Faq f = faqDao.get(c.id);
     return buildFaqSlices(c, f.question, f.answer); // question/answer 两个语义单元
-  } else if ("course".equals(c.type)) {
-    List<Lesson> lessons = courseDao.listLessons(c.id);
-    return buildLessonSlices(c, lessons); // 一课节一切片，字幕由LLM提取
-  } else if ("case".equals(c.type)) {
-    String json = caseDao.getDetail(c.id);
-    String text = normalize(caseExtractor.toText(json)); // 字段抽取与拼接
-    return listOf(slice(c, "C_0", text));
-  } else if ("image".equals(c.type)) {
-    ImageMeta m = imageDao.get(c.id);
-    String caption = llmClient.caption(m.url);
-    return listOf(slice(c, "I_0", caption + " " + m.url));
-  } else if ("table".equals(c.type)) {
-    Table t = tableDao.get(c.id);
-    return buildTableRowSlices(c, t.header, t.rows); // 每行拼接表头，保证行语义完整
+  } else {
+    // 其他形态(course/case/image/table)按各自策略切分
+    return sliceStrategyFactory.get(c.type).build(c);
   }
-  return emptyList();
 }
     \end{lstlisting}
   \end{minipage}
@@ -405,20 +392,16 @@ public ContentDetailDTO getDetail(DetailReq req) {
   }
   Content c = contentDao.get(req.contentId);
   authService.checkContentVisible(req.operator, scope, c.id);
+  
+  // 按内容形态加载正文或结构字段
   if ("knowledge".equals(c.type)) {
-    String body = knowledgeDao.getBody(c.id);
-    return renderService.renderKnowledge(c, body);
+    return renderService.renderKnowledge(c, knowledgeDao.getBody(c.id));
   } else if ("faq".equals(c.type)) {
     Faq f = faqDao.get(c.id);
     return renderService.renderFaq(c, f.question, f.answer);
-  } else if ("course".equals(c.type)) {
-    List<Lesson> lessons = courseDao.listLessons(c.id);
-    return renderService.renderCourse(c, lessons);
-  } else if ("case".equals(c.type)) {
-    String detailJson = caseDao.getDetail(c.id);
-    return renderService.renderCase(c, detailJson);
+  } else {
+    return renderService.renderExtension(c);
   }
-  throw new BizException("unsupported content type");
 }
     \end{lstlisting}
   \end{minipage}
