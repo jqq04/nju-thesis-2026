@@ -7,7 +7,7 @@
 
 为便于阐述实现细节，本节首先给出内容管理模块对外提供的关键接口概览，随后按子模块展开说明其核心实现机制。内容管理模块的关键服务端接口定义如表\ref{tab:cm_api}所示。
 
-\begin{table}[htbp]
+\begin{table}[!ht]
   \centering
   \caption{内容管理模块接口表}
   \label{tab:cm_api}
@@ -37,7 +37,7 @@
 
 为便于后续内容应用、治理与洞察模块在实现上复用统一口径，内容管理模块在存储层形成了以空间、应用、内容为主干的结构化表设计，并为不同形态提供子表或详情存储。内容管理模块的核心数据表与职责划分如表\ref{tab:cm_data_tables}所示。
 
-\begin{table}[htbp]
+\begin{table}[!ht]
   \centering
   \caption{内容管理模块核心数据表}
   \label{tab:cm_data_tables}
@@ -62,7 +62,7 @@
 
 （2）内容创建与编辑保存关键实现。内容创建与编辑的核心在于保证跨表写入的原子性，并避免并发编辑导致的数据覆盖。创建时，系统在同一事务内写入content元数据，并根据content\_type写入对应子表的正文或结构字段；编辑保存时，系统采用“读-改-写 + 条件更新”的方式进行一致性控制：客户端携带基于modify\_time的基线时间戳，写入时在SQL层做条件更新校验，若影响行数为0则提示刷新后重试。内容创建与草稿保存的关键实现片段如图\ref{fig:cm_version_key_code}所示。
 
-\begin{figure}[htbp]
+\begin{figure}[!ht]
   \centering
   \begin{minipage}{0.94\linewidth}
     \begin{lstlisting}[basicstyle=\ttfamily\small,numbers=left,numberstyle=\tiny,frame=single,breaklines=true]
@@ -110,7 +110,7 @@ public Long saveDraft(SaveDraftReq req) {
 
 在数据结构上，类目表以parent\_id表达父子关系，并维护path字段以表达祖先链路编码，使得“获取节点路径”“批量获取子树”等操作可以在单次查询或少量查询中完成，降低前端渲染目录树的请求开销。对于类目移动，服务端需要校验目标父节点不能位于待移动节点的子树中，并在同一事务内完成parent\_id与path的更新，以避免出现中间态导致目录树不可用。类目移动的关键实现片段如图\ref{fig:cm_category_move_key_code}所示。
 
-\begin{figure}[htbp]
+\begin{figure}[!ht]
   \centering
   \begin{minipage}{0.94\linewidth}
     \begin{lstlisting}[basicstyle=\ttfamily\small,numbers=left,numberstyle=\tiny,frame=single,breaklines=true]
@@ -138,7 +138,7 @@ public void moveCategory(MoveCategoryReq req) {
 
 为保证“可复用”与“可控”的一致性，引用关系写入并非简单的多对多插入，而需要同时满足内容状态、授权策略与范围配置等约束。引用关系写入的关键实现片段如图\ref{fig:cm_reference_key_code}所示。
 
-\begin{figure}[htbp]
+\begin{figure}[!ht]
   \centering
   \begin{minipage}{0.94\linewidth}
     \begin{lstlisting}[basicstyle=\ttfamily\small,numbers=left,numberstyle=\tiny,frame=single,breaklines=true]
@@ -171,7 +171,7 @@ public void addReference(AddRefReq req) {
 
 在工程实现中，content\_auth的裁决遵循“动作优先”的原则：当请求为查看、编辑、删除、上下线等具体动作时，服务端先对目标内容加载其授权规则集合，并过滤出包含目标动作码的规则子集；随后按auth\_tactic执行策略匹配。根据项目口径，auth\_code以精简集合表达动作权限，例如\texttt{r/w/u}分别对应“读/写/上下线”等能力，单条规则可携带多个动作码以减少规则数量。动作码与典型业务动作的映射如表\ref{tab:cm_auth_code_map}所示。
 
-\begin{table}[htbp]
+\begin{table}[!ht]
   \centering
   \caption{content\_auth动作码映射示例}
   \label{tab:cm_auth_code_map}
@@ -186,7 +186,7 @@ public void addReference(AddRefReq req) {
 
 在策略匹配层，平台支持免登录可见、外部登录用户可见、内部员工可见、员工匹配、部门匹配、角色匹配与自定义表达式匹配等策略。一条内容可同时配置多条content\_auth规则，且同一动作码（例如读权限r）允许存在多条并行生效的规则（如“员工匹配”与“部门匹配”同时配置），命中任意一条规则即可视为授权通过。实现上，服务端先将访问者信息解析为可用于授权判断的“权限标签集合”（例如internal、employee:123、department:xxx、role:yyy等），再将content\_auth记录映射为对应的标签匹配条件并执行集合包含判断。这种设计解耦了规则配置与匹配逻辑，使得策略扩展无需修改核心校验代码。策略裁决的关键实现片段如图\ref{fig:cm_content_auth_match_key_code}所示。
 
-\begin{figure}[htbp]
+\begin{figure}[!ht]
   \centering
   \begin{minipage}{0.94\linewidth}
     \begin{lstlisting}[basicstyle=\ttfamily\small,numbers=left,numberstyle=\tiny,frame=single,breaklines=true]
@@ -238,7 +238,7 @@ private boolean matchRule(AuthRule r, Set<String> grants, Visitor v) {
 
 审批与发布链路的实现重点在于两点：其一是以状态机约束操作合法性，避免非法状态流转；其二是发布后通过事件驱动触发下游异步处理，使“发布版本”在索引与数据侧尽快达成一致。关键实现片段如图\ref{fig:cm_publish_key_code}所示。
 
-\begin{figure}[htbp]
+\begin{figure}[!ht]
   \centering
   \begin{minipage}{0.94\linewidth}
     \begin{lstlisting}[basicstyle=\ttfamily\small,numbers=left,numberstyle=\tiny,frame=single,breaklines=true]
@@ -266,7 +266,7 @@ public void approve(ApproveReq req) {
 
 内容应用模块的关键服务端接口定义如表\ref{tab:ca_api}所示。
 
-\begin{table}[htbp]
+\begin{table}[!ht]
   \centering
   \caption{内容应用模块接口表}
   \label{tab:ca_api}
@@ -309,7 +309,7 @@ public void approve(ApproveReq req) {
 
 切片生成的工程实现可以拆分为“内容提取$\rightarrow$文本规范化$\rightarrow$按类型切片$\rightarrow$补充元信息”四步。内容提取阶段按content\_type从对应子表或文档库加载正文或结构字段；文本规范化阶段对HTML标签、富文本标记、空白与不可见字符做清洗，并统一标点与换行以减少embedding噪声；按类型切片阶段根据不同形态选择不同的语义单元；最后补充元信息阶段将标题、摘要、类目、标签、权限等字段写入切片结构，便于召回与过滤。切片构建的关键实现片段如图\ref{fig:ca_slice_build_key_code}所示。
 
-\begin{figure}[htbp]
+\begin{figure}[!ht]
   \centering
   \begin{minipage}{0.94\linewidth}
     \begin{lstlisting}[basicstyle=\ttfamily\small,numbers=left,numberstyle=\tiny,frame=single,breaklines=true]
@@ -341,7 +341,7 @@ public List<Slice> buildSlices(Content c) {
 
 （5）关键实现片段。索引构建核心在于“事件消费$\rightarrow$拉取发布版本$\rightarrow$切片$\rightarrow$双索引写入”。其关键实现片段如图\ref{fig:index_build_key_code}所示。
 
-\begin{figure}[htbp]
+\begin{figure}[!ht]
   \centering
   \begin{minipage}{0.94\linewidth}
     \begin{lstlisting}[basicstyle=\ttfamily\small,numbers=left,numberstyle=\tiny,frame=single,breaklines=true]
@@ -373,7 +373,7 @@ public void onContentPublished(ContentPublishedEvent e) {
 
 页面化展示的关键实现片段如图\ref{fig:ca_display_key_code}所示。
 
-\begin{figure}[htbp]
+\begin{figure}[!ht]
   \centering
   \begin{minipage}{0.94\linewidth}
     \begin{lstlisting}[basicstyle=\ttfamily\small,numbers=left,numberstyle=\tiny,frame=single,breaklines=true]
@@ -411,7 +411,7 @@ public ContentDetailDTO getDetail(DetailReq req) {
 
 内容检索服务的查询构造关键实现片段如图\ref{fig:ca_search_key_code}所示。
 
-\begin{figure}[htbp]
+\begin{figure}[!ht]
   \centering
   \begin{minipage}{0.94\linewidth}
     \begin{lstlisting}[basicstyle=\ttfamily\small,numbers=left,numberstyle=\tiny,frame=single,breaklines=true]
@@ -455,7 +455,7 @@ public SearchResp search(SearchReq req) {
 
 （3）关键参数与实现。召回阶段的关键参数包括TopK与MinScore：TopK用于控制返回候选切片数量，MinScore用于设置最小相似度阈值以过滤低相关候选。表\ref{tab:rag_params}给出了关键参数的工程含义。
 
-\begin{table}[htbp]
+\begin{table}[!ht]
   \centering
   \caption{RAG召回关键参数}
   \label{tab:rag_params}
@@ -470,7 +470,7 @@ public SearchResp search(SearchReq req) {
 
 重排实现采用“粗排+精排”的两阶段策略：粗排阶段以召回通道得分与轻量特征（标题命中、关键词覆盖）进行线性加权，快速裁剪候选集合；精排阶段对裁剪后的候选计算更细粒度特征，例如query与slice的语义相似度、与标题/摘要的覆盖度、以及同一content的多样性约束，并输出最终topN证据。重排的关键实现片段如图\ref{fig:rag_rerank_key_code}所示。
 
-\begin{figure}[htbp]
+\begin{figure}[!ht]
   \centering
   \begin{minipage}{0.94\linewidth}
     \begin{lstlisting}[basicstyle=\ttfamily\small,numbers=left,numberstyle=\tiny,frame=single,breaklines=true]
@@ -505,7 +505,7 @@ public List<SliceHit> rank(String query, List<SliceHit> hits, int topn) {
 
 （2）问题改写。为了提升召回的准确性，在执行多通道召回前，系统会先调用LLM对用户原始Query进行改写。通过Prompt约束，模型需提取“对象、场景、诉求”三要素，并输出“完整表述”和更接近知识标题的“主要问题”。问题改写提示词模板如图\ref{fig:rag_rewrite_prompt}所示。
 
-\begin{figure}[htbp]
+\begin{figure}[!ht]
   \centering
   \begin{minipage}{0.94\linewidth}
     \begin{lstlisting}[basicstyle=\ttfamily\small,numbers=left,numberstyle=\tiny,frame=single,breaklines=true]
@@ -544,7 +544,7 @@ public List<SliceHit> rank(String query, List<SliceHit> hits, int topn) {
   \label{fig:rag_rewrite_prompt}
 \end{figure}
 
-\begin{figure}[htbp]
+\begin{figure}[!ht]
   \centering
   \begin{minipage}{0.94\linewidth}
     \begin{lstlisting}[basicstyle=\ttfamily\small,numbers=left,numberstyle=\tiny,frame=single,breaklines=true]
@@ -574,7 +574,7 @@ public EvidencePack retrieveEvidence(AskReq req) {
 
 提示词结构在实现上通常包含三部分：系统约束（禁止编造、必须基于证据回答）、任务描述（回答风格、输出结构）、证据集合（按slice聚合并编号）。证据集合为每条证据分配key（可使用S1/S2等序号，也可直接使用slice\_id），并要求模型在回答中以固定引用标记声明知识来源，例如\texttt{[引用]<key1,key2>}。该设计降低了引用解析难度，也使得在回答失败时可以退化为返回证据摘要而不丢失溯源能力。生成回答提示词模板如图\ref{fig:qa_prompt_tpl}所示。
 
-\begin{figure}[htbp]
+\begin{figure}[!ht]
   \centering
   \begin{minipage}{0.94\linewidth}
     \begin{lstlisting}[basicstyle=\ttfamily\small,numbers=left,numberstyle=\tiny,frame=single,breaklines=true]
@@ -613,7 +613,7 @@ public EvidencePack retrieveEvidence(AskReq req) {
 
 （4）关键实现片段。生成式问答的关键实现片段如图\ref{fig:qa_flow_key_code}所示。
 
-\begin{figure}[htbp]
+\begin{figure}[!ht]
   \centering
   \begin{minipage}{0.94\linewidth}
     \begin{lstlisting}[basicstyle=\ttfamily\small,numbers=left,numberstyle=\tiny,frame=single,breaklines=true]
@@ -641,7 +641,7 @@ public AskResp ask(AskReq req) {
 
 内容治理模块的关键服务端接口定义如表\ref{tab:cg_api}所示。
 
-\begin{table}[htbp]
+\begin{table}[!ht]
   \centering
   \caption{内容治理模块接口表}
   \label{tab:cg_api}
@@ -657,7 +657,7 @@ public AskResp ask(AskReq req) {
 
 治理任务线上化需要在存储层固化“主任务-子任务”的任务模型。主任务负责一次治理计算的配置与状态管理，子任务承载具体问题内容与处理结论。根据项目手册口径，治理任务相关表的核心字段如表\ref{tab:cg_tables}所示。
 
-\begin{table}[htbp]
+\begin{table}[!ht]
   \centering
   \caption{治理任务数据表（核心字段）}
   \label{tab:cg_tables}
@@ -679,7 +679,7 @@ public AskResp ask(AskReq req) {
 
 重复度治理在业务侧需要可解释的分级口径，以便运营判断“是否需要合并/下线/保留”。平台按重复占比对重复程度进行分级，典型口径如表\ref{tab:cg_dup_level}所示。
 
-\begin{table}[htbp]
+\begin{table}[!ht]
   \centering
   \caption{重复度分级口径示例}
   \label{tab:cg_dup_level}
@@ -704,7 +704,7 @@ public AskResp ask(AskReq req) {
 
 重复度与歧义度的判别提示词需要在“可解释”与“可解析”之间取得平衡：既要提供足够的对比信息与裁决规则以降低误判，也要保证输出为机器可解析的结构化JSON，便于任务生成与后续复检。判别提示词模板如图\ref{fig:cg_judge_prompt_tpl}所示。
 
-\begin{figure}[htbp]
+\begin{figure}[!ht]
   \centering
   \begin{minipage}{0.94\linewidth}
     \begin{lstlisting}[basicstyle=\ttfamily\small,numbers=left,numberstyle=\tiny,frame=single,breaklines=true]
@@ -745,7 +745,7 @@ public AskResp ask(AskReq req) {
   \label{fig:cg_judge_prompt_tpl}
 \end{figure}
 
-\begin{figure}[htbp]
+\begin{figure}[!ht]
   \centering
   \begin{minipage}{0.94\linewidth}
     \begin{lstlisting}[basicstyle=\ttfamily\small,numbers=left,numberstyle=\tiny,frame=single,breaklines=true]
@@ -764,7 +764,7 @@ public LlmJudgeResp dupAmbJudge(Long a, Long b) {
 
 （3）结果聚合与任务生成。检测结果按内容对聚合，并与内容元信息、引用范围等字段拼装形成可流转的治理子任务。重复/歧义检测的关键实现片段如图\ref{fig:cg_dup_amb_key_code}所示。
 
-\begin{figure}[htbp]
+\begin{figure}[!ht]
   \centering
   \begin{minipage}{0.94\linewidth}
     \begin{lstlisting}[basicstyle=\ttfamily\small,numbers=left,numberstyle=\tiny,frame=single,breaklines=true]
@@ -794,7 +794,7 @@ public void runDupAmb(MainTask task) {
 
 覆盖度判断在工程实现上同样采用“召回+判别”的模式：先对覆盖对象（类目/概念/定义/query等）执行RAG召回得到TopK候选证据，再由大模型判断候选证据是否能够覆盖该覆盖对象，并输出覆盖结论与可解释字段用于落表。覆盖度判别提示词模板如图\ref{fig:cg_coverage_prompt_tpl}所示。
 
-\begin{figure}[htbp]
+\begin{figure}[!ht]
   \centering
   \begin{minipage}{0.94\linewidth}
     \begin{lstlisting}[basicstyle=\ttfamily\small,numbers=left,numberstyle=\tiny,frame=single,breaklines=true]
@@ -859,7 +859,7 @@ public void runDupAmb(MainTask task) {
 
 任务状态机在实现上需要满足幂等与并发安全：同一子任务只允许一个责任人进入处理中状态，避免多方同时处理导致冲突；子任务完成后不可回退到待处理，除非被复检回收重新打开。表\ref{tab:cg_task_status}给出了主任务与子任务的状态口径示例。
 
-\begin{table}[htbp]
+\begin{table}[!ht]
   \centering
   \caption{治理任务状态口径示例}
   \label{tab:cg_task_status}
@@ -875,7 +875,7 @@ public void runDupAmb(MainTask task) {
 
 巡检实现的关键在于“只重算受影响范围”。平台以content\_id为索引维护子任务的反向引用，内容变更时仅查出关联子任务进行重算，避免对全量任务重复计算。复检回收的关键实现片段如图\ref{fig:cg_recheck_key_code}所示。
 
-\begin{figure}[htbp]
+\begin{figure}[!ht]
   \centering
   \begin{minipage}{0.94\linewidth}
     \begin{lstlisting}[basicstyle=\ttfamily\small,numbers=left,numberstyle=\tiny,frame=single,breaklines=true]
@@ -905,7 +905,7 @@ public void dailyRecheck(Date since) {
 
 数据洞察模块的关键服务端接口定义如表\ref{tab:di_api}所示。
 
-\begin{table}[htbp]
+\begin{table}[!ht]
   \centering
   \caption{数据洞察模块接口表}
   \label{tab:di_api}
@@ -925,7 +925,7 @@ public void dailyRecheck(Date since) {
 
 为保证事件口径可复用且便于扩展，平台将每条事件抽象为“公共维度 + 事件特有扩展字段”的统一结构：公共维度用于跨事件关联与链路追踪，扩展字段用于承载不同事件的特有信息（例如检索关键词、召回通道、候选数量、引用列表等）。事件明细的核心字段设计如表\ref{tab:di_event_schema}所示。
 
-\begin{table}[htbp]
+\begin{table}[!ht]
   \centering
   \caption{事件明细核心字段设计}
   \label{tab:di_event_schema}
@@ -946,7 +946,7 @@ public void dailyRecheck(Date since) {
 
 扩展字段ext用于承载不同事件的特有信息。以智能问答链路为例，rag\_recall事件会携带召回通道、TopK、MinScore、候选数量与最终证据集合摘要；llm\_generate事件会携带prompt长度、生成耗时、引用数量、是否触发退化等信息。表\ref{tab:di_event_ext}给出了典型事件的ext字段示例，用于支撑后续“链路分析$\rightarrow$问题定位$\rightarrow$策略优化”的闭环。
 
-\begin{table}[htbp]
+\begin{table}[!ht]
   \centering
   \caption{ext字段示例（典型事件）}
   \label{tab:di_event_ext}
@@ -975,7 +975,7 @@ public void dailyRecheck(Date since) {
 
 （1）聚类构建机制。聚类构建采用基于语义相似图的连通分量方法：将每条Query向量化写入向量索引，设定最小相似度阈值\texttt{min\_score}，相似度$\ge$阈值的Query之间建立边；从未归类Query出发递归扩展其邻居集合，形成一个连通分量作为聚类。聚类构建的关键实现片段如图\ref{fig:di_cluster_key_code}所示。
 
-\begin{figure}[htbp]
+\begin{figure}[!ht]
   \centering
   \begin{minipage}{0.94\linewidth}
     \begin{lstlisting}[basicstyle=\ttfamily\small,numbers=left,numberstyle=\tiny,frame=single,breaklines=true]
@@ -1007,7 +1007,7 @@ public List<Cluster> buildClusters(List<QueryItem> items, double minScore) {
 
 （2）主题总结。会话聚类完成后需要生成可读的主题标题与关键词，便于在洞察看板与治理覆盖任务中定位问题簇。平台在实现中使用大模型对同一聚类的代表性Query集合进行总结，输出摘要、关键词与代表Query列表，并将摘要作为cluster\_title写入聚类指标宽表。聚类主题总结提示词模板如图\ref{fig:di_cluster_prompt_tpl}所示。
 
-\begin{figure}[htbp]
+\begin{figure}[!ht]
   \centering
   \begin{minipage}{0.94\linewidth}
     \begin{lstlisting}[basicstyle=\ttfamily\small,numbers=left,numberstyle=\tiny,frame=single,breaklines=true]

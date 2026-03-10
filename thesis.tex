@@ -7,6 +7,15 @@
 \documentclass[macfonts,master,twoside,AutoFakeBold= {2}]{njuthesis}
 % 开启 synctex 支持
 \synctex=1
+
+% 引入 placeins 宏包，防止浮动体跨过 \section
+\usepackage[section]{placeins}
+% 重新定义 \subsection，使其也作为浮动体屏障，防止图表跨越小节
+\let\Oldsubsection\subsection
+\renewcommand{\subsection}{\FloatBarrier\Oldsubsection}
+\let\Oldsubsubsection\subsubsection
+\renewcommand{\subsubsection}{\FloatBarrier\Oldsubsubsection}
+
 %% njuthesis 文档类的可选参数有：
 %%   winfonts, linuxfonts, macfonts, adobefonts winfonts 选项使得文档使用Windows 系统提供的字体；linuxfonts 选项使得文档使用Linux 系统提供的字体；macfonts 选项使得文档使用Mac 系统提供的字体；adobefonts 选项使得文档使用Adobe提供的OTF中文字体(需自行下载安转)
 %%   phd/master/bachelor 选择博士/硕士/学士论文

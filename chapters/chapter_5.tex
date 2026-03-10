@@ -7,7 +7,7 @@
 
 平台在实现上由内容管理、内容应用、内容治理与数据洞察等模块构成，依赖关系型数据库与文档数据库存储内容资产，并在内容发布后构建全文索引与向量索引以支撑检索与智能问答。由于论文工程无法直接提供企业内部真实部署细节，本节从“部署形态+关键依赖组件+测试工具链”三个维度描述测试环境口径，便于复现测试结论。平台测试环境描述如表\ref{tab:test_env}所示。
 
-\begin{table}[htbp]
+\begin{table}[!ht]
   \centering
   \caption{测试环境描述表}
   \label{tab:test_env}
@@ -35,7 +35,7 @@
 
 以content\_auth的“动作优先”裁决为例，单元测试需要覆盖不同auth\_tactic与auth\_code组合下的匹配结果，并验证“命中任一规则即放行、无规则命中则拒绝”的裁决逻辑。单元测试用例示例如图\ref{fig:unit_test_example}所示。
 
-\begin{figure}[htbp]
+\begin{figure}[!ht]
   \centering
   \begin{minipage}{0.94\linewidth}
     \begin{lstlisting}[basicstyle=\ttfamily\small,numbers=left,numberstyle=\tiny,frame=single,breaklines=true]
@@ -66,7 +66,7 @@ def "test_content_auth_action_first"() {
 
 创建空间与应用是平台组织与权限的起点，用例用于验证空间隔离与应用边界能够正确生效。创建空间/应用的测试用例如表\ref{tab:tc01}所示。
 
-\begin{table}[htbp]
+\begin{table}[!ht]
   \centering
   \caption{创建空间/应用测试用例}
   \label{tab:tc01}
@@ -81,7 +81,7 @@ def "test_content_auth_action_first"() {
 
 内容生产链路覆盖创建、编辑、提审、审批与发布等过程，且要求读链路对外仅展示已发布内容。内容发布审批的测试用例如表\ref{tab:tc02}所示。
 
-\begin{table}[htbp]
+\begin{table}[!ht]
   \centering
   \caption{内容提审与审批发布测试用例}
   \label{tab:tc02}
@@ -96,7 +96,7 @@ def "test_content_auth_action_first"() {
 
 跨应用引用用于复用权威内容并控制可见范围，用例用于验证“仅可引用已发布内容”与“引用幂等”约束。应用引用内容测试用例如表\ref{tab:tc03}所示。
 
-\begin{table}[htbp]
+\begin{table}[!ht]
   \centering
   \caption{应用引用内容测试用例}
   \label{tab:tc03}
@@ -113,7 +113,7 @@ def "test_content_auth_action_first"() {
 
 内容检索用于验证多字段召回、高亮与过滤逻辑是否正确。内容检索测试用例如表\ref{tab:tc04}所示。
 
-\begin{table}[htbp]
+\begin{table}[!ht]
   \centering
   \caption{内容检索测试用例}
   \label{tab:tc04}
@@ -128,7 +128,7 @@ def "test_content_auth_action_first"() {
 
 智能问答用于验证“问题改写+多通道召回+重排+引用输出”的端到端链路，以及未命中与超时场景下的退化策略。智能问答测试用例如表\ref{tab:tc05}所示。
 
-\begin{table}[htbp]
+\begin{table}[!ht]
   \centering
   \caption{智能问答测试用例}
   \label{tab:tc05}
@@ -145,7 +145,7 @@ def "test_content_auth_action_first"() {
 
 重复/歧义治理用于验证候选召回、LLM判别与任务生成的闭环过程。重复/歧义治理测试用例如表\ref{tab:tc06}所示。
 
-\begin{table}[htbp]
+\begin{table}[!ht]
   \centering
   \caption{重复/歧义治理测试用例}
   \label{tab:tc06}
@@ -160,7 +160,7 @@ def "test_content_auth_action_first"() {
 
 覆盖度治理用于验证“洞察聚类筛选薄弱主题$\rightarrow$生成覆盖任务$\rightarrow$补充内容$\rightarrow$复检回收”的闭环。覆盖度治理测试用例如表\ref{tab:tc07}所示。
 
-\begin{table}[htbp]
+\begin{table}[!ht]
   \centering
   \caption{覆盖度治理测试用例}
   \label{tab:tc07}
@@ -175,7 +175,7 @@ def "test_content_auth_action_first"() {
 
 数据洞察用于验证事件规范、trace\_id链路追踪与下钻能力。数据洞察测试用例如表\ref{tab:tc08}所示。
 
-\begin{table}[htbp]
+\begin{table}[!ht]
   \centering
   \caption{数据洞察链路测试用例}
   \label{tab:tc08}

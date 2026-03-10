@@ -24,7 +24,7 @@
 
 本平台的用户角色如表\ref{tab:user_role}所示，主要分为四种，分别是：平台负责人、业务负责人、业务运营和客户。平台负责人负责整个平台层面的配置与运维管理；业务负责人负责某一业务空间下内容体系的整体管理与维护；业务运营是平台内容生产和日常运营的主要执行角色；客户主要作为内容的消费方，通过页面或智能服务获取平台提供的内容支持。
 
-\begin{table}[htbp]
+\begin{table}[!ht]
   \centering
   \caption{用户角色表}
   \label{tab:user_role}
@@ -44,7 +44,7 @@
 \subsection{内容管理功能需求}
 内容管理功能的用例图如图\ref{fig:cm_usecase}所示。内容管理模块作为平台的核心模块，主要负责内容资产的全生命周期管理，包括内容的生产、维护、组织、权限控制以及发布上线等环节。该模块旨在将分散在不同业务线和系统中的内容进行统一纳管，通过标准化的模型和流程，确保内容在流转过程中的一致性、安全性和可控性。
 
-\begin{figure}[H]
+\begin{figure}[!ht]
   \centering
   \fbox{\parbox{0.92\linewidth}{\vspace{18mm}\centering 内容管理用例图占位（待补充）\vspace{18mm}}}
   \caption{内容管理用例图}
@@ -55,7 +55,7 @@
 
 （1）空间与应用管理。平台需要支持以空间为单位建立业务隔离与治理边界。空间用于承载内容资产的业务归属、成员范围与默认权限策略，并支持空间的创建、编辑以及基础配置维护。为适配不同消费场景，平台需在空间内支持应用配置：应用定义内容对外呈现的组织方式与可用能力，包括可用内容形态、类目树与标签体系、检索范围与排序规则等。空间与应用管理功能主要包含创建空间与创建应用等用例。其中，创建空间与创建应用用例描述分别如表\ref{tab:cm_create_space}与表\ref{tab:cm_create_app}所示。
 
-\begin{table}[H]
+\begin{table}[!ht]
   \centering
   \caption{创建空间用例描述表}
   \label{tab:cm_create_space}
@@ -73,7 +73,7 @@
   \end{tabular}
 \end{table}
 
-\begin{table}[H]
+\begin{table}[!ht]
   \centering
   \caption{创建应用用例描述表}
   \label{tab:cm_create_app}
@@ -93,7 +93,7 @@
 
 （2）多形态内容服务。平台需要支持多种内容形态的统一纳管与一致化维护。不同内容形态在结构与消费方式上存在差异，但应具备统一的基础管理能力，包括创建、编辑与保存草稿等。多形态内容服务的典型用例包括创建内容、编辑内容与删除内容，其用例描述分别如表\ref{tab:cm_create_content}、表\ref{tab:cm_edit_content}与表\ref{tab:cm_delete_content}所示。
 
-\begin{table}[H]
+\begin{table}[!ht]
   \centering
   \caption{创建内容用例描述表}
   \label{tab:cm_create_content}
@@ -111,7 +111,7 @@
   \end{tabular}
 \end{table}
 
-\begin{table}[H]
+\begin{table}[!ht]
   \centering
   \caption{编辑内容用例描述表}
   \label{tab:cm_edit_content}
@@ -129,7 +129,7 @@
   \end{tabular}
 \end{table}
 
-\begin{table}[H]
+\begin{table}[!ht]
   \centering
   \caption{删除内容用例描述表}
   \label{tab:cm_delete_content}
@@ -149,7 +149,7 @@
 
 （3）权限管理。平台需要构建基于角色的访问控制（RBAC）体系，在空间与应用维度实现权限隔离与精细化授权。权限粒度应覆盖模块级与操作级，既能控制用户进入某一空间/应用的访问权限，也能控制内容的创建、编辑、删除、提审、审批、上线与下线等具体操作权限。权限管理功能主要包含成员角色分配与权限策略配置等用例，其用例描述如表\ref{tab:cm_assign_role}与表\ref{tab:cm_config_permission}所示。
 
-\begin{table}[H]
+\begin{table}[!ht]
   \centering
   \caption{成员角色分配用例描述表}
   \label{tab:cm_assign_role}
@@ -167,7 +167,7 @@
   \end{tabular}
 \end{table}
 
-\begin{table}[H]
+\begin{table}[!ht]
   \centering
   \caption{权限策略配置用例描述表}
   \label{tab:cm_config_permission}
@@ -187,7 +187,7 @@
 
 （4）审核与发布。内容对外可用的前提是准确性与合规性可控。平台需要提供流程化的审核与发布机制，对内容状态流转进行约束。内容在生命周期中至少应包含草稿、待审批、已发布、已下线等状态，状态变更需满足权限校验与流程条件。审核与发布功能主要包含提交审核、内容审批与内容上下线等用例，其用例描述分别如表\ref{tab:cm_submit_review}、表\ref{tab:cm_approve_content}与表\ref{tab:cm_online_offline}所示。
 
-\begin{table}[H]
+\begin{table}[!ht]
   \centering
   \caption{提交审核用例描述表}
   \label{tab:cm_submit_review}
@@ -205,7 +205,7 @@
   \end{tabular}
 \end{table}
 
-\begin{table}[H]
+\begin{table}[!ht]
   \centering
   \caption{内容审批用例描述表}
   \label{tab:cm_approve_content}
@@ -223,7 +223,7 @@
   \end{tabular}
 \end{table}
 
-\begin{table}[H]
+\begin{table}[!ht]
   \centering
   \caption{内容上下线用例描述表}
   \label{tab:cm_online_offline}
@@ -243,7 +243,7 @@
 
 （5）其他功能。除核心链路外，平台还需提供辅助能力以提升内容组织效率与复用效果，包括类目管理、标签管理以及应用引用机制等。其他功能主要包含类目管理、标签管理与应用引用内容等用例，其用例描述分别如表\ref{tab:cm_category_manage}、表\ref{tab:cm_tag_manage}与表\ref{tab:cm_reference_manage}所示。
 
-\begin{table}[H]
+\begin{table}[!ht]
   \centering
   \caption{类目管理用例描述表}
   \label{tab:cm_category_manage}
@@ -261,7 +261,7 @@
   \end{tabular}
 \end{table}
 
-\begin{table}[H]
+\begin{table}[!ht]
   \centering
   \caption{标签管理用例描述表}
   \label{tab:cm_tag_manage}
@@ -279,7 +279,7 @@
   \end{tabular}
 \end{table}
 
-\begin{table}[H]
+\begin{table}[!ht]
   \centering
   \caption{应用引用内容用例描述表}
   \label{tab:cm_reference_manage}
@@ -300,7 +300,7 @@
 \subsection{内容应用功能需求}
 内容应用功能的用例图如图\ref{fig:ca_usecase}所示。内容应用模块的主要功能是对内容进行展示、检索与问答，以满足不同场景下的内容消费需求。一方面，平台需要支持面向门户与管理后台的页面化展示与检索能力，帮助用户通过目录导航、列表筛选与关键词搜索快速定位内容；另一方面，平台需要面向智能问答等上游智能应用提供检索增强生成能力，使用户能够以对话方式获取结构化且可追溯的内容依据。
 
-\begin{figure}[H]
+\begin{figure}[!ht]
   \centering
   \fbox{\parbox{0.92\linewidth}{\vspace{18mm}\centering 内容应用用例图占位（待补充）\vspace{18mm}}}
   \caption{内容应用用例图}
@@ -317,7 +317,7 @@
 
 本节选取三个关键用例进行描述。
 
-\begin{table}[H]
+\begin{table}[!ht]
   \centering
   \caption{内容展示用例描述表}
   \label{tab:ca_display}
@@ -335,7 +335,7 @@
   \end{tabular}
 \end{table}
 
-\begin{table}[H]
+\begin{table}[!ht]
   \centering
   \caption{内容检索用例描述表}
   \label{tab:ca_search}
@@ -353,7 +353,7 @@
   \end{tabular}
 \end{table}
 
-\begin{table}[H]
+\begin{table}[!ht]
   \centering
   \caption{生成式问答用例描述表}
   \label{tab:ca_qa}
@@ -374,7 +374,7 @@
 \subsection{内容治理功能需求}
 内容治理功能的用例图如图\ref{fig:cg_usecase}所示。内容管理模块为平台提供了统一的内容资产底座，内容应用模块实现了内容的展示与智能问答，然而随着内容规模扩大与消费频率提升，重复冗余、表述冲突与覆盖不足等质量问题会直接影响检索效果与问答准确性。因此，内容治理模块的主要功能是对内容质量进行指标化检测，并以任务形式推动治理闭环，与前述模块协同形成“生产—应用—治理—反馈”的完整链路，保证内容体系在持续演进过程中的可维护性与可控性。
 
-\begin{figure}[H]
+\begin{figure}[!ht]
   \centering
   \fbox{\parbox{0.92\linewidth}{\vspace{18mm}\centering 内容治理用例图占位（待补充）\vspace{18mm}}}
   \caption{内容治理用例图}
@@ -391,7 +391,7 @@
 
 本节选取三个关键用例进行描述。
 
-\begin{table}[H]
+\begin{table}[!ht]
   \centering
   \caption{质量检测用例描述表}
   \label{tab:cg_dup_detect}
@@ -409,7 +409,7 @@
   \end{tabular}
 \end{table}
 
-\begin{table}[H]
+\begin{table}[!ht]
   \centering
   \caption{治理任务创建用例描述表}
   \label{tab:cg_task_create}
@@ -427,7 +427,7 @@
   \end{tabular}
 \end{table}
 
-\begin{table}[H]
+\begin{table}[!ht]
   \centering
   \caption{治理任务处理用例描述表}
   \label{tab:cg_task_handle}
@@ -449,7 +449,7 @@
 \subsection{数据洞察功能需求}
 数据洞察功能的用例图如图\ref{fig:di_usecase}所示。内容管理模块负责内容的生产与发布，内容应用模块实现内容的消费与问答，内容治理模块推动质量问题的检测与闭环处理，而数据洞察模块则作为平台的“反馈中枢”，对上述模块的运行效果进行量化评估，支撑运营决策与平台迭代。该模块通过对页面访问、检索与问答链路、用户会话等数据进行采集与分析，输出面向运营与治理的指标体系，使平台能够形成“应用驱动生产、数据反哺治理”的闭环。
 
-\begin{figure}[H]
+\begin{figure}[!ht]
   \centering
   \fbox{\parbox{0.92\linewidth}{\vspace{18mm}\centering 数据洞察用例图占位（待补充）\vspace{18mm}}}
   \caption{数据洞察用例图}
@@ -458,7 +458,7 @@
 
 数据洞察模块的关键用例包括页面数据监控、会话维度分析、内容维度分析与会话明细。平台通过对页面访问、检索与问答链路日志进行采集与聚合，支撑运营人员从页面、会话与内容三个视角对平台效果进行量化评估，并通过会话明细下钻实现问题定位，为内容生产与治理策略调整提供依据。
 
-\begin{table}[H]
+\begin{table}[!ht]
   \centering
   \caption{页面数据监控用例描述表}
   \label{tab:di_page_monitor}
@@ -476,7 +476,7 @@
   \end{tabular}
 \end{table}
 
-\begin{table}[H]
+\begin{table}[!ht]
   \centering
   \caption{会话维度分析用例描述表}
   \label{tab:di_session_analysis}
@@ -494,7 +494,7 @@
   \end{tabular}
 \end{table}
 
-\begin{table}[H]
+\begin{table}[!ht]
   \centering
   \caption{内容维度分析用例描述表}
   \label{tab:di_content_analysis}
@@ -512,7 +512,7 @@
   \end{tabular}
 \end{table}
 
-\begin{table}[H]
+\begin{table}[!ht]
   \centering
   \caption{会话明细用例描述表}
   \label{tab:di_session_detail}
@@ -545,7 +545,7 @@
 \section{系统整体设计}
 平台整体架构如图\ref{fig:system}所示。平台围绕内容全生命周期，将核心业务能力划分为内容管理、内容应用、内容治理与数据洞察四个模块，并通过统一内容模型与权限体系实现协同：内容管理负责空间与应用组织、内容创建维护、content\_auth权限控制以及审批发布；内容应用面向页面化场景提供展示与检索，并面向上游智能助手提供检索增强生成（RAG）能力；内容治理对重复度、歧义度与覆盖度等质量问题进行检测，并通过线上化治理任务形成闭环；数据洞察通过事件采集与指标查询评估内容使用效果并反哺治理策略。跨模块的关键协同采用事件机制：内容发布后由内容服务发布更新事件到MQ，供下游索引更新与统计链路消费，实现主链路与异步处理解耦。
 
-\begin{figure}[htbp]
+\begin{figure}[!ht]
   \centering
   \includegraphics[width=1.0\linewidth]{./figure/figures-系统架构图.pdf}
   \caption{系统架构图}
@@ -556,7 +556,7 @@
 
 （1）逻辑视图。图\ref{fig:system_logic_view}为平台的逻辑视图，用于从业务能力与数据能力角度描述系统的主要功能模块及其协作关系。平台在逻辑上由内容管理、内容应用、内容治理与数据洞察四个核心域构成：内容管理负责空间与应用组织、内容生产维护、内容权限（content\_auth）与审批发布，将knowledge、faq、course与case等多形态内容纳入统一内容资产；内容应用面向门户与管理后台提供展示与检索能力，并面向上游智能助手提供生成式问答能力，支持返回可追溯的引用来源；内容治理对内容质量进行重复、歧义与覆盖等维度的检测，并通过治理任务推动修订与复检；数据洞察对访问、检索与问答行为进行统计分析，评估内容效果与治理收益并反哺运营策略。四个核心域以统一内容模型作为数据输入口径，并通过发布事件与任务事件实现跨域协同，形成“生产—发布—应用—治理—评估”的闭环体系。
 
-\begin{figure}[htbp]
+\begin{figure}[!ht]
   \centering
   \fbox{\parbox{0.92\linewidth}{\vspace{14mm}\centering 系统逻辑视图占位（待补充）\vspace{14mm}}}
   \caption{系统逻辑视图}
@@ -565,7 +565,7 @@
 
 （2）开发视图。图\ref{fig:system_dev_view}为平台的开发视图，用于描述系统在工程实现层面的模块划分与依赖关系。平台对外提供管理后台、内容门户等入口；统一鉴权由权限拦截器与RBAC模块承接，鉴权以\texttt{user\_id + scope + code}为输入进行缓存校验。核心业务能力按域拆分为内容管理、内容应用、内容治理与数据洞察等模块，并复用审批流转、类目与标签、content\_auth等通用能力。为降低耦合与提升可维护性，平台将发布后的索引更新等耗时操作以事件方式异步化处理：内容服务在内容状态变为已发布后发布更新事件到MQ，下游消费事件并更新ES与Embedding索引；内容治理在检测与任务处理后推动内容修订并进入再次审批发布；数据洞察侧承接埋点事件并对接数仓产出指标。
 
-\begin{figure}[htbp]
+\begin{figure}[!ht]
   \centering
   \fbox{\parbox{0.92\linewidth}{\vspace{14mm}\centering 开发视图占位（待补充）\vspace{14mm}}}
   \caption{开发视图}
@@ -574,7 +574,7 @@
 
 （3）物理视图。图\ref{fig:system_physical_view}为平台的物理视图，用于描述系统在部署与运行环境中的组件构成。平台的管理后台与内容门户以Web应用形式部署，后端按模块提供内容管理、内容应用、内容治理与数据洞察等服务能力。数据存储方面，平台使用关系型数据库存储空间、应用、内容元数据、内容权限（content\_auth）、审批与治理任务等结构化数据；案例（case）详情存储在MongoDB中以适配灵活字段。检索侧同时具备ES全文检索索引与Embedding语义索引，以支撑页面检索与语义召回。内容发布后由内容服务发布更新事件到MQ，支撑索引更新等下游处理解耦。数据洞察方面，平台在在线链路采集页面与问答事件，并对接离线数仓产出聚合指标供展示分析。
 
-\begin{figure}[htbp]
+\begin{figure}[!ht]
   \centering
   \fbox{\parbox{0.92\linewidth}{\vspace{14mm}\centering 物理视图占位（待补充）\vspace{14mm}}}
   \caption{物理视图}
@@ -590,7 +590,7 @@
 
 （1）空间与应用管理。空间与应用是内容管理模块的组织基础。平台采用“空间—应用”二级组织模型：空间作为业务归属与权限边界，应用作为内容消费场景与配置边界。空间管理主要包含空间创建、成员管理与默认策略配置；应用管理主要包含应用创建、能力开关与内容范围配置等。空间与应用管理的关键交互过程如图\ref{fig:cm_space_app_seq}所示。
 
-\begin{figure}[htbp]
+\begin{figure}[!ht]
   \centering
   \fbox{\parbox{0.92\linewidth}{\vspace{14mm}\centering 空间与应用管理时序图占位（待补充）\vspace{14mm}}}
   \caption{空间与应用管理时序图}
@@ -599,21 +599,21 @@
 
 （2）统一内容模型与多形态内容。平台在内容层引入统一内容模型，使用content\_type区分knowledge、faq、course与case四类内容形态，并由一张内容表（content）维护所有内容的公共元数据字段（内容ID、类型、标题、摘要、正文引用、创建时间、更新时间、状态等）。不同内容类型的具体属性存储在对应的子表中，如knowledge、faq、course等；其中case为适配结构化字段灵活演进，其详情存储在MongoDB中。该设计保证了多形态内容在管理侧具备一致的生命周期操作，同时又允许不同内容形态按需扩展字段。平台核心领域对象及其关联关系可用类图表达，如图\ref{fig:cm_domain_class}所示。
 
-\begin{figure}[htbp]
+\begin{figure}[!ht]
   \centering
   \fbox{\parbox{0.92\linewidth}{\vspace{18mm}\centering 平台核心领域模型类图占位（待补充）\vspace{18mm}}}
   \caption{平台核心领域模型类图}
   \label{fig:cm_domain_class}
 \end{figure}
 
-\begin{figure}[htbp]
+\begin{figure}[!ht]
   \centering
   \fbox{\parbox{0.92\linewidth}{\vspace{14mm}\centering 内容创建与维护时序图占位（待补充）\vspace{14mm}}}
   \caption{内容创建与维护时序图}
   \label{fig:cm_content_version_seq}
 \end{figure}
 
-\begin{figure}[htbp]
+\begin{figure}[!ht]
   \centering
   \fbox{\parbox{0.92\linewidth}{\vspace{14mm}\centering 内容状态机图占位（待补充）\vspace{14mm}}}
   \caption{内容状态机图}
@@ -622,7 +622,7 @@
 
 （3）内容权限与审批发布。平台在空间与应用维度进行访问隔离，并在内容粒度通过content\_auth实现策略式授权，以满足跨应用引用与精细化操作控制需求。对于管理端操作，平台结合RBAC角色体系完成基础权限控制；对于内容对象，平台通过“授权对象+策略+变量+权限码”的模型表达细粒度权限。RBAC权限矩阵如表\ref{tab:rbac_matrix}所示。鉴权决策流程与审批发布链路分别如图\ref{fig:cm_auth_flow}与图\ref{fig:content_publish}所示。
 
-\begin{table}[htbp]
+\begin{table}[!ht]
   \centering
   \caption{RBAC权限矩阵表}
   \label{tab:rbac_matrix}
@@ -637,14 +637,14 @@
 
 权限体系在工程实现中由RBAC与content\_auth两部分叠加组成：RBAC负责模块与操作级的基础权限，content\_auth负责内容对象级的策略授权。两类对象及其关系可用类图表达，如图\ref{fig:cm_auth_class}所示。
 
-\begin{figure}[htbp]
+\begin{figure}[!ht]
   \centering
   \fbox{\parbox{0.92\linewidth}{\vspace{18mm}\centering 权限与授权领域类图占位（待补充）\vspace{18mm}}}
   \caption{权限与授权领域类图}
   \label{fig:cm_auth_class}
 \end{figure}
 
-\begin{figure}[htbp]
+\begin{figure}[!ht]
   \centering
   \fbox{\parbox{0.92\linewidth}{\vspace{14mm}\centering 内容权限鉴权流程图占位（待补充）\vspace{14mm}}}
   \caption{内容权限鉴权流程图}
@@ -653,7 +653,7 @@
 
 在内容发布环节，平台遵循“编辑—提审—审批—发布”的流转机制：内容上线前需要通过审批流程，审批通过后内容服务更新内容状态为已发布，并发布内容更新事件到消息队列，供下游索引更新与相关统计链路异步消费，以降低主链路耦合并提升整体吞吐。
 
-\begin{figure}[htbp]
+\begin{figure}[!ht]
   \centering
   \includegraphics[width=1.0\linewidth]{./figure/figures-内容发布事件时序图.png}
   \caption{内容发布流程时序图}
@@ -662,7 +662,7 @@
 
 审批与发布链路涉及内容状态、审批记录与发布事件等核心对象，其数据关系与状态约束可用类图表达，如图\ref{fig:cm_publish_class}所示。
 
-\begin{figure}[htbp]
+\begin{figure}[!ht]
   \centering
   \fbox{\parbox{0.92\linewidth}{\vspace{18mm}\centering 审批与发布领域类图占位（待补充）\vspace{18mm}}}
   \caption{审批与发布领域类图}
@@ -671,7 +671,7 @@
 
 （4）内容组织与应用引用。为提升内容可发现性与复用效果，平台提供类目管理、标签管理与应用引用内容机制。类目以树状层级构建稳定导航入口，标签以扁平维度实现横向聚合；应用引用内容用于表达应用可使用哪些已发布内容，使权威口径能够在多个应用复用并保持一致。应用引用内容的关键交互过程如图\ref{fig:cm_app_content_ref_seq}所示。
 
-\begin{figure}[htbp]
+\begin{figure}[!ht]
   \centering
   \fbox{\parbox{0.92\linewidth}{\vspace{14mm}\centering 应用引用内容时序图占位（待补充）\vspace{14mm}}}
   \caption{应用引用内容时序图}
@@ -683,38 +683,36 @@
 
 内容应用模块负责将管理好的内容资产转化为可被消费的服务，支持“页面化展示”与“生成式问答”两大核心场景。
 
-（1）多形态内容前置处理与索引构建。为支撑高效检索与问答，内容在发布后需经过前置处理与索引构建流程。对于页面化展示与搜索，系统构建基于ES的全文索引（包含标题、摘要、元数据与权限信息）；对于生成式问答，系统构建基于向量数据库的切片索引（将正文切分为语义完整的片段并向量化）。该过程由MQ消息驱动，确保索引与数据库状态准实时一致。
+（1）多形态内容前置处理与索引构建。为支撑高效检索与问答，内容在发布后需经过前置处理与索引构建流程。对于页面化展示与搜索，系统构建基于ES的全文索引（包含标题、摘要、元数据与权限信息）；对于生成式问答，系统构建基于向量数据库的切片索引（将正文切分为语义完整的片段并向量化）。该过程由MQ消息驱动，确保索引与数据库状态准实时一致。索引构建流程如图\ref{fig:index_build_flow}所示。
 
-（2）页面化内容应用机制。面向门户与管理后台，提供基于ES索引的统一内容展示服务，包括类目导航、标签筛选、列表分页与全文检索。系统利用ES的倒排索引能力实现全量字段过滤（含权限控制），并结合数据库回查机制保障详情页的强一致性。
-
-（3）多通道召回。面向生成式问答场景，系统采用“ES全文检索 + Embedding向量召回”的双路架构。全文通道侧重精确关键词匹配与元数据过滤，向量通道侧重语义理解与长尾问法覆盖。两路召回结果经融合去重与重排后，输出TopN高质量切片作为回答依据。
-
-（4）生成式问答流程。系统将召回的证据切片注入大模型Prompt，结合业务约束生成回答，并在输出中附带可溯源的引用标记。该流程实现了“问答-证据-治理”的闭环，有效降低了模型幻觉风险。
-
-内容应用模块的关键交互流程如图\ref{fig:index_build_flow}、图\ref{fig:ca_display_flow}、图\ref{fig:ca_search_flow}与图\ref{fig:ca_rag_flow}所示。
-
-\begin{figure}[htbp]
+\begin{figure}[!ht]
   \centering
   \fbox{\parbox{0.9\linewidth}{\vspace{2cm}\centering 索引构建流程图占位（待补充）\vspace{2cm}}}
   \caption{索引构建流程图}
   \label{fig:index_build_flow}
 \end{figure}
 
-\begin{figure}[htbp]
+（2）页面化内容应用机制。面向门户与管理后台，提供基于ES索引的统一内容展示服务，包括类目导航、标签筛选、列表分页与全文检索。系统利用ES的倒排索引能力实现全量字段过滤（含权限控制），并结合数据库回查机制保障详情页的强一致性。页面化内容展示流程如图\ref{fig:ca_display_flow}所示。
+
+\begin{figure}[!ht]
   \centering
   \fbox{\parbox{0.9\linewidth}{\vspace{2cm}\centering 页面化内容展示流程图占位（待补充）\vspace{2cm}}}
   \caption{页面化内容展示流程图}
   \label{fig:ca_display_flow}
 \end{figure}
 
-\begin{figure}[htbp]
+（3）多通道召回。面向生成式问答场景，系统采用“ES全文检索 + Embedding向量召回”的双路架构。全文通道侧重精确关键词匹配与元数据过滤，向量通道侧重语义理解与长尾问法覆盖。两路召回结果经融合去重与重排后，输出TopN高质量切片作为回答依据。内容检索流程如图\ref{fig:ca_search_flow}所示。
+
+\begin{figure}[!ht]
   \centering
   \fbox{\parbox{0.9\linewidth}{\vspace{2cm}\centering 内容检索流程图占位（待补充）\vspace{2cm}}}
   \caption{内容检索流程图}
   \label{fig:ca_search_flow}
 \end{figure}
 
-\begin{figure}[htbp]
+（4）生成式问答流程。系统将召回的证据切片注入大模型Prompt，结合业务约束生成回答，并在输出中附带可溯源的引用标记。该流程实现了“问答-证据-治理”的闭环，有效降低了模型幻觉风险。生成式问答流程如图\ref{fig:ca_rag_flow}所示。
+
+\begin{figure}[!ht]
   \centering
   \fbox{\parbox{0.9\linewidth}{\vspace{2cm}\centering 生成式问答流程图占位（待补充）\vspace{2cm}}}
   \caption{生成式问答流程图}
@@ -723,14 +721,14 @@
 
 内容应用模块涉及的关键类图如图\ref{fig:ca_index_class}与图\ref{fig:ca_qa_class}所示。
 
-\begin{figure}[htbp]
+\begin{figure}[!ht]
   \centering
   \fbox{\parbox{0.9\linewidth}{\vspace{2cm}\centering 切片与索引领域类图占位（待补充）\vspace{2cm}}}
   \caption{切片与索引领域类图}
   \label{fig:ca_index_class}
 \end{figure}
 
-\begin{figure}[htbp]
+\begin{figure}[!ht]
   \centering
   \fbox{\parbox{0.9\linewidth}{\vspace{2cm}\centering 生成式问答领域类图占位（待补充）\vspace{2cm}}}
   \caption{生成式问答领域类图}
@@ -746,7 +744,7 @@
 
 （2）重复度/歧义度模型。重复度与歧义度检测的核心思路是采用“候选召回+大模型判别”的方式避免全量两两比较。首先对每个待检测内容在检索侧召回TopK相似候选，形成候选对集合；随后对“当前内容—候选内容”构造判别提示词，使用大模型输出相似度与歧义度判断；最后将判别结果汇总为相似对、重复组与歧义候选组，并输出来源定位信息供人工复核与任务生成。重复度与歧义度检测流程如图\ref{fig:cg_dup_amb_flow}所示。
 
-\begin{figure}[htbp]
+\begin{figure}[!ht]
   \centering
   \fbox{\parbox{0.92\linewidth}{\vspace{14mm}\centering 重复度/歧义度模型检测流程示意图占位（待补充）\vspace{14mm}}}
   \caption{重复度/歧义度模型检测流程示意图}
@@ -757,7 +755,7 @@
 
 （4）质量治理任务线上化。为将质量治理从离线跑数与人工推动升级为线上闭环，平台将治理过程抽象为主任务与子任务两层结构。主任务负责一次治理计算的配置与状态管理，包含任务名称、空间、会话周期与召回阈值等上下文信息；主任务进入计算中后生成治理任务列表，并在计算完成后对外展示结果。子任务主要包含覆盖任务与重复歧义任务两类：覆盖任务承载缺知识聚类结果，支持人工标记“无需补充/需要补充”并填写说明，系统每日巡检若发现已可召回到相关答案则自动完成；重复歧义任务承载重复对与歧义对结果，支持人工判断是否需要下线并完成处理标记，系统每日巡检若发现内容变更、下线或删除后不再存在重复/歧义，则自动完成。质量治理任务线上化的结构与关键流程如图\ref{fig:cg_task_flow}所示。
 
-\begin{figure}[htbp]
+\begin{figure}[!ht]
   \centering
   \fbox{\parbox{0.92\linewidth}{\vspace{14mm}\centering 质量治理任务线上化流程示意图占位（待补充）\vspace{14mm}}}
   \caption{质量治理任务线上化流程示意图}
@@ -766,7 +764,7 @@
 
 治理任务线上化涉及主任务、覆盖任务、重复/歧义任务以及任务处理记录等对象，并需表达任务状态机与关联关系，其领域模型类图如图\ref{fig:cg_task_class}所示。
 
-\begin{figure}[htbp]
+\begin{figure}[!ht]
   \centering
   \fbox{\parbox{0.92\linewidth}{\vspace{18mm}\centering 治理任务领域类图占位（待补充）\vspace{18mm}}}
   \caption{治理任务领域类图}
@@ -775,7 +773,7 @@
 
 （5）复检回收与链路一致性。治理任务处理通常会引发内容修订与再次发布，平台需要保证“内容资产—索引—问答结果”在治理后保持一致。对于需要修订的内容，治理处理应与内容管理的提审与发布流程打通，发布后由索引构建服务消费发布事件完成增量索引更新；随后对任务范围执行复检回收，确认质量问题是否消除，并将复检结果与指标变化回收至数据洞察体系，用于形成治理前后对比与策略迭代。跨域协同链路示意如图\ref{fig:cg_fix_publish_seq}所示。
 
-\begin{figure}[htbp]
+\begin{figure}[!ht]
   \centering
   \fbox{\parbox{0.92\linewidth}{\vspace{14mm}\centering 治理修订-发布-复检时序图占位（待补充）\vspace{14mm}}}
   \caption{治理修订-发布-复检时序图}
@@ -785,7 +783,7 @@
 \subsection{数据洞察模块设计}
 数据洞察模块为平台提供效果评估与问题定位能力，是“应用驱动生产、数据反哺治理”的关键闭环环节。该模块的实现链路采用“前端埋点与服务端事件采集$\rightarrow$数仓统一加工与指标口径沉淀$\rightarrow$洞察服务查询与权限控制$\rightarrow$前端可视化与下钻明细”的模式：数据加工与指标口径由数仓侧负责，本平台侧重点在事件规范、采集链路、与数仓/BI的对接以及查询服务建设。数据采集与指标生成链路示意如图\ref{fig:di_pipeline}所示。
 
-\begin{figure}[htbp]
+\begin{figure}[!ht]
   \centering
   \fbox{\parbox{0.92\linewidth}{\vspace{14mm}\centering 数据采集与指标生成链路示意图占位（待补充）\vspace{14mm}}}
   \caption{数据采集与指标生成链路示意图}
@@ -796,7 +794,7 @@
 
 为支撑事件的可扩展与跨链路关联，平台将事件抽象为“公共维度 + ext扩展字段”的统一模型，并以trace\_id与session\_id建立会话与链路关联。事件数据模型与关键维度关系如图\ref{fig:di_event_class}所示。
 
-\begin{figure}[htbp]
+\begin{figure}[!ht]
   \centering
   \fbox{\parbox{0.92\linewidth}{\vspace{18mm}\centering 事件采集与维度模型类图占位（待补充）\vspace{18mm}}}
   \caption{事件采集与维度模型类图}
@@ -828,7 +826,7 @@
 \subsection{概念结构设计}
 平台以空间与应用作为组织边界：空间（Space）用于区分不同业务线并形成权限边界，应用（Application）用于表示空间下的具体业务领域或使用场景。内容（Content）作为统一抽象实体，通过内容类型字段区分knowledge、faq、course与case四类内容形态，并与类目、标签、应用引用关系共同构成内容组织方式。权限体系由两部分叠加：一是平台管理权限，采用“角色-权限-作用域”的RBAC模型；二是内容级可见性与可操作范围，由content\_auth模块在内容粒度再判一层，以支持免登录可见、员工/部门/角色匹配等策略。
 
-\begin{figure}[htbp]
+\begin{figure}[!ht]
   \centering
   \fbox{\parbox{0.92\linewidth}{\vspace{14mm}\centering 数据库E-R图占位（待补充）\vspace{14mm}}}
   \caption{数据库E-R图}
@@ -840,7 +838,7 @@
 
 （1）空间与应用表。空间与应用是内容组织与权限隔离的基础边界，其表结构如表\ref{tab:db_space}与表\ref{tab:db_application}所示。
 
-\begin{table}[htbp]
+\begin{table}[!ht]
   \centering
   \caption{空间表（space）}
   \label{tab:db_space}
@@ -856,7 +854,7 @@
   \end{tabular}
 \end{table}
 
-\begin{table}[htbp]
+\begin{table}[!ht]
   \centering
   \caption{应用表（application）}
   \label{tab:db_application}
@@ -875,7 +873,7 @@
 
 （2）统一内容表。内容表承接所有内容形态的公共字段，其表结构如表\ref{tab:db_content}所示。
 
-\begin{table}[htbp]
+\begin{table}[!ht]
   \centering
   \caption{内容表（content）}
   \label{tab:db_content}
@@ -896,7 +894,7 @@
 
 （3）多形态内容子表。不同内容类型的差异字段存储在对应子表中：knowledge/faq/course落在关系型数据库中，case详情存储在MongoDB中。其中faq除标准问与答案外，还需要维护相似问集合以支撑相似问召回与口径统一。相关表结构如表\ref{tab:db_knowledge}至表\ref{tab:db_case_detail_mongo}所示。
 
-\begin{table}[htbp]
+\begin{table}[!ht]
   \centering
   \caption{知识内容表（knowledge）}
   \label{tab:db_knowledge}
@@ -909,7 +907,7 @@
   \end{tabular}
 \end{table}
 
-\begin{table}[htbp]
+\begin{table}[!ht]
   \centering
   \caption{问答内容表（faq）}
   \label{tab:db_faq}
@@ -923,7 +921,7 @@
   \end{tabular}
 \end{table}
 
-\begin{table}[htbp]
+\begin{table}[!ht]
   \centering
   \caption{相似问表（faq\_similar\_question）}
   \label{tab:db_faq_similar_question}
@@ -937,7 +935,7 @@
   \end{tabular}
 \end{table}
 
-\begin{table}[htbp]
+\begin{table}[!ht]
   \centering
   \caption{课程内容表（course）}
   \label{tab:db_course}
@@ -951,7 +949,7 @@
   \end{tabular}
 \end{table}
 
-\begin{table}[htbp]
+\begin{table}[!ht]
   \centering
   \caption{课节表（course\_lesson）}
   \label{tab:db_course_lesson}
@@ -966,7 +964,7 @@
   \end{tabular}
 \end{table}
 
-\begin{table}[htbp]
+\begin{table}[!ht]
   \centering
   \caption{案例详情集合（MongoDB：case\_detail）}
   \label{tab:db_case_detail_mongo}
@@ -981,7 +979,7 @@
 
 （4）类目与标签表。为支撑内容在页面化展示与检索场景下的组织与聚合，平台提供类目树与标签体系，并通过关联表建立内容与类目/标签的绑定关系。相关表结构如表\ref{tab:db_tag}至表\ref{tab:db_content_category_ref}所示。
 
-\begin{table}[htbp]
+\begin{table}[!ht]
   \centering
   \caption{标签表（tag）}
   \label{tab:db_tag}
@@ -997,7 +995,7 @@
   \end{tabular}
 \end{table}
 
-\begin{table}[htbp]
+\begin{table}[!ht]
   \centering
   \caption{内容-标签关联表（content\_tag\_ref）}
   \label{tab:db_content_tag_ref}
@@ -1011,7 +1009,7 @@
   \end{tabular}
 \end{table}
 
-\begin{table}[htbp]
+\begin{table}[!ht]
   \centering
   \caption{类目表（category）}
   \label{tab:db_category}
@@ -1029,7 +1027,7 @@
   \end{tabular}
 \end{table}
 
-\begin{table}[htbp]
+\begin{table}[!ht]
   \centering
   \caption{内容-类目关联表（content\_category\_ref）}
   \label{tab:db_content_category_ref}
@@ -1045,7 +1043,7 @@
 
 （5）平台RBAC表。平台管理权限使用五张表落地：user、role、permission、role\_permission、user\_role\_binding。用户-角色绑定关系区分GLOBAL/SPACE/APP作用域，以实现“平台负责人（GLOBAL）、业务负责人（SPACE）、业务运营（APP|SPACE）”的权限隔离与授权。其表结构如表\ref{tab:db_user}至表\ref{tab:db_user_role_binding}所示。
 
-\begin{table}[htbp]
+\begin{table}[!ht]
   \centering
   \caption{用户表（user）}
   \label{tab:db_user}
@@ -1058,7 +1056,7 @@
   \end{tabular}
 \end{table}
 
-\begin{table}[htbp]
+\begin{table}[!ht]
   \centering
   \caption{角色表（role）}
   \label{tab:db_role}
@@ -1070,7 +1068,7 @@
   \end{tabular}
 \end{table}
 
-\begin{table}[htbp]
+\begin{table}[!ht]
   \centering
   \caption{权限表（permission）}
   \label{tab:db_permission}
@@ -1083,7 +1081,7 @@
   \end{tabular}
 \end{table}
 
-\begin{table}[htbp]
+\begin{table}[!ht]
   \centering
   \caption{角色-权限关联表（role\_permission）}
   \label{tab:db_role_permission}
@@ -1096,7 +1094,7 @@
   \end{tabular}
 \end{table}
 
-\begin{table}[htbp]
+\begin{table}[!ht]
   \centering
   \caption{用户-角色绑定表（user\_role\_binding）}
   \label{tab:db_user_role_binding}
@@ -1114,7 +1112,7 @@
 
 （6）内容权限表（content\_auth）。内容级权限以“内容 + 策略 + 变量 + 权限码”的方式表达，其表结构如表\ref{tab:db_content_auth}所示；auth\_tactic支持免登录可见、所有外部用户可见、所有内部员工可见、员工匹配、部门匹配、角色匹配以及自定义匹配等策略。
 
-\begin{table}[htbp]
+\begin{table}[!ht]
   \centering
   \caption{内容权限表（content\_auth）}
   \label{tab:db_content_auth}
@@ -1131,7 +1129,7 @@
 
 （7）内容审批与应用引用表。内容上线依赖审批表记录审批状态与审批意见；跨应用复用通过content\_app\_ref维护引用关系。其表结构如表\ref{tab:db_content_approval}与表\ref{tab:db_content_app_ref}所示。
 
-\begin{table}[htbp]
+\begin{table}[!ht]
   \centering
   \caption{内容审批表（content\_approval）}
   \label{tab:db_content_approval}
@@ -1149,7 +1147,7 @@
   \end{tabular}
 \end{table}
 
-\begin{table}[htbp]
+\begin{table}[!ht]
   \centering
   \caption{应用引用表（content\_app\_ref）}
   \label{tab:db_content_app_ref}
@@ -1166,7 +1164,7 @@
 
 （8）治理任务表。内容治理模块将检测结果以治理任务形式线上化流转，主任务负责配置与状态管理，重复歧义任务与覆盖度任务承载具体治理问题。其表结构如表\ref{tab:db_govern_main_task}至表\ref{tab:db_govern_coverage_task}所示。
 
-\begin{table}[htbp]
+\begin{table}[!ht]
   \centering
   \caption{主任务表（govern\_main\_task）}
   \label{tab:db_govern_main_task}
@@ -1184,7 +1182,7 @@
   \end{tabular}
 \end{table}
 
-\begin{table}[htbp]
+\begin{table}[!ht]
   \centering
   \caption{重复歧义任务表（govern\_dup\_amb\_task）}
   \label{tab:db_govern_dup_amb_task}
@@ -1205,7 +1203,7 @@
   \end{tabular}
 \end{table}
 
-\begin{table}[htbp]
+\begin{table}[!ht]
   \centering
   \caption{覆盖度任务表（govern\_coverage\_task）}
   \label{tab:db_govern_coverage_task}
@@ -1227,7 +1225,7 @@
 
 （9）数据洞察数仓表。数据洞察模块的指标计算与口径沉淀由数仓侧负责，平台侧通过查询接口对接数仓侧宽表与明细表。为保证论文写作与实现口径一致，本节给出数据洞察侧核心数据表（数仓侧）的字段设计，如表\ref{tab:db_di_event_ods}至表\ref{tab:db_di_session_detail}所示。
 
-\begin{table}[htbp]
+\begin{table}[!ht]
   \centering
   \caption{事件明细表（ODS：di\_event\_ods）}
   \label{tab:db_di_event_ods}
@@ -1249,7 +1247,7 @@
   \end{tabular}
 \end{table}
 
-\begin{table}[htbp]
+\begin{table}[!ht]
   \centering
   \caption{页面指标宽表（DWS：di\_page\_metric\_d）}
   \label{tab:db_di_page_metric_d}
@@ -1267,7 +1265,7 @@
   \end{tabular}
 \end{table}
 
-\begin{table}[htbp]
+\begin{table}[!ht]
   \centering
   \caption{会话聚类指标宽表（DWS：di\_session\_cluster\_d）}
   \label{tab:db_di_session_cluster_d}
@@ -1287,7 +1285,7 @@
   \end{tabular}
 \end{table}
 
-\begin{table}[htbp]
+\begin{table}[!ht]
   \centering
   \caption{内容指标宽表（DWS：di\_content\_metric\_d）}
   \label{tab:db_di_content_metric_d}
@@ -1307,7 +1305,7 @@
   \end{tabular}
 \end{table}
 
-\begin{table}[htbp]
+\begin{table}[!ht]
   \centering
   \caption{会话明细表（DWD：di\_session\_detail）}
   \label{tab:db_di_session_detail}
