@@ -319,20 +319,6 @@ RBAC 表结构（核心字段）：
 | category_id | 类目 ID | bigint | 外键，关联 category |
 | create_time | 创建时间 | datetime |  |
 
-##### 内容引用机制
-
-为方便内容复用，支持不同应用之间的内容引用，即一个应用可以引用另一个应用中的内容。引用关系通过 `content_app_ref` 表维护，记录引用源应用、引用目标应用、引用内容 ID 等信息。
-
-应用引用表（`content_app_ref`）：
-
-| 字段名 | 描述 | 类型 | 备注 |
-|---|---|---|---|
-| id | 主键 ID | bigint | 主键 |
-| source_app_id | 引用源应用 ID | bigint | 外键 |
-| target_app_id | 引用目标应用 ID | bigint | 外键 |
-| content_id | 内容 ID | bigint | 外键 |
-| create_time | 创建时间 | datetime |  |
-
 ### 内容应用模块
 
 #### 统一内容索引与过滤（ES核心定位）

@@ -86,24 +86,6 @@
       </root>
     </mxGraphModel>
   </diagram>
-  <diagram name="SEQ-AppContentRef">
-    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
-      <root>
-        <mxCell id="0"/>
-        <mxCell id="1" parent="0"/>
-        <mxCell id="t" value="应用引用内容时序图（简化）" style="text;html=1;align=left;verticalAlign=middle;fontSize=18;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="20" y="20" width="520" height="40" as="geometry"/></mxCell>
-        <mxCell id="c1" value="负责人" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#999999;" vertex="1" parent="1"><mxGeometry x="70" y="110" width="120" height="40" as="geometry"/></mxCell>
-        <mxCell id="c2" value="CM API" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1"><mxGeometry x="250" y="110" width="120" height="40" as="geometry"/></mxCell>
-        <mxCell id="c3" value="Auth" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#999999;" vertex="1" parent="1"><mxGeometry x="430" y="110" width="120" height="40" as="geometry"/></mxCell>
-        <mxCell id="c4" value="DB" style="shape=cylinder;whiteSpace=wrap;html=1;strokeColor=#999999;" vertex="1" parent="1"><mxGeometry x="610" y="100" width="120" height="60" as="geometry"/></mxCell>
-        <mxCell id="e1" value="addContentRef(app, content)" style="endArrow=block;html=1;" edge="1" parent="1" source="c1" target="c2"><mxGeometry relative="1" as="geometry"/></mxCell>
-        <mxCell id="e2" value="checkPermission(APP_CONFIG)" style="endArrow=block;html=1;" edge="1" parent="1" source="c2" target="c3"><mxGeometry relative="1" as="geometry"/></mxCell>
-        <mxCell id="e3" value="verify content is PUBLISHED" style="endArrow=block;html=1;" edge="1" parent="1" source="c2" target="c4"><mxGeometry relative="1" as="geometry"/></mxCell>
-        <mxCell id="e4" value="upsert(content_app_ref)" style="endArrow=block;html=1;" edge="1" parent="1" source="c2" target="c4"><mxGeometry relative="1" as="geometry"/></mxCell>
-        <mxCell id="note" value="幂等：重复引用不产生重复记录" style="text;html=1;align=left;verticalAlign=middle;fontSize=12;fontColor=#666666;" vertex="1" parent="1"><mxGeometry x="70" y="240" width="900" height="30" as="geometry"/></mxCell>
-      </root>
-    </mxGraphModel>
-  </diagram>
   <diagram name="FLOW-Display">
     <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
       <root>

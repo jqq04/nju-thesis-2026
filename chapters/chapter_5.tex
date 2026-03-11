@@ -94,21 +94,6 @@ def "test_content_auth_action_first"() {
   \end{tabular}
 \end{table}
 
-跨应用引用用于复用权威内容并控制可见范围，用例用于验证“仅可引用已发布内容”与“引用幂等”约束。应用引用内容测试用例如表\ref{tab:tc03}所示。
-
-\begin{table}[!ht]
-  \centering
-  \caption{应用引用内容测试用例}
-  \label{tab:tc03}
-  \begin{tabular}{c|p{10.2cm}}
-    \hline
-    用例编号 & TC03 \\ \hline
-    测试内容 & 应用引用已发布内容 \\ \hline
-    测试步骤 & 1) 在源应用发布一条内容。2) 在目标应用发起引用该内容。3) 重复执行引用操作验证幂等。4) 在目标应用的列表与检索中查看引用内容。 \\ \hline
-    预期结果 & 1) 未发布内容禁止被引用，已发布内容可引用。2) 重复引用不产生重复记录。3) 目标应用仅可见其引用集合内的内容且权限过滤生效。 \\ \hline
-  \end{tabular}
-\end{table}
-
 \subsection{内容应用功能测试}
 
 内容检索用于验证多字段召回、高亮与过滤逻辑是否正确。内容检索测试用例如表\ref{tab:tc04}所示。

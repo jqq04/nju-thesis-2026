@@ -10,7 +10,6 @@
         <mxCell id="space" value="space" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=2;" vertex="1" parent="1"><mxGeometry x="80" y="120" width="160" height="70" as="geometry"/></mxCell>
         <mxCell id="app" value="application" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=2;" vertex="1" parent="1"><mxGeometry x="280" y="120" width="180" height="70" as="geometry"/></mxCell>
         <mxCell id="content" value="content" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=2;" vertex="1" parent="1"><mxGeometry x="500" y="120" width="160" height="70" as="geometry"/></mxCell>
-        <mxCell id="ref" value="content_app_ref" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="700" y="120" width="200" height="70" as="geometry"/></mxCell>
         <mxCell id="cat" value="category/tag" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="500" y="220" width="160" height="60" as="geometry"/></mxCell>
         <mxCell id="review" value="review_record" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="700" y="220" width="200" height="60" as="geometry"/></mxCell>
         <mxCell id="auth" value="content_auth_rule" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="700" y="310" width="200" height="60" as="geometry"/></mxCell>
@@ -21,7 +20,6 @@
         <mxCell id="mongo" value="Mongo: case_detail" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1"><mxGeometry x="500" y="480" width="200" height="60" as="geometry"/></mxCell>
         <mxCell id="e1" style="endArrow=block;html=1;" edge="1" parent="1" source="space" target="app"><mxGeometry relative="1" as="geometry"/></mxCell>
         <mxCell id="e2" style="endArrow=block;html=1;" edge="1" parent="1" source="app" target="content"><mxGeometry relative="1" as="geometry"/></mxCell>
-        <mxCell id="e3" style="endArrow=block;html=1;" edge="1" parent="1" source="content" target="ref"><mxGeometry relative="1" as="geometry"/></mxCell>
         <mxCell id="e4" style="endArrow=block;html=1;dashed=1;" edge="1" parent="1" source="content" target="cat"><mxGeometry relative="1" as="geometry"/></mxCell>
         <mxCell id="e5" style="endArrow=block;html=1;" edge="1" parent="1" source="content" target="review"><mxGeometry relative="1" as="geometry"/></mxCell>
         <mxCell id="e6" style="endArrow=block;html=1;" edge="1" parent="1" source="content" target="auth"><mxGeometry relative="1" as="geometry"/></mxCell>
@@ -40,12 +38,10 @@
         <mxCell id="Space" value="Space&#10;+id&#10;+name&#10;+owner_id" style="swimlane;html=1;whiteSpace=wrap;rounded=0;" vertex="1" parent="1"><mxGeometry x="80" y="120" width="200" height="140" as="geometry"/></mxCell>
         <mxCell id="App" value="Application&#10;+id&#10;+space_id&#10;+name&#10;+config" style="swimlane;html=1;whiteSpace=wrap;rounded=0;" vertex="1" parent="1"><mxGeometry x="320" y="120" width="240" height="160" as="geometry"/></mxCell>
         <mxCell id="Content" value="Content&#10;+id&#10;+type&#10;+status&#10;+title/summary" style="swimlane;html=1;whiteSpace=wrap;rounded=0;" vertex="1" parent="1"><mxGeometry x="600" y="120" width="240" height="180" as="geometry"/></mxCell>
-        <mxCell id="Ref" value="ContentAppRef&#10;+app_id&#10;+content_id" style="swimlane;html=1;whiteSpace=wrap;rounded=0;" vertex="1" parent="1"><mxGeometry x="880" y="120" width="220" height="120" as="geometry"/></mxCell>
         <mxCell id="Review" value="ReviewRecord&#10;+content_id&#10;+status&#10;+auditor" style="swimlane;html=1;whiteSpace=wrap;rounded=0;" vertex="1" parent="1"><mxGeometry x="600" y="330" width="240" height="140" as="geometry"/></mxCell>
         <mxCell id="e1" style="endArrow=block;html=1;" edge="1" parent="1" source="Space" target="App"><mxGeometry relative="1" as="geometry"/></mxCell>
         <mxCell id="e2" style="endArrow=block;html=1;" edge="1" parent="1" source="App" target="Content"><mxGeometry relative="1" as="geometry"/></mxCell>
         <mxCell id="e3" style="endArrow=block;html=1;" edge="1" parent="1" source="Content" target="Review"><mxGeometry relative="1" as="geometry"/></mxCell>
-        <mxCell id="e4" style="endArrow=block;html=1;" edge="1" parent="1" source="Content" target="Ref"><mxGeometry relative="1" as="geometry"/></mxCell>
       </root>
     </mxGraphModel>
   </diagram>
