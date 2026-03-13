@@ -630,7 +630,7 @@ public AskResp ask(AskReq req) {
     表名 & 关键字段（示例） & 说明 \\ \hline
     govern\_main\_task & id, name, space\_id, session\_period, recall\_threshold, status & 治理主任务，承载会话周期、阈值等参数与计算状态。 \\ \hline
     govern\_dup\_amb\_task & id, main\_task\_id, app\_id, task\_type, content\_id\_a, content\_id\_b, status, assignee\_id, result & 重复/歧义子任务，描述内容对、任务类型与处理结果。 \\ \hline
-    govern\_coverage\_task & id, main\_task\_id, app\_id, item\_type, item\_value, score, status, assignee\_id & 覆盖度子任务，描述覆盖对象（类目/标签/概念/定义/query等）与覆盖评分。 \\ \hline
+    govern\_coverage\_task & id, main\_task\_id, app\_id, cluster\_title, representative\_query, query\_count, status & 覆盖度子任务，描述缺失知识簇的主题、代表性问法与热度。 \\ \hline
   \end{tabular}
 \end{table}
 
@@ -735,11 +735,16 @@ public void runDupAmb(MainTask task) {
 \subsection{覆盖度检测实现}
 \label{subsec:impl_cg_coverage}
 
-覆盖度治理用于持续发现“缺知识”与薄弱领域，并将缺口转化为可闭环的补充任务。实现中覆盖度检测主要基于会话数据：在设定会话周期与召回阈值的前提下，对用户原声执行召回评估，召回结果未满足阈值要求的视为缺知识；对缺知识原声进行聚类生成覆盖任务，由业务人员补充内容或完善现有内容，并通过周期复检对任务范围进行回收。
+覆盖度检测旨在发现系统中缺失或薄弱的知识点。面对海量的用户会话日志，逐条进行覆盖度判别既不经济也无必要。因此，本项目设计了“意图筛选—会话聚类—代表性Query判别”的漏斗型处理路径，在大幅降低大模型计算开销的同时，确保治理任务聚焦于高频共性问题。
 
-覆盖度检测在实现上通常包含两条互补路径：其一是知识体系驱动，对接广告与商业化知识体系（类目、标签、概念、定义等）作为覆盖对象集合，逐项执行RAG召回并用大模型判断“是否覆盖”并打分，得到覆盖度分布；其二是需求驱动，从用户query与未命中行为中抽取真实需求，按语义聚类形成覆盖任务并推动内容补充。本项目实现以需求驱动路径为主，并在主任务配置中保留召回阈值与会话周期等参数，便于与知识体系驱动结果在同一指标口径下对齐。
+（1）意图筛选与需求聚类。系统首先引入意图分类模型，对全量用户Query进行清洗，过滤掉闲聊与操作指令，仅保留“业务咨询”类Query。随后，复用数据洞察模块的\textbf{会话聚类}能力（见\ref{subsec:impl_di_cluster}节），将语义相近的Query聚合为簇，并提取每个簇的\textbf{代表性Query}作为该需求的“指纹”。
 
-覆盖度判断在工程实现上同样采用“召回+判别”的模式：先对覆盖对象（类目/概念/定义/query等）执行RAG召回得到TopK候选证据，再由大模型判断候选证据是否能够覆盖该覆盖对象，并输出覆盖结论与可解释字段用于落表。覆盖度判别提示词模板如图\ref{fig:cg_coverage_prompt_tpl}所示。
+（2）基于代表性Query的覆盖度判别。针对筛选出的代表性Query，系统执行“召回+判别”的标准化检测流程：
+\begin{itemize}
+    \item \textbf{召回粗筛}：执行标准RAG检索，若Top1相似度低于阈值（如0.6），直接判定为“召回缺失”。
+    \item \textbf{LLM精判}：对于相似度尚可但内容存疑的情况，调用大模型进行精细化评估。模型接收代表性Query与召回证据，判断现有知识是否能充分回答该问题。
+\end{itemize}
+覆盖度判别提示词模板如图\ref{fig:cg_coverage_prompt_tpl}所示。
 
 \begin{figure}[!ht]
   \centering
@@ -779,32 +784,18 @@ public void runDupAmb(MainTask task) {
   \label{fig:cg_coverage_prompt_tpl}
 \end{figure}
 
-（1）缺知识识别。系统将每条query按空间/应用范围进行召回评估，若top1相似度低于阈值或无有效证据，则将该query记录为缺知识候选。
-
-缺知识候选的来源既包括用户在智能问答中的原始query，也包括搜索框的查询词与未命中行为。实现中平台对缺知识候选进行基础清洗：去除纯噪声query、合并大小写与数字格式差异、过滤过短文本，并按空间/应用聚合以避免跨边界混淆。召回评估同时参考全文与向量两路结果，当两路均未达到阈值要求时才判定为缺知识，以降低单通道失误带来的误判。
-
-（2）覆盖任务生成。覆盖度治理的目标是将“缺知识候选”转化为可闭环的补充任务。在工程实现中，query的语义聚类属于数据洞察模块会话分析的前置步骤：洞察侧将历史query聚类并产出聚类指标宽表，治理侧复用该聚类结果进行任务生成与分发。
-
-具体而言，平台从洞察侧筛选低解决率或高转人工的聚类主题，结合召回评估结果判定为覆盖薄弱点，并生成覆盖任务。覆盖任务以\texttt{cluster\_id}或代表性query作为定位依据：一方面，cluster\_id用于在洞察侧下钻到明细会话与原始query集合；另一方面，代表性query用于在治理侧做复检回收。该设计将“发现问题（洞察）”与“解决问题（治理）”解耦，使覆盖度治理能够持续从真实用户需求中获得输入而不重复建设聚类能力。
-
-（3）复检回收。任务处理后，系统对原聚类代表query进行复检，若已能召回到满足阈值的证据则自动完成任务，避免“内容已补充但任务未更新”导致统计失真。
-
-复检回收以任务中沉淀的代表性query为输入，复用问答召回能力对其进行周期性评估；当top1证据满足阈值且引用内容处于已发布状态时，任务自动进入完成状态。对于重复/歧义类任务，复检回收则以内容对为输入，若内容被合并、下线或修订后不再判定为重复/歧义，则任务自动关闭，从而实现“治理处理$\rightarrow$复检验证$\rightarrow$任务闭环”的持续运营机制。
+（3）结果映射与任务生成。若代表性Query被判定为“未覆盖”，则整个聚类簇被标记为“缺知识”状态。系统将该簇下的所有原始Query关联至同一治理任务，便于内容运营人员在处理时参考用户的真实问法，从而补充更精准的知识内容。
 
 \subsection{治理任务线上化与闭环机制}
 \label{subsec:impl_cg_task}
 
-治理任务线上化将检测结果以主任务与子任务两层结构落地。主任务负责一次治理计算的配置与状态管理，包含任务名称、空间、会话周期与召回阈值等上下文信息；子任务承载具体问题与处理结论。重复/歧义任务支持人工判断下线、保留或合并；覆盖任务支持标记“无需补充/需要补充”并填写说明，处理引发内容修订后可进入内容管理的提审与发布流程，发布后由索引构建服务消费发布事件完成增量索引更新。
+治理任务线上化模块负责将前述算法检测出的“问题候选”转化为可流转、可追踪的\textbf{治理工单}，并提供从“任务分发”到“人工处理”再到“效果复检”的全流程闭环能力。该模块将离线分析结果与在线内容生产链路打通，确保每一个治理动作（如补充知识、合并重复项）都能实时反哺到知识库中，从而实现质量的持续提升。
 
-在任务状态设计上，主任务的状态通常包括“新建/计算中/计算完成”，子任务的状态包括“待处理/处理中/已完成/已关闭”。平台将任务处理与内容发布链路打通：当责任人根据覆盖任务补充内容或根据重复任务合并下线内容后，内容进入提审与审批发布；发布事件触发索引更新后，复检回收再对任务范围进行验证并更新任务状态。该设计将治理从一次性离线分析转化为可持续的线上闭环，使治理效果能够稳定反哺内容应用与数据洞察。
+（1）任务模型与生成。治理任务采用“主任务（Batch）—子任务（Item）”的双层结构：主任务定义了单次治理的执行上下文（如空间范围、时间窗口、算法版本）；子任务则是具体的待处理实体。对于重复/歧义治理，子任务对应一个“待判别的内容对”；对于覆盖度治理，子任务对应一个“待补充的缺知识簇”。任务生成过程通过异步Job批量写入数据库，并采用\textbf{幂等策略}防止重复生成：系统以\texttt{(TaskType, EntityID)}为唯一键，确保同一问题在未关闭前不会重复创建新任务。
 
-（1）主任务创建与计算执行。主任务创建由空间维度入口发起：用户填写任务名称、选择业务空间、设置会话周期与召回阈值，提交后主任务进入“计算中”。计算任务由后台异步执行，避免在前台请求中长时间阻塞。实现上主任务包含两类计算：重复/歧义任务计算以空间内已发布内容为输入，按TopK召回生成候选对并调用LLM判别；覆盖任务计算以洞察侧产出的会话聚类为输入，筛选低解决率主题并结合召回评估生成覆盖子任务。计算完成后主任务状态更新为“计算完成”，并生成子任务列表供责任人处理。
+（2）任务分发与状态流转。子任务分发支持“指派”与“认领”两种方式：指派模式由空间负责人按业务域将任务分配到具体责任人；认领模式允许运营人员从任务池领取处理。任务处理动作与内容管理链路深度集成：重复/歧义任务的处理（下线/合并）直接触发内容的下线或修订；覆盖任务的处理（补充内容）触发新内容的创建或已有内容的更新。
 
-为保证计算可重复触发且不产生重复任务，子任务写入采用幂等upsert：重复/歧义子任务以(main\_task\_id, task\_type, content\_id\_a, content\_id\_b)作为业务唯一键，覆盖子任务以(main\_task\_id, app\_id, item\_type, item\_value)作为业务唯一键。主任务的计算过程以批处理方式推进，并周期性写入进度与耗时信息，便于前端展示计算状态与失败定位。
-
-（2）任务分发与处理流程。子任务分发支持“指派”与“认领”两种方式：指派模式由空间负责人按业务域将任务分配到具体责任人；认领模式允许运营人员从任务池领取处理。重复/歧义任务的处理动作通常包括下线、保留与合并：下线用于消除重复入口，保留用于确认差异合理，合并用于将多个内容统一为权威内容并调整引用关系；覆盖任务的处理动作通常是补充内容或标记无需补充，并填写说明。任务处理会记录处理结果与处理人，并推动必要的内容修订进入“提审$\rightarrow$审批$\rightarrow$发布”链路。
-
-任务状态机在实现上需要满足幂等与并发安全：同一子任务只允许一个责任人进入处理中状态，避免多方同时处理导致冲突；子任务完成后不可回退到待处理，除非被复检回收重新打开。表\ref{tab:cg_task_status}给出了主任务与子任务的状态口径示例。
+任务状态机在实现上严格约束流转逻辑，确保并发安全。主任务状态包括“新建/计算中/计算完成”，子任务状态包括“待处理/处理中/已完成/已关闭”。表\ref{tab:cg_task_status}给出了主任务与子任务的状态口径示例。
 
 \begin{table}[!ht]
   \centering
@@ -818,30 +809,34 @@ public void runDupAmb(MainTask task) {
   \end{tabular}
 \end{table}
 
-（3）系统巡检与复检回收。为避免“内容已变更但任务未更新”导致任务长期堆积，平台增加定时巡检：每天扫描自上次巡检以来发生上线、下线、删除或内容修订的内容，定位关联的重复/歧义子任务并重新执行判别；对覆盖子任务则复用召回评估对代表性query进行复检。若重复/歧义问题已消除或覆盖已达标，则系统自动将子任务标记为已关闭或已完成。
+（3）系统复检与任务回收。为确保治理动作真实有效，平台设计了“系统复检”闭环机制。对于已处理的任务，系统每日定时执行算法复检，仅当重复/歧义消除或覆盖率达标时才自动关闭任务，防止无效修复；针对算法误判或特殊业务场景，支持用户发起审批流程，通过人工审核后强制关闭任务。
 
-巡检实现的关键在于“只重算受影响范围”。平台以content\_id为索引维护子任务的反向引用，内容变更时仅查出关联子任务进行重算，避免对全量任务重复计算。复检回收的关键实现片段如图\ref{fig:cg_recheck_key_code}所示。
+复检回收的关键实现片段如图\ref{fig:cg_recheck_key_code}所示。
 
 \begin{figure}[!ht]
   \centering
   \begin{minipage}{0.94\linewidth}
     \begin{lstlisting}[basicstyle=\ttfamily\small,numbers=left,numberstyle=\tiny,frame=single,breaklines=true]
+public void submitTaskResult(Long taskId, String result) {
+  // 1. 更新人工处理结果
+  Task t = taskDao.get(taskId);
+  t.setResult(result);
+  t.setStatus("DONE"); // 标记为已处理，等待系统巡检或人工强制关闭
+  taskDao.update(t);
+}
+
 public void dailyRecheck(Date since) {
+  // 3. 定时巡检：处理任务流程外的变更
   List<Long> changed = contentDao.listChangedPublishedContents(since);
   for (Long contentId : changed) {
     for (DupAmbTask t : dupAmbTaskDao.listByContent(contentId)) {
-      LlmJudgeResp r = llmJudge.dupAmbJudge(t.contentIdA, t.contentIdB);
-      if (!r.isDuplicate() && !r.isAmbiguous()) dupAmbTaskDao.close(t.id);
+      if (recheckService.checkDupAmb(t)) dupAmbTaskDao.close(t.id);
     }
-  }
-  for (CoverageTask t : coverageTaskDao.listOpenTasks()) {
-    boolean ok = recallEvaluator.covered(t.representQuery, t.threshold);
-    if (ok) coverageTaskDao.close(t.id);
   }
 }
     \end{lstlisting}
   \end{minipage}
-  \caption{治理任务复检回收关键代码}
+  \caption{治理任务主动复检与巡检关键代码}
   \label{fig:cg_recheck_key_code}
 \end{figure}
 
