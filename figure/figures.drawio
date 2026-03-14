@@ -964,58 +964,83 @@
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
         <mxCell id="ErldKgArMulId_wdX0j1-2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;" value="内容管理" vertex="1">
-          <mxGeometry height="1330" width="660" x="300" y="520" as="geometry" />
+          <mxGeometry height="1330" width="660" x="300" y="530" as="geometry" />
+        </mxCell>
+        <mxCell id="PTBEAIAFLHXm-O25Lxdd-5" edge="1" parent="1" source="ErldKgArMulId_wdX0j1-3" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="ErldKgArMulId_wdX0j1-9">
+          <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="ErldKgArMulId_wdX0j1-3" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="平台负责人" vertex="1">
-          <mxGeometry height="60" width="30" x="210" y="580" as="geometry" />
+          <mxGeometry height="60" width="30" x="210" y="600" as="geometry" />
         </mxCell>
         <mxCell id="ErldKgArMulId_wdX0j1-4" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="业务负责人" vertex="1">
-          <mxGeometry height="60" width="30" x="210" y="680" as="geometry" />
+          <mxGeometry height="60" width="30" x="210" y="740" as="geometry" />
         </mxCell>
         <mxCell id="ErldKgArMulId_wdX0j1-5" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="业务运营" vertex="1">
-          <mxGeometry height="60" width="30" x="210" y="790" as="geometry" />
+          <mxGeometry height="60" width="30" x="210" y="860" as="geometry" />
+        </mxCell>
+        <mxCell id="PTBEAIAFLHXm-O25Lxdd-7" edge="1" parent="1" source="ErldKgArMulId_wdX0j1-9" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;" target="PTBEAIAFLHXm-O25Lxdd-3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="PTBEAIAFLHXm-O25Lxdd-8" connectable="0" parent="PTBEAIAFLHXm-O25Lxdd-7" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="&amp;lt;&amp;lt;include&amp;gt;&amp;gt;" vertex="1">
+          <mxGeometry relative="1" x="-0.1359" y="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
         </mxCell>
         <mxCell id="ErldKgArMulId_wdX0j1-9" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="空间与应用管理" vertex="1">
-          <mxGeometry height="80" width="120" x="380" y="580" as="geometry" />
-        </mxCell>
-        <mxCell id="ErldKgArMulId_wdX0j1-10" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="多形态内容管理" vertex="1">
-          <mxGeometry height="80" width="120" x="380" y="820" as="geometry" />
-        </mxCell>
-        <mxCell id="ErldKgArMulId_wdX0j1-11" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="权限管理" vertex="1">
-          <mxGeometry height="80" width="120" x="380" y="1050" as="geometry" />
+          <mxGeometry height="80" width="170" x="364" y="590" as="geometry" />
         </mxCell>
         <mxCell id="ErldKgArMulId_wdX0j1-12" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="其他" vertex="1">
-          <mxGeometry height="80" width="120" x="380" y="1640" as="geometry" />
-        </mxCell>
-        <mxCell id="ErldKgArMulId_wdX0j1-13" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="创建空间" vertex="1">
-          <mxGeometry height="80" width="120" x="670" y="520" as="geometry" />
-        </mxCell>
-        <mxCell id="ErldKgArMulId_wdX0j1-14" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="创建应用" vertex="1">
-          <mxGeometry height="80" width="120" x="660" y="610" as="geometry" />
+          <mxGeometry height="80" width="120" x="414" y="1660" as="geometry" />
         </mxCell>
         <mxCell id="ErldKgArMulId_wdX0j1-15" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="创建内容" vertex="1">
-          <mxGeometry height="80" width="120" x="630" y="710" as="geometry" />
+          <mxGeometry height="80" width="120" x="570" y="840" as="geometry" />
         </mxCell>
         <mxCell id="ErldKgArMulId_wdX0j1-16" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="编辑内容" vertex="1">
-          <mxGeometry height="80" width="120" x="670" y="810" as="geometry" />
+          <mxGeometry height="80" width="120" x="670" y="820" as="geometry" />
         </mxCell>
         <mxCell id="anmlybJrdDQXy1jmqDlA-1" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="删除内容" vertex="1">
-          <mxGeometry height="80" width="120" x="630" y="905" as="geometry" />
+          <mxGeometry height="80" width="120" x="580" y="905" as="geometry" />
         </mxCell>
         <mxCell id="anmlybJrdDQXy1jmqDlA-3" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="标签管理" vertex="1">
-          <mxGeometry height="80" width="120" x="600" y="1520" as="geometry" />
+          <mxGeometry height="80" width="120" x="630" y="1580" as="geometry" />
         </mxCell>
         <mxCell id="anmlybJrdDQXy1jmqDlA-4" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="类目树管理" vertex="1">
-          <mxGeometry height="80" width="120" x="640" y="1610" as="geometry" />
-        </mxCell>
-        <mxCell id="anmlybJrdDQXy1jmqDlA-5" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="内容引用" vertex="1">
-          <mxGeometry height="80" width="120" x="610" y="1690" as="geometry" />
+          <mxGeometry height="80" width="120" x="620" y="1720" as="geometry" />
         </mxCell>
         <mxCell id="anmlybJrdDQXy1jmqDlA-6" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="成员角色分配" vertex="1">
           <mxGeometry height="80" width="120" x="630" y="1010" as="geometry" />
         </mxCell>
         <mxCell id="xltpy_7-tEKbYSbDC4C6-1" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="权限策略配置" vertex="1">
           <mxGeometry height="80" width="120" x="630" y="1110" as="geometry" />
+        </mxCell>
+        <mxCell id="PTBEAIAFLHXm-O25Lxdd-3" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="创建空间" vertex="1">
+          <mxGeometry height="80" width="170" x="657" y="530" as="geometry" />
+        </mxCell>
+        <mxCell id="PTBEAIAFLHXm-O25Lxdd-4" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="创建应用" vertex="1">
+          <mxGeometry height="80" width="170" x="760" y="610" as="geometry" />
+        </mxCell>
+        <mxCell id="PTBEAIAFLHXm-O25Lxdd-10" edge="1" parent="1" source="ErldKgArMulId_wdX0j1-9" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="PTBEAIAFLHXm-O25Lxdd-4">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="630" y="668" as="sourcePoint" />
+            <mxPoint x="767" y="640" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="PTBEAIAFLHXm-O25Lxdd-11" connectable="0" parent="PTBEAIAFLHXm-O25Lxdd-10" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="&amp;lt;&amp;lt;include&amp;gt;&amp;gt;" vertex="1">
+          <mxGeometry relative="1" x="-0.1359" y="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="PTBEAIAFLHXm-O25Lxdd-12" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="多形态内容管理" vertex="1">
+          <mxGeometry height="80" width="170" x="364" y="740" as="geometry" />
+        </mxCell>
+        <mxCell id="PTBEAIAFLHXm-O25Lxdd-14" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="权限管理" vertex="1">
+          <mxGeometry height="80" width="170" x="364" y="940" as="geometry" />
+        </mxCell>
+        <mxCell id="PTBEAIAFLHXm-O25Lxdd-15" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="审核与发布" vertex="1">
+          <mxGeometry height="80" width="170" x="364" y="1130" as="geometry" />
+        </mxCell>
+        <mxCell id="PTBEAIAFLHXm-O25Lxdd-16" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="其他" vertex="1">
+          <mxGeometry height="80" width="170" x="380" y="1410" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>

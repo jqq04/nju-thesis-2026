@@ -3,9 +3,7 @@
 \section{内容管理模块的实现}
 \label{sec:impl_cm}
 
-内容管理模块是平台的内容资产底座，承担内容生产、组织、权限与发布等职责，是后续内容应用与内容治理的数据输入来源。实现层面，模块围绕统一内容模型构建空间与应用组织、内容与版本管理、类目与标签组织、权限控制与审批发布等能力，并通过统一的变更事件驱动ES全量索引同步，保证内容资产在展示、检索、问答与治理链路中的一致性与时效性。
-
-为便于阐述实现细节，本节首先给出内容管理模块对外提供的关键接口概览，随后按子模块展开说明其核心实现机制。内容管理模块的关键服务端接口定义如表\ref{tab:cm_api}所示。
+内容管理模块是平台的内容资产底座，承担内容生产、组织、权限与发布等职责，是后续内容应用与内容治理的数据输入来源。实现层面，模块围绕统一内容模型构建内容组织体系（空间/应用/类目/标签）、内容创编与详情管理、权限控制与审批发布等能力。内容管理模块的关键服务端接口定义如表\ref{tab:cm_api}所示。
 
 \begin{table}[!ht]
   \centering
@@ -14,51 +12,35 @@
   \begin{tabular}{c|c|p{9cm}}
     \hline
     服务名称 & 接口名称 & 功能描述 \\ \hline
-    空间/应用管理 & createSpace / updateSpace / getSpaceDetail & 创建与维护业务空间，作为业务归属与权限边界。 \\ \hline
-    空间/应用管理 & createApp / updateApp / getAppDetail & 在空间内创建应用并配置消费场景能力与内容范围。 \\ \hline
-    内容管理 & createContent / updateContent & 创建与编辑内容元数据，写入草稿版本并维护版本链。 \\ \hline
-    内容管理 & saveDraft / getDraft & 保存草稿并获取可编辑版本，支持并发编辑的一致性控制。 \\ \hline
-    内容管理 & submitReview / approve / reject & 发起提审、审批通过或驳回，驱动内容状态流转并生成发布口径。 \\ \hline
-    内容管理 & publish / offline & 发布生成对外可见的发布版本，或下线使内容对外不可见。 \\ \hline
-    组织能力 & upsertCategory / moveCategory / upsertTag & 维护应用内类目树与标签体系，支撑导航、筛选与聚合展示。 \\ \hline
-    权限能力 & checkPermission / getContentAuth & 基于 RBAC 与 content\_auth 进行访问控制与策略查询。 \\ \hline
+    内容组织体系 & createSpace / createApp / upsertCategory / moveCategory / upsertTag & 建立空间与应用边界，并在应用内维护类目树与标签体系，用于内容归属与组织。 \\ \hline
+    内容创编与详情 & createContent / updateContent / saveDraft / getDraft / getDetail & 支撑内容创建、编辑与草稿维护，并按内容形态加载详情正文或结构字段。 \\ \hline
+    权限与审批发布 & checkPermission / getContentAuth / submitReview / approve / reject / publish / offline & 基于 RBAC 与 content\_auth 进行访问控制，并驱动内容状态流转与发布口径生成。 \\ \hline
   \end{tabular}
 \end{table}
 
-表\ref{tab:cm_api}中列出的接口覆盖了内容管理模块的三条主链路：组织边界建立（空间/应用）、内容生产与发布（内容/版本/审批）、以及访问控制（组织/权限）。创建空间与创建应用接口用于初始化业务隔离边界与消费边界，后续所有内容都需归属到空间与源应用中。内容创建、编辑与草稿保存接口用于支撑高频内容生产活动，并通过版本链承载变更历史。提审、审批与发布接口用于将内容从可编辑态切换到对外可用态，并为下游检索问答与治理模块提供“发布版本”的统一输入口径。类目树与标签接口用于组织内容并服务于导航与筛选。最后，权限相关接口为后续读链路的范围确定与结果过滤提供约束条件。
+表\ref{tab:cm_api}中列出的接口覆盖了内容管理模块的三条主链路：内容组织体系（空间/应用/类目/标签）、内容创编与详情管理（创建/编辑/草稿/详情）、以及权限与审批发布（RBAC/content\_auth与发布状态机）。通过这三条主链路，平台在管理侧完成内容的归属与组织、生产与维护、以及对外可用口径的控制。
 
-\subsection{多形态内容统一建模与管理}
+\subsection{内容组织体系}
+\label{subsec:impl_cm_org}
+
+面对海量内容，平台将内容组织抽象为“空间—应用—类目—标签”四级体系，用于统一表达业务归属、消费场景与内容组织方式。空间与应用用于划定数据与权限边界；类目与标签用于在应用内组织内容，支撑目录导航与灵活聚合。
+
+（1）空间与应用隔离。平台在物理层通过\texttt{space\_id}与\texttt{app\_id}实现多租户隔离。空间（Space）作为业务线边界，对应独立的数据库分片或逻辑分区，保障不同业务线的数据安全；应用（App）作为场景边界，拥有独立的配置集（如内容形态开关、审批流模版）。在实现上，所有核心业务表（如content、category、tag）均包含这两个分片键，使得所有查询均可下推至特定分片，避免全表扫描。
+
+（2）类目树与标签体系。在应用内部，平台提供结构化与扁平化两种组织方式。类目树采用路径枚举（Path Enumeration）模型存储，每个节点维护\texttt{parent\_id}与\texttt{path}（如\texttt{0/10/105}），支持$O(1)$复杂度的子树查询与路径解析，为前端提供高性能的目录导航。标签体系则采用扁平集合管理，支持多值绑定与灵活聚合。
+
+这一多维组织体系最终通过统一内容模型落地：每条内容记录均冗余存储\texttt{space\_id}、\texttt{app\_id}、\texttt{category\_id}与\texttt{tag\_ids}，确保了内容资产在存储层具备清晰的业务归属与属性特征，为后续的权限控制与高效分发奠定了数据基础。
+
+\subsection{内容创编与详情管理}
 \label{subsec:impl_cm_model}
 
 多形态内容统一建模是内容管理模块实现的基础。平台将knowledge、faq、course、case四类内容抽象为统一的内容实体content，并在子表中分别维护不同形态的结构与正文字段，从而实现“统一元数据口径、差异字段独立演进、发布状态可控”的工程目标。其核心实现要点包括统一元数据字段设计、多形态差异字段承载、面向发布的状态约束以及跨链路可回溯的内容标识体系。
 
 本节围绕“内容创建与编辑、版本链维护、状态流转约束”给出实现说明，并通过关键实现片段支撑论述。内容创建与版本管理的交互过程与状态流转可分别与图\ref{fig:cm_content_version_seq}与图\ref{fig:cm_content_state}对应理解。
 
-为便于后续内容应用、治理与洞察模块在实现上复用统一口径，内容管理模块在存储层形成了以空间、应用、内容为主干的结构化表设计，并为不同形态提供子表或详情存储。内容管理模块的核心数据表与职责划分如表\ref{tab:cm_data_tables}所示。
-
-\begin{table}[!ht]
-  \centering
-  \caption{内容管理模块核心数据表}
-  \label{tab:cm_data_tables}
-  \begin{tabular}{c|p{4.2cm}|p{7.2cm}}
-    \hline
-    数据对象 & 关键字段（示例） & 说明 \\ \hline
-    space & id, name, owner\_id, status & 业务归属与隔离边界，承载成员与默认权限策略。 \\ \hline
-    application & id, space\_id, name, type, status & 内容消费场景与配置边界，定义可用形态、组织方式与范围。 \\ \hline
-    content & id, space\_id, app\_id, content\_type, title, summary, status & 统一内容实体元数据，content\_type区分knowledge/faq/course/case。 \\ \hline
-    knowledge & content\_id, body & 知识正文（富文本/Markdown），用于页面展示与切片索引。 \\ \hline
-    faq & content\_id, question, answer & FAQ以标准问答对表达最小知识单元。 \\ \hline
-    faq\_similar\_question & faq\_id, question & 相似问扩展，用于覆盖不同问法并提升FAQ召回。 \\ \hline
-    course / course\_lesson & content\_id, title, lesson\_no, content & 课程按“课程元信息+课节”拆分，lesson\_no维护顺序。 \\ \hline
-    case\_detail(MongoDB) & content\_id, detail(json) & 案例详情字段灵活演进，采用文档存储承载可变结构。 \\ \hline
-    content\_approval & content\_id, submitter\_id, reviewer\_id, status & 内容审批记录，驱动发布状态流转并约束上线口径。 \\ \hline
-    content\_auth & content\_id, auth\_tactic, auth\_variable, auth\_code & 内容粒度策略授权，与RBAC共同完成访问控制。 \\ \hline
-  \end{tabular}
-\end{table}
-
 （1）统一内容实体与多形态子表。平台在关系型数据库中维护content表与多形态子表：content表记录空间、归属应用、类型、标题、摘要、状态等元数据；不同内容形态的正文与结构字段落在对应子表中，例如knowledge.body、faq.question/answer、course\_lesson.content。该设计使列表、权限、检索与治理能够基于统一的content标识协同，同时允许不同形态按需演进字段结构。
 
-（2）内容创建与编辑保存关键实现。内容创建与编辑的核心在于保证跨表写入的原子性，并避免并发编辑导致的数据覆盖。创建时，系统在同一事务内写入content元数据，并根据content\_type写入对应子表的正文或结构字段；编辑保存时，系统采用“读-改-写 + 条件更新”的方式进行一致性控制：客户端携带基于modify\_time的基线时间戳，写入时在SQL层做条件更新校验，若影响行数为0则提示刷新后重试。内容创建与草稿保存的关键实现片段如图\ref{fig:cm_version_key_code}所示。
+（2）内容创建与草稿维护。内容创建与编辑保存的核心是保证元数据表与子表的写入一致性。创建时，服务端在同一事务内写入content元数据，并根据content\_type写入对应子表的正文或结构字段；草稿保存时，更新content元数据并同步更新子表内容，使得管理端能够以“草稿”为口径持续迭代内容。内容创建与草稿保存的关键实现片段如图\ref{fig:cm_version_key_code}所示。
 
 \begin{figure}[!ht]
   \centering
@@ -78,10 +60,7 @@ public Long createContent(CreateReq req) {
 }
 
 public Long saveDraft(SaveDraftReq req) {
-  boolean ok = contentDao.casUpdateMeta(req.contentId, req.baseModifyTime, req.title, req.summary);
-  if (!ok) {
-    throw new ConflictException("content version changed, please refresh");
-  }
+  contentDao.updateMeta(req.contentId, req.title, req.summary);
   if ("knowledge".equals(req.type)) {
     knowledgeDao.updateBody(req.contentId, req.body);
   } else if ("faq".equals(req.type)) {
@@ -95,42 +74,11 @@ public Long saveDraft(SaveDraftReq req) {
   \label{fig:cm_version_key_code}
 \end{figure}
 
-（3）内容与元数据管理。不同内容形态在实现上采用“元数据轻量返回、正文按需加载”的策略：列表与目录页仅返回content表中的title、summary、content\_type等元数据字段，并携带类目、标签等用于前端渲染筛选项；详情页在完成对象级权限校验后再读取对应形态子表的正文或结构字段，避免大字段在高频列表请求中被重复加载。对于course与case等结构型内容，详情页由服务端将多条课节记录或MongoDB detail(json)聚合为统一的渲染模型，保证前端消费一致。
+（3）内容详情读取。管理端在查看内容详情时，服务端先加载content元数据（空间、归属应用、类型、状态等），再按content\_type读取对应子表的正文或结构字段并组装为统一的详情对象。例如knowledge读取正文body，faq读取question/answer，course聚合课节列表，case从MongoDB读取detail(json)。该机制使得多形态内容能够以统一接口对外提供详情能力，并确保详情口径与内容状态及权限裁决保持一致。
 
 （4）状态与发布口径约束。内容生命周期至少包含草稿、待审批、已发布、已下线等状态，平台在状态机约束下实现编辑、提审、审批、发布与下线等操作。实现中，读链路对外仅返回已发布状态内容；写链路在提审时冻结变更并进入待审批状态，审批通过后更新内容状态为已发布并触发发布事件，驱动下游索引更新与数据回收，避免“草稿可见”导致的口径漂移。
 
-\subsection{内容组织机制}
-\label{subsec:impl_cm_org_ref}
-
-内容组织机制用于提升内容的可发现性，降低重复维护成本。实现层面，平台以“应用内类目树+标签体系”为核心组织方式：类目树提供稳定的导航入口，标签提供跨类目聚合与筛选能力。
-
-（1）类目树与标签体系实现。类目树以应用为边界维护，采用父子层级结构表达目录导航关系，并对节点移动、删除等操作进行约束以避免形成环或不合法层级。平台在类目查询场景提供“按应用获取完整树”和“按节点获取路径/子树”等接口，并在内容展示时通过内容-类目关联完成目录聚合。标签体系以扁平集合方式管理，支持标签的新增、禁用与与内容的绑定关系维护，用于在门户与后台提供基于标签的聚合与筛选能力。
-
-在数据结构上，类目表以parent\_id表达父子关系，并维护path字段以表达祖先链路编码，使得“获取节点路径”“批量获取子树”等操作可以在单次查询或少量查询中完成，降低前端渲染目录树的请求开销。对于类目移动，服务端需要校验目标父节点不能位于待移动节点的子树中，并在同一事务内完成parent\_id与path的更新，以避免出现中间态导致目录树不可用。类目移动的关键实现片段如图\ref{fig:cm_category_move_key_code}所示。
-
-\begin{figure}[!ht]
-  \centering
-  \begin{minipage}{0.94\linewidth}
-    \begin{lstlisting}[basicstyle=\ttfamily\small,numbers=left,numberstyle=\tiny,frame=single,breaklines=true]
-public void moveCategory(MoveCategoryReq req) {
-  Category node = categoryDao.get(req.categoryId);
-  Category newParent = categoryDao.get(req.newParentId);
-  if (newParent.path.startsWith(node.path)) {
-    throw new BizException("invalid move: cycle detected");
-  }
-  String newPath = newParent.path + "/" + node.id;
-  categoryDao.updateParentAndPath(node.id, req.newParentId, newPath);
-  categoryDao.batchUpdateSubtreePath(node.path, newPath);
-}
-    \end{lstlisting}
-  \end{minipage}
-  \caption{类目移动关键代码}
-  \label{fig:cm_category_move_key_code}
-\end{figure}
-
-标签体系在实现上通常以(app\_id, name)作为唯一性约束，避免同一应用下出现同名标签导致筛选歧义。对于历史标签清理，平台采用“禁用”而非“物理删除”的策略，使得历史内容的标签标注能够被稳定回溯，同时在展示与检索场景下仅对启用标签开放筛选入口。
-
-\subsection{权限管理与审批流程}
+\subsection{权限控制与审批发布}
 \label{subsec:impl_cm_auth_approval}
 
 内容管理模块同时面向管理后台与对外消费链路提供能力，因此权限体系需要同时覆盖“后台可操作范围”与“内容可见/可操作范围”。平台采用“RBAC + content\_auth”的组合实现：RBAC用于在空间与应用维度进行角色授权与模块级/操作级控制，content\_auth用于在内容粒度表达更细的策略约束，以支撑精细化可见范围以及合规要求。
@@ -259,15 +207,9 @@ public void approve(ApproveReq req) {
 \subsection{多形态内容前置处理与索引构建}
 \label{subsec:impl_ca_index}
 
-为支持“页面化展示/搜索”与“RAG生成”两大核心场景，平台构建了基于ES的全文索引与基于Embedding的向量索引。该链路由统一的MQ消息（content\_update/publish）驱动：当内容发生更新或发布时，索引服务消费消息，执行“数据同步$\rightarrow$切片处理$\rightarrow$双路分发”的流程，确保索引状态与数据库保持准实时一致。
+为支持“页面化展示/搜索”与“RAG召回”两大核心场景，平台构建了基于ES的全文索引与基于Embedding的向量索引。该链路由统一的MQ消息（content\_update/publish）驱动：当内容发生更新或发布时，索引服务消费消息，执行“数据同步$\rightarrow$切片处理$\rightarrow$双路索引”的流程，确保索引状态与数据库保持准实时一致。
 
-（1）索引同步与分发链路。索引构建服务作为MQ消费端，在收到变更消息后，首先回查数据库拉取最新的全量业务信息（含正文、权限规则、标签、类目等）。随后基于**统一的切片策略**并行执行两条分发逻辑：
-\begin{itemize}
-\item \textbf{同步到ES（文本倒排索引）}：将切片文本及其元数据（如 \texttt{content\_id}, \texttt{auth}, \texttt{status} 等）写入Elasticsearch。此索引利用倒排机制，侧重\textbf{“精确关键词匹配”}与\textbf{“元数据过滤”}，同时服务于页面化内容应用与RAG文本召回。
-\item \textbf{同步到向量库（语义向量索引）}：对切片文本进行Embedding向量化，将向量及其元数据写入向量数据库。此索引利用向量相似度，侧重\textbf{“深层语义理解”}与\textbf{“跨词召回”}，专门服务于RAG语义召回。
-\end{itemize}
-
-（2）切片处理策略。不同内容形态在RAG链路中需统一为可检索的最小语义单元（切片）。根据项目口径，切片策略如下：
+（1）切片处理策略。切片是RAG检索的基础，其粒度直接影响召回的准确性与答案生成的质量。若切片过大，包含过多无关信息，会干扰模型生成；若切片过小，语义不完整，模型难以理解上下文。平台针对不同形态制定了差异化的切片策略：
 \begin{enumerate}
 \item \textbf{文章（knowledge）}：以固定长度为基础切片，并尽量保持段落语义完整性，避免跨段切分导致上下文断裂；切片携带文章标题、摘要、类目、标签等元数据。
 \item \textbf{问答（faq）}：问题与答案作为完整语义单元不做切片处理，可分别入库并建立索引；召回阶段按场景组合使用（例如仅对question检索或对question+answer联合检索）。
@@ -275,13 +217,11 @@ public void approve(ApproveReq req) {
 \item \textbf{案例（case）}：每个案例作为一个切片；切片携带案例标题、摘要、类目、标签等元数据。
 \end{enumerate}
 
-此外，对于文章内存在的图片与表格类内容，在切片时需要特殊处理。针对图片内容，平台对比了“多模态Embedding”与“视觉大模型理解”两种方案。实测发现，多模态Embedding虽然支持图文同空间检索，但对图片内的细粒度文本信息（如海报文字、截图数据）敏感度不足。因此，平台最终采用视觉大模型（VLM）理解方案：利用大模型对图片进行OCR与语义理解，生成详细的文本描述，将描述文本与图片链接一起作为切片入库。这种方式将图片检索降维为文本检索，显著提升了对图内文字的召回能力。针对表格内容，避免直接按字符切断，而是按行保持语义完整并携带表头信息，将其转化为Markdown格式入库，以提升表格类知识在问答中的可用性。
+此外，对于各种内容中存在的图片与表格类内容，在切片时需要特殊处理。针对图片内容，平台对比了“多模态Embedding”与“视觉大模型（VLM）理解”两种方案。实测发现，多模态Embedding虽然支持图文同空间检索，但对图片内的细粒度文本信息（如海报文字、截图数据）敏感度不足。因此，平台最终采用视觉大模型理解方案：利用大模型对图片进行OCR与语义理解，生成详细的文本描述，将描述文本与图片链接一起作为切片入库。这种方式将图片检索降维为文本检索，显著提升了对图内文字的召回能力。针对表格内容，避免直接按字符切断，而是按行保持语义完整并携带表头信息，将其转化为Markdown格式入库，以提升表格类知识在问答中的可用性。
 
 在切片前的文本规范化阶段，系统会对原始HTML进行清洗：去除无意义的样式标签（如\texttt{style}、\texttt{span}）与乱码噪声，同时保留关键的结构化标记（如标题\texttt{h1-h6}、列表\texttt{li}、图片占位符）。保留这些结构信息有助于大模型理解上下文层级，并在生成答案时能够正确引用原文的结构。
 
 在切片结构上，平台将每个切片建模为包含\texttt{slice\_id、content\_id、space\_id、app\_id、content\_type、text}等字段的最小证据单元，并可选携带\texttt{position}用于表示在正文中的定位信息（例如段落序号或课节序号）。该设计使得召回结果既能用于生成式问答的证据输入，也能在输出侧映射为“内容标题+片段摘要+定位信息”的引用，降低用户在溯源时的跳转成本。
-
-为保证切片与原文的一致性，系统采用\textbf{“内容粒度的全量覆盖策略”}。当内容发生变更并发布时，索引服务会触发该内容的完整重建流程：首先根据最新正文重新生成所有切片，随后在索引层执行\textbf{“先删后写”}操作，即清理该\texttt{content\_id}下的所有旧切片数据，并批量写入新生成的切片。这种策略避免了复杂的增量比对逻辑，确保了索引中的切片始终与最新发布版本保持完全一致。
 
 切片生成的工程实现可以拆分为“内容提取$\rightarrow$文本规范化$\rightarrow$按类型切片$\rightarrow$补充元信息”四步。内容提取阶段按content\_type从对应子表或文档库加载正文或结构字段；文本规范化阶段对富文本标记、空白与不可见字符做清洗，并统一标点与换行以减少embedding噪声；按类型切片阶段根据不同形态选择不同的语义单元；最后补充元信息阶段将标题、摘要、类目、标签、权限等字段写入切片结构，便于召回与过滤。切片构建的关键实现片段如图\ref{fig:ca_slice_build_key_code}所示。
 
@@ -307,13 +247,19 @@ public List<Slice> buildSlices(Content c) {
   \label{fig:ca_slice_build_key_code}
 \end{figure}
 
-（3）全量元信息绑定与权限前置过滤。为实现高效的统一检索与权限控制，系统在构建索引时采用了\textbf{“富切片（Rich Chunk）”}模式：每个切片文档中不仅包含正文文本与向量，还全量冗余了所属内容的元数据，包括\texttt{app\_id}、\texttt{content\_id}、\texttt{status}、\texttt{category\_id}、\texttt{tag\_ids}以及用于权限控制的\texttt{content\_auth}规则集合。
+（2）索引同步与分发链路。索引构建服务作为MQ消费端，在收到变更消息后，首先回查数据库拉取最新的全量业务信息（含正文、权限规则、标签、类目等）。为保证切片与原文的一致性，系统采用“内容粒度的全量覆盖策略”。当内容发生变更并发布时，索引服务会触发该内容的完整重建流程：首先根据最新正文重新生成所有切片，随后在索引层执行“先删后写”操作，即清理该\texttt{content\_id}下的所有旧切片数据，并批量写入新生成的切片。这种策略避免了复杂的增量比对逻辑，确保了索引中的切片始终与最新发布版本保持完全一致。
+
+在完成切片生成后，系统基于“统一的切片策略”并行执行两条分发逻辑：
+\begin{itemize}
+\item \textbf{同步到ES（文本倒排索引）}：将切片文本及其元数据（如 \texttt{content\_id}, \texttt{auth}, \texttt{status} 等）写入Elasticsearch。此索引利用倒排机制，侧重“精确关键词匹配”，同时服务于页面化内容应用与RAG文本召回。
+\item \textbf{同步到向量库（语义向量索引）}：对切片文本进行Embedding向量化，将向量及其元数据写入向量数据库。此索引利用向量相似度，侧重“语义理解”，专门服务于RAG语义召回。
+\end{itemize}
+
+（3）全量元信息绑定与权限前置过滤。为实现高效的统一检索与权限控制，系统在构建索引时采用了“富切片（Rich Chunk）”模式：每个切片文档中不仅包含正文文本与向量，还全量冗余了所属内容的元数据，包括\texttt{app\_id}、\texttt{content\_id}、\texttt{status}、\texttt{category\_id}、\texttt{tag\_ids}以及用于权限控制的\texttt{content\_auth}规则集合。
 
 这一设计将复杂的关联查询转化为单文档的属性过滤，使得检索引擎能够独立承担所有筛选职责。在召回阶段，系统将过滤条件与查询词一同提交给检索引擎。这种前置过滤机制利用了搜索引擎的高效筛选能力，避免了传统“先召回后过滤”模式下因权限拦截导致的分页空洞与结果总数不准问题，显著提升了检索性能与用户体验。
 
-（4）基于幂等覆盖的最终一致性。索引构建服务采用\textbf{“幂等覆盖”}策略处理变更消息：无论消息是否乱序或重复投递，服务总是回查数据库获取最新的发布版本，执行完整的“切片—写入”流程。由于写入操作采用全量覆盖模式（Overwrite），同一内容的多次构建结果是确定的。这种设计天然消除了并发冲突与脏读风险，无需复杂的版本比对或过期标记，即可在“至少一次投递”的消息语义下保证索引与数据库的最终一致性。
-
-（5）关键实现片段。索引构建核心在于“事件消费$\rightarrow$拉取发布版本$\rightarrow$切片$\rightarrow$双索引写入”。其关键实现片段如图\ref{fig:index_build_key_code}所示。
+（4）关键实现片段。索引构建核心在于“事件消费$\rightarrow$获取内容$\rightarrow$切片$\rightarrow$双索引写入”。其关键实现片段如图\ref{fig:index_build_key_code}所示。
 
 \begin{figure}[!ht]
   \centering
@@ -639,11 +585,11 @@ public AskResp ask(AskReq req) {
 \subsection{重复度与歧义度检测算法实现}
 \label{subsec:impl_cg_dup_amb}
 
-针对海量内容的重复与歧义检测，若采用两两比对的暴力算法，其复杂度为$O(n^2)$，在工程上不可接受。因此，平台设计了\textbf{“向量粗召回 + LLM精判别”}的两阶段检测算法，在保证检测精度的同时显著降低计算开销。
+针对海量内容的重复与歧义检测，若采用两两比对的暴力算法，其复杂度为$O(n^2)$，在工程上不可接受。因此，平台设计了“向量粗召回 + LLM精判别”的两阶段检测算法，在保证检测精度的同时显著降低计算开销。
 
-（1）第一阶段：基于向量相似度的候选生成（Coarse Recall）。该阶段的目标是快速筛选出“可能存在问题”的内容对。算法利用向量索引的高效检索能力，对空间内的每一篇内容$C_i$，在向量空间中检索其TopK相似邻居集合$\{N_1, N_2, ..., N_k\}$。若$Sim(C_i, N_j)$超过预设阈值（如0.8），则将$(C_i, N_j)$标记为一个\textbf{待判别候选对}。这一步将检测范围从全量空间缩小到了高相似度的局部邻域。
+（1）第一阶段：基于向量相似度的候选生成（Coarse Recall）。该阶段的目标是快速筛选出“可能存在问题”的内容对。算法利用向量索引的高效检索能力，对空间内的每一篇内容$C_i$，在向量空间中检索其TopK相似邻居集合$\{N_1, N_2, ..., N_k\}$。若$Sim(C_i, N_j)$超过预设阈值（如0.8），则将$(C_i, N_j)$标记为一个待判别候选对。这一步将检测范围从全量空间缩小到了高相似度的局部邻域。
 
-（2）第二阶段：基于大模型的语义判别（Fine-grained Judgment）。该阶段的目标是对候选对进行精确的语义裁决。系统将候选对$(C_i, N_j)$的标题与正文拼装入特定的\textbf{判别提示词（Prompt）}，调用大语言模型进行逻辑判断：
+（2）第二阶段：基于大模型的语义判别（Fine-grained Judgment）。该阶段的目标是对候选对进行精确的语义裁决。系统将候选对$(C_i, N_j)$的标题与正文拼装入特定的判别提示词（Prompt），调用大语言模型进行逻辑判断：
 \begin{itemize}
 \item \textbf{重复度判别}：模型需对比两篇内容的主体与核心描述。若主体相同且描述高度重叠，判定为“重复”，并输出重叠比例。
 \item \textbf{歧义度判别}：模型需识别两篇内容是否描述同一业务主体但存在事实冲突（如对同一活动的起止时间描述不一致）。若存在逻辑矛盾，判定为“歧义”，并提取冲突摘要。
@@ -737,7 +683,7 @@ public void runDupAmb(MainTask task) {
 
 覆盖度检测旨在发现系统中缺失或薄弱的知识点。面对海量的用户会话日志，逐条进行覆盖度判别既不经济也无必要。因此，本项目设计了“意图筛选—会话聚类—代表性Query判别”的漏斗型处理路径，在大幅降低大模型计算开销的同时，确保治理任务聚焦于高频共性问题。
 
-（1）意图筛选与需求聚类。系统首先引入意图分类模型，对全量用户Query进行清洗，过滤掉闲聊与操作指令，仅保留“业务咨询”类Query。随后，复用数据洞察模块的\textbf{会话聚类}能力（见\ref{subsec:impl_di_cluster}节），将语义相近的Query聚合为簇，并提取每个簇的\textbf{代表性Query}作为该需求的“指纹”。
+（1）意图筛选与需求聚类。系统首先引入意图分类模型，对全量用户Query进行清洗，过滤掉闲聊与操作指令，仅保留“业务咨询”类Query。随后，复用数据洞察模块的会话聚类能力（见\ref{subsec:impl_di_cluster}节），将语义相近的Query聚合为簇，并提取每个簇的代表性Query作为该需求的“指纹”。
 
 （2）基于代表性Query的覆盖度判别。针对筛选出的代表性Query，系统执行“召回+判别”的标准化检测流程：
 \begin{itemize}
@@ -789,9 +735,9 @@ public void runDupAmb(MainTask task) {
 \subsection{治理任务线上化与闭环机制}
 \label{subsec:impl_cg_task}
 
-治理任务线上化模块负责将前述算法检测出的“问题候选”转化为可流转、可追踪的\textbf{治理工单}，并提供从“任务分发”到“人工处理”再到“效果复检”的全流程闭环能力。该模块将离线分析结果与在线内容生产链路打通，确保每一个治理动作（如补充知识、合并重复项）都能实时反哺到知识库中，从而实现质量的持续提升。
+治理任务线上化模块负责将前述算法检测出的“问题候选”转化为可流转、可追踪的治理工单，并提供从“任务分发”到“人工处理”再到“效果复检”的全流程闭环能力。该模块将离线分析结果与在线内容生产链路打通，确保每一个治理动作（如补充知识、合并重复项）都能实时反哺到知识库中，从而实现质量的持续提升。
 
-（1）任务模型与生成。治理任务采用“主任务（Batch）—子任务（Item）”的双层结构：主任务定义了单次治理的执行上下文（如空间范围、时间窗口、算法版本）；子任务则是具体的待处理实体。对于重复/歧义治理，子任务对应一个“待判别的内容对”；对于覆盖度治理，子任务对应一个“待补充的缺知识簇”。任务生成过程通过异步Job批量写入数据库，并采用\textbf{幂等策略}防止重复生成：系统以\texttt{(TaskType, EntityID)}为唯一键，确保同一问题在未关闭前不会重复创建新任务。
+（1）任务模型与生成。治理任务采用“主任务（Batch）—子任务（Item）”的双层结构：主任务定义了单次治理的执行上下文（如空间范围、时间窗口、算法版本）；子任务则是具体的待处理实体。对于重复/歧义治理，子任务对应一个“待判别的内容对”；对于覆盖度治理，子任务对应一个“待补充的缺知识簇”。任务生成过程通过异步Job批量写入数据库，并采用幂等策略防止重复生成：系统以\texttt{(TaskType, EntityID)}为唯一键，确保同一问题在未关闭前不会重复创建新任务。
 
 （2）任务分发与状态流转。子任务分发支持“指派”与“认领”两种方式：指派模式由空间负责人按业务域将任务分配到具体责任人；认领模式允许运营人员从任务池领取处理。任务处理动作与内容管理链路深度集成：重复/歧义任务的处理（下线/合并）直接触发内容的下线或修订；覆盖任务的处理（补充内容）触发新内容的创建或已有内容的更新。
 
