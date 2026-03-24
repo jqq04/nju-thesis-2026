@@ -56,3 +56,9 @@ git push origin feat/mac
 
 ## Trae AI
 - 使用 Trae 辅助写作
+
+## 编译
+编译命令：
+```bash
+latexmk -xelatex -bibtex- -interaction=nonstopmode -synctex=1 thesis.tex
+```

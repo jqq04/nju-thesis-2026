@@ -1,4 +1,4 @@
-<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36" version="29.6.0" pages="26">
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36" version="29.6.1" pages="26">
   <diagram id="remXLEl2kWC0B1G6v7ud" name="RocketMQ架构图">
     <mxGraphModel dx="1644" dy="1048" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
@@ -1369,7 +1369,7 @@
         <mxCell id="spv_mysql" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="MySQL&#xa;结构化数据" vertex="1">
           <mxGeometry height="70" width="180" x="260" y="710" as="geometry" />
         </mxCell>
-        <mxCell id="spv_mongo" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="MongoDB&#xa;case 详情" vertex="1">
+        <mxCell id="spv_mongo" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="MongoDB&lt;br&gt;非结构化数据" vertex="1">
           <mxGeometry height="70" width="180" x="460" y="710" as="geometry" />
         </mxCell>
         <mxCell id="spv_redis" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Redis&#xa;缓存" vertex="1">
@@ -1390,43 +1390,43 @@
         <mxCell id="spv_dw" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="离线数仓/计算" vertex="1">
           <mxGeometry height="70" width="220" x="940" y="810" as="geometry" />
         </mxCell>
-        <mxCell id="spv_e1" edge="1" parent="1" source="spv_admin" target="spv_gateway" style="endArrow=block;html=1;rounded=0;strokeWidth=1;">
+        <mxCell id="spv_e1" edge="1" parent="1" source="spv_admin" style="endArrow=block;html=1;rounded=0;strokeWidth=1;" target="spv_gateway">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="spv_e2" edge="1" parent="1" source="spv_portal" target="spv_gateway" style="endArrow=block;html=1;rounded=0;strokeWidth=1;">
+        <mxCell id="spv_e2" edge="1" parent="1" source="spv_portal" style="endArrow=block;html=1;rounded=0;strokeWidth=1;" target="spv_gateway">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="spv_e3" edge="1" parent="1" source="spv_ai" target="spv_gateway" style="endArrow=block;html=1;rounded=0;strokeWidth=1;">
+        <mxCell id="spv_e3" edge="1" parent="1" source="spv_ai" style="endArrow=block;html=1;rounded=0;strokeWidth=1;" target="spv_gateway">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="spv_e4" edge="1" parent="1" source="spv_gateway" target="spv_cm" style="endArrow=block;html=1;rounded=0;strokeWidth=1;edgeStyle=orthogonalEdgeStyle;">
+        <mxCell id="spv_e4" edge="1" parent="1" source="spv_gateway" style="endArrow=block;html=1;rounded=0;strokeWidth=1;edgeStyle=orthogonalEdgeStyle;" target="spv_cm">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="spv_e5" edge="1" parent="1" source="spv_gateway" target="spv_ca" style="endArrow=block;html=1;rounded=0;strokeWidth=1;edgeStyle=orthogonalEdgeStyle;">
+        <mxCell id="spv_e5" edge="1" parent="1" source="spv_gateway" style="endArrow=block;html=1;rounded=0;strokeWidth=1;edgeStyle=orthogonalEdgeStyle;" target="spv_ca">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="spv_e6" edge="1" parent="1" source="spv_gateway" target="spv_cg" style="endArrow=block;html=1;rounded=0;strokeWidth=1;edgeStyle=orthogonalEdgeStyle;">
+        <mxCell id="spv_e6" edge="1" parent="1" source="spv_gateway" style="endArrow=block;html=1;rounded=0;strokeWidth=1;edgeStyle=orthogonalEdgeStyle;" target="spv_cg">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="spv_e7" edge="1" parent="1" source="spv_gateway" target="spv_di" style="endArrow=block;html=1;rounded=0;strokeWidth=1;edgeStyle=orthogonalEdgeStyle;">
+        <mxCell id="spv_e7" edge="1" parent="1" source="spv_gateway" style="endArrow=block;html=1;rounded=0;strokeWidth=1;edgeStyle=orthogonalEdgeStyle;" target="spv_di">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="spv_e8" edge="1" parent="1" source="spv_cm" target="spv_mysql" style="endArrow=block;html=1;rounded=0;strokeWidth=1;dashed=1;dashPattern=3 3;">
+        <mxCell id="spv_e8" edge="1" parent="1" source="spv_cm" style="endArrow=block;html=1;rounded=0;strokeWidth=1;dashed=1;dashPattern=3 3;" target="spv_mysql">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="spv_e9" edge="1" parent="1" source="spv_cm" target="spv_mongo" style="endArrow=block;html=1;rounded=0;strokeWidth=1;dashed=1;dashPattern=3 3;">
+        <mxCell id="spv_e9" edge="1" parent="1" source="spv_cm" style="endArrow=block;html=1;rounded=0;strokeWidth=1;dashed=1;dashPattern=3 3;" target="spv_mongo">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="spv_e10" edge="1" parent="1" source="spv_ca" target="spv_es" style="endArrow=block;html=1;rounded=0;strokeWidth=1;dashed=1;dashPattern=3 3;">
+        <mxCell id="spv_e10" edge="1" parent="1" source="spv_ca" style="endArrow=block;html=1;rounded=0;strokeWidth=1;dashed=1;dashPattern=3 3;" target="spv_es">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="spv_e11" edge="1" parent="1" source="spv_ca" target="spv_vec" style="endArrow=block;html=1;rounded=0;strokeWidth=1;dashed=1;dashPattern=3 3;">
+        <mxCell id="spv_e11" edge="1" parent="1" source="spv_ca" style="endArrow=block;html=1;rounded=0;strokeWidth=1;dashed=1;dashPattern=3 3;" target="spv_vec">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="spv_e12" edge="1" parent="1" source="spv_support" target="spv_mq" style="endArrow=block;html=1;rounded=0;strokeWidth=1;dashed=1;dashPattern=6 3;" value="事件/异步">
+        <mxCell id="spv_e12" edge="1" parent="1" source="spv_support" style="endArrow=block;html=1;rounded=0;strokeWidth=1;dashed=1;dashPattern=6 3;" target="spv_mq" value="事件/异步">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="spv_e13" edge="1" parent="1" source="spv_di" target="spv_dw" style="endArrow=block;html=1;rounded=0;strokeWidth=1;dashed=1;dashPattern=6 3;" value="离线聚合">
+        <mxCell id="spv_e13" edge="1" parent="1" source="spv_di" style="endArrow=block;html=1;rounded=0;strokeWidth=1;dashed=1;dashPattern=6 3;" target="spv_dw" value="离线聚合">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
       </root>
