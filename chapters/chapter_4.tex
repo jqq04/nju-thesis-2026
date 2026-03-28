@@ -214,7 +214,7 @@ public void approve(ApproveReq req) {
 \subsection{多形态内容前置处理与索引构建}
 \label{subsec:impl_ca_index}
 
-为支持“页面化展示/搜索”与“RAG召回”两大核心场景，平台构建了基于ES的全文索引与基于Embedding的向量索引。该链路由统一的MQ消息（content\_update/publish）驱动：当内容发生更新或发布时，索引服务消费消息，执行“数据同步$\rightarrow$切片处理$\rightarrow$双路索引”的流程，确保索引状态与数据库保持准实时一致。
+为支持“页面化展示/搜索”与“RAG召回”两大核心场景，平台构建了基于ES的全文索引与基于Embedding的向量索引（底层为Milvus向量数据库）。该链路由统一的MQ消息（content\_update/publish）驱动：当内容发生更新或发布时，索引服务消费消息，执行“数据同步$\rightarrow$切片处理$\rightarrow$双路索引”的流程，确保索引状态与数据库保持准实时一致。
 
 （1）切片处理策略。切片是RAG检索的基础，其粒度直接影响召回的准确性与答案生成的质量。若切片过大，包含过多无关信息，会干扰模型生成；若切片过小，语义不完整，模型难以理解上下文。平台针对不同形态制定了差异化的切片策略：
 \begin{enumerate}

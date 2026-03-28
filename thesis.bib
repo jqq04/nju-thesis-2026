@@ -4,11 +4,366 @@
 
 % 参考文献
 
-@article {BHR12, 
-	title = {An overview of Multipath TCP},
-	author = {Olivier Bonaventure and Mark Handley and Costin Raiciu},
-	journal = {USENIX login;},
-	year = {2012},
-	month = {October},
+%%%%%%%%%%%%%%%%%%%%%%%% 相关技术综述 %%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 第一篇把 RPC 从“概念”推进到“工程可用系统”的论文，RPC奠基之作。
+@article{birrell1984implementing,
+  title={Implementing remote procedure calls},
+  author={Birrell, Andrew D and Nelson, Bruce Jay},
+  journal={ACM Transactions on Computer Systems (TOCS)},
+  volume={2},
+  number={1},
+  pages={39--59},
+  year={1984},
+  publisher={ACM New York, NY, USA}
 }
 
+%% RPC 通信模型 研究报告
+@article{tay1990survey,
+  title={A survey of remote procedure calls},
+  author={Tay, Beng Hang and Ananda, Akkihebbal L},
+  journal={ACM SIGOPS Operating Systems Review},
+  volume={24},
+  number={3},
+  pages={68--79},
+  year={1990},
+  publisher={ACM New York, NY, USA}
+}
+
+%% 一篇从信息检索研究视角，对 Lucene 4 的工程设计、索引结构、测试哲学与评测困境进行系统性“学术解释”的论文
+@inproceedings{bialecki2012apache,
+  title={Apache lucene 4},
+  author={Bia{\l}ecki, Andrzej and Muir, Robert and Ingersoll, Grant and Imagination, Lucid},
+  booktitle={SIGIR 2012 workshop on open source information retrieval},
+  pages={17},
+  year={2012},
+  organization={sn}
+}
+
+% 文档数据库 MongoDB
+%% MongoDB 官方文档
+@online{mongodb_manual,
+  title        = {MongoDB Manual},
+  organization = {MongoDB, Inc.},
+  url          = {https://www.mongodb.com/docs/manual/},
+  urldate      = {2026-03-28},
+  note         = {Accessed: 2026-03-28}
+}
+
+%% mongodb 多维度分析
+@article{chauhan2019review,
+  title={A review on various aspects of MongoDB databases},
+  author={Chauhan, Anjali},
+  journal={International Journal of Engineering Research \& Technology (IJERT)},
+  volume={8},
+  number={05},
+  pages={90--92},
+  year={2019}
+}
+
+
+
+% 消息队列 RocketMQ
+%% Apache RocketMQ 官方文档
+@online{apache_rocketmq_docs,
+  title        = {Apache RocketMQ Documentation},
+  organization = {Apache Software Foundation},
+  url          = {https://rocketmq.apache.org/docs/},
+  urldate      = {2026-03-28},
+  note         = {Accessed: 2026-03-28}
+}
+
+% 向量数据库 Milvus
+%% Milvus 介绍
+@inproceedings{wang2021milvus,
+  title={Milvus: A purpose-built vector data management system},
+  author={Wang, Jianguo and Yi, Xiaomeng and Guo, Rentong and Jin, Hai and Xu, Peng and Li, Shengjun and Wang, Xiangyu and Guo, Xiangzhou and Li, Chengming and Xu, Xiaohai and others},
+  booktitle={Proceedings of the 2021 international conference on management of data},
+  pages={2614--2627},
+  year={2021}
+}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%% 内容管理 %%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 经典Enterprise Content Management (ECM)：统一文档管理；支撑流程（workflow）；降低系统成本（开源）
+@article{maican2016system,
+  title={A system architecture based on open source enterprise content management systems for supporting educational institutions},
+  author={Maican, Catalin and Lixandroiu, Radu},
+  journal={International Journal of Information Management},
+  volume={36},
+  number={2},
+  pages={207--214},
+  year={2016},
+  publisher={Elsevier}
+}
+
+%% 企业内容管理研究 综述
+@article{alalwan2012enterprise,
+  title={Enterprise content management research: a comprehensive review},
+  author={Alalwan, Jaffar Ahmad and Weistroffer, Heinz Roland},
+  journal={Journal of Enterprise Information Management},
+  volume={25},
+  number={5},
+  pages={441--461},
+  year={2012},
+  publisher={Emerald Group Publishing Limited}
+}
+
+%% 企业内容管理：集成视角
+@inproceedings{paivarinta2005enterprise,
+  title={Enterprise content management: an integrated perspective on information management},
+  author={Paivarinta, Tero and Munkvold, Bj{\o}rn Erik},
+  booktitle={Proceedings of the 38th annual hawaii international conference on system sciences},
+  pages={96--96},
+  year={2005},
+  organization={IEEE}
+}
+
+%% Research problem: The widespread adoption of component content management in organizations calls for a comprehensive summary of the territory of this phenomenon. A summary provides stakeholders in component content management with a sense of how the practice has evolved and its implications to research, theory, and future practice. The last such review was published in 2003. This integrative literature review is intended to fill the gap in the literature by describing the current state of component content management as presented in the current publications. Research questions: How is “content” currently defined, described, and approached in the component content-management literature? What processes and tools are organizations adopting to achieve the goals of component content management? Literature review: The theoretical orientation of this review is Rhetorical Genre theory, which allows for classifying individual components as a genre characterized by granularity, reusability, and potentiality. Component content management gained recognition in the mid-1990s when early adopter organizations were looking for more efficient and effective approaches to reusing information between similar products or versions of the same product. Developments in the 2000s include a surge of publications focused on defining and describing component content management; new best practices for implementing a component content-management initiative; evolving processes and technologies for creating highly engineered, modular content that can automatically adjust to specific user requests and device capabilities; and collaborative efforts to integrate content creation and management strategies across organizational units. Scholarly and trade publications increasingly explore different concerns; whereas scholarly publications tend to offer critical perspectives on component content management, trade publications tend to describe processes and technologies and articulate best practices. Both...
+@article{andersen2016current,
+  title={The current state of component content management: An integrative literature review},
+  author={Andersen, Rebekka and Batova, Tatiana},
+  journal={IEEE Transactions on Professional Communication},
+  volume={58},
+  number={3},
+  pages={247--270},
+  year={2016},
+  publisher={IEEE}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%% RAG %%%%%%%%%%%%%%%%%%%%%%%%%%
+%%  RAG / Open-domain QA 的早期关键工作，提出了“retrieval + generation” 的可工程化路径
+@inproceedings{izacard-grave-2021-leveraging,
+    title = "Leveraging Passage Retrieval with Generative Models for Open Domain Question Answering",
+    author = "Izacard, Gautier  and
+      Grave, Edouard",
+    editor = "Merlo, Paola  and
+      Tiedemann, Jorg  and
+      Tsarfaty, Reut",
+    booktitle = "Proceedings of the 16th Conference of the European Chapter of the Association for Computational Linguistics: Main Volume",
+    month = apr,
+    year = "2021",
+    address = "Online",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/2021.eacl-main.74/",
+    doi = "10.18653/v1/2021.eacl-main.74",
+    pages = "874--880",
+    abstract = "Generative models for open domain question answering have proven to be competitive, without resorting to external knowledge. While promising, this approach requires to use models with billions of parameters, which are expensive to train and query. In this paper, we investigate how much these models can benefit from retrieving text passages, potentially containing evidence. We obtain state-of-the-art results on the Natural Questions and TriviaQA open benchmarks. Interestingly, we observe that the performance of this method significantly improves when increasing the number of retrieved passages. This is evidence that sequence-to-sequence models offers a flexible framework to efficiently aggregate and combine evidence from multiple passages."
+}
+
+%% rag祖师级论文，被引用次数15760；描述rag在llm生成时的作用
+@article{lewis2020retrieval,
+  title={Retrieval-augmented generation for knowledge-intensive nlp tasks},
+  author={Lewis, Patrick and Perez, Ethan and Piktus, Aleksandra and Petroni, Fabio and Karpukhin, Vladimir and Goyal, Naman and K{\"u}ttler, Heinrich and Lewis, Mike and Yih, Wen-tau and Rockt{\"a}schel, Tim and others},
+  journal={Advances in neural information processing systems},
+  volume={33},
+  pages={9459--9474},
+  year={2020}
+}
+
+%% rag技术综述
+@article{cheng2025survey,
+  title={A survey on knowledge-oriented retrieval-augmented generation},
+  author={Cheng, Mingyue and Luo, Yucong and Ouyang, Jie and Liu, Qi and Liu, Huijie and Li, Li and Yu, Shuo and Zhang, Bohou and Cao, Jiawei and Ma, Jie and others},
+  journal={arXiv preprint arXiv:2503.10677},
+  year={2025}
+}
+
+
+%% 论文重点包括：RAG、多模态文档理解（文本/表格/图片）、长上下文建模、 文档级知识检索、文档智能应用场景、工程挑战与未来趋势
+@article{ke2025large,
+  title={Large language models in document intelligence: A comprehensive survey, recent advances, challenges, and future trends},
+  author={Ke, Wenjun and Zheng, Yifan and Li, Yining and Xu, Hengyuan and Nie, Dong and Wang, Peng and He, Yao},
+  journal={ACM Transactions on Information Systems},
+  volume={44},
+  number={1},
+  pages={1--64},
+  year={2025},
+  publisher={ACM New York, NY}
+}
+
+%% 现有多模态 RAG 在领域文档（教育期刊）中存在：图片语义难以被检索系统理解；不同模态（图 / 表 / 文）与用户真实意图对齐不足的问题，核心方案，不是直接做图像检索，而是：
+%% 1. 抽取图片上下文文本
+%% 2. 用多模态大模型生成语义摘要
+%% 3. 将图片“文本化”，进入文本检索 / 向量索引体系
+@inproceedings{yu2025mind,
+  title={MIND-RAG: Multimodal Context-Aware and Intent-Aware Retrieval-Augmented Generation for Educational Publications},
+  author={Yu, Jiayang and Xie, Yuxi and Zhang, Guixuan and Liu, Jie and Zeng, Zhi and Huang, Ying and Zhang, Shuwu},
+  booktitle={Proceedings of the IEEE/CVF International Conference on Computer Vision},
+  pages={4157--4164},
+  year={2025}
+}
+
+%% 金融领域多模态rag，核心思想：
+%% 1. 多模态前置处理（图像&表格）
+%% 2. 不同模态使用不同相似度阈值，避免表格图像被淹没
+%% 3. 分层召回策略，先文本再多模态，减少浪费
+@article{gondhalekar2025multifinrag,
+  title={MultiFinRAG: An Optimized Multimodal Retrieval-Augmented Generation (RAG) Framework for Financial Question Answering},
+  author={Gondhalekar, Chinmay and Patel, Urjitkumar and Yeh, Fang-Chun},
+  journal={arXiv preprint arXiv:2506.20821},
+  year={2025}
+}
+
+%% 不是只做“检索 + 生成”，而是围绕“真实业务 QA”设计一个“多维度 RAG 系统”。
+%% 1. 多模态前置处理
+%% 2. 多通道召回
+%% 3. 专用重排模块
+@inproceedings{wang2025finsage,
+  title={Finsage: A multi-aspect rag system for financial filings question answering},
+  author={Wang, Xinyu and Chi, Jijun and Tai, Zhenghan and Kwok, Tung Sum Thomas and He, Hailin and Li, Zhuhong and Hua, Yuchen and Li, Muzhi and Lu, Peng and Wang, Suyucheng and others},
+  booktitle={Proceedings of the 34th ACM International Conference on Information and Knowledge Management},
+  pages={6144--6152},
+  year={2025}
+}
+
+
+%% rag重排，提出将上下文排序与生成任务统一到单一大语言模型中，
+%%  通过指令微调显著提升了检索增强生成在多项基准任务上的性能，验证了高质量重排对于 RAG 整体效果的重要性。
+@article{yu2024rankrag,
+  title={Rankrag: Unifying context ranking with retrieval-augmented generation in llms},
+  author={Yu, Yue and Ping, Wei and Liu, Zihan and Wang, Boxin and You, Jiaxuan and Zhang, Chao and Shoeybi, Mohammad and Catanzaro, Bryan},
+  journal={Advances in Neural Information Processing Systems},
+  volume={37},
+  pages={121156--121184},
+  year={2024}
+}
+
+%% 典型的 cross-encoder reranking 增强技巧与效果提升来源，适合支撑“cross-encoder 能显著提升重排效果”这类结论
+@inproceedings{pradeep2022squeezing,
+  title={Squeezing water from a stone: a bag of tricks for further improving cross-encoder effectiveness for reranking},
+  author={Pradeep, Ronak and Liu, Yuqi and Zhang, Xinyu and Li, Yilin and Yates, Andrew and Lin, Jimmy},
+  booktitle={European Conference on Information Retrieval},
+  pages={655--670},
+  year={2022},
+  organization={Springer}
+}
+
+%% 工程实践类，rag多路检索，加权融合重排
+@inproceedings{ravishankar2025novel,
+  title={Novel Hybrid Retrieval and Reranking with Score Fusion for Advanced Financial Question Answering using Large Language Models},
+  author={Ravishankar, S and Varalakshmi, P},
+  booktitle={2025 IEEE Silchar Subsection Conference (SILCON)},
+  pages={1--6},
+  year={2025},
+  organization={IEEE}
+}
+
+%% retrieve require bm25
+@inproceedings{wang2021bert,
+  title={Bert-based dense retrievers require interpolation with bm25 for effective passage retrieval},
+  author={Wang, Shuai and Zhuang, Shengyao and Zuccon, Guido},
+  booktitle={Proceedings of the 2021 ACM SIGIR international conference on theory of information retrieval},
+  pages={317--324},
+  year={2021}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%% 内容质量、内容治理 %%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 文本去重：从语法到语义
+@article{kim2026survey,
+  title={A Survey of Text Deduplication: From Syntactic Matching to Semantic Understanding},
+  author={Kim, Jeongmin and Park, Yeonsu},
+  journal={IEEE Access},
+  year={2026},
+  publisher={IEEE}
+}
+
+%% 支撑“语义去重在大规模数据上是必要且有效的”，以及“仅靠传统去重难以发现语义重复”。
+@article{abbas2023semdedup,
+  title={Semdedup: Data-efficient learning at web-scale through semantic deduplication},
+  author={Abbas, Amro and Tirumala, Kushal and Simig, D{\'a}niel and Ganguli, Surya and Morcos, Ari S},
+  journal={arXiv preprint arXiv:2303.09540},
+  year={2023}
+}
+
+
+%% 内容治理相关，使用专家规则解决大规模原数据的语义冲突。
+@article{kulmukhametov2021improving,
+  title={Improving data quality in large-scale repositories through conflict resolution},
+  author={Kulmukhametov, Artur and Rauber, Andreas and Becker, Christoph},
+  journal={International Journal on Digital Libraries},
+  volume={22},
+  number={4},
+  pages={365--383},
+  year={2021},
+  publisher={Springer}
+}
+
+%% 使用logic和llm自动检测冲突
+@article{gartner2024automated,
+  title={Automated requirement contradiction detection through formal logic and LLMs},
+  author={G{\"a}rtner, Alexander Elenga and G{\"o}hlich, Dietmar},
+  journal={Automated Software Engineering},
+  volume={31},
+  number={2},
+  pages={49},
+  year={2024},
+  publisher={Springer}
+}
+
+%% 论文总结了影响数据质量的因素与组织常用的改进与维护策略，论证了内容/数据质量问题是长期存在、系统性的问题，而不是一次性修复的问题。
+@article{sillaber2019experience,
+  title={Experience: Data and information quality challenges in governance, risk, and compliance management},
+  author={Sillaber, Christian and Mussmann, Andrea and Breu, Ruth},
+  journal={Journal of Data and Information Quality (JDIQ)},
+  volume={11},
+  number={2},
+  pages={1--14},
+  year={2019},
+  publisher={ACM New York, NY, USA}
+}
+
+%% 系统定义数据质量，覆盖数据质量维度、数据质量度量方法、数据质量管理与治理等
+@book{mahanti2019data,
+  title={Data quality: dimensions, measurement, strategy, management, and governance},
+  author={Mahanti, Rupa},
+  year={2019},
+  publisher={Quality Press}
+}
+
+%% 讲述内容元数据质量评估应该从哪些维度
+@article{kumar2025exploring,
+  title={Exploring dimensions of metadata quality assessment: a scoping review},
+  author={Kumar, Vinit and Chandrappa and Harinarayana, NS},
+  journal={Journal of Librarianship and Information Science},
+  volume={57},
+  number={3},
+  pages={661--673},
+  year={2025},
+  publisher={SAGE Publications Sage UK: London, England}
+}
+
+%% 研究数据仓库（RDR）是如何理解“数据质量”，以及它们是如何组织和实施“数据质量保障（DQA）活动”的？
+@article{stvilia2024data,
+  title={Data quality assurance in research data repositories: a theory-guided exploration and model},
+  author={Stvilia, Besiki and Lee, Dong Joon},
+  journal={Journal of Documentation},
+  volume={80},
+  number={4},
+  pages={793--812},
+  year={2024},
+  publisher={Emerald Publishing Limited}
+}
+
+%%%%%%%%%% 数据洞察 %%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 聚类研究
+@article{jain1999data,
+  title={Data clustering: a review},
+  author={Jain, Anil K and Murty, M Narasimha and Flynn, Patrick J},
+  journal={ACM computing surveys (CSUR)},
+  volume={31},
+  number={3},
+  pages={264--323},
+  year={1999},
+  publisher={Acm New York, NY, USA}
+}
+
+%% 聚类方法
+@incollection{rokach2005clustering,
+  title={Clustering methods},
+  author={Rokach, Lior and Maimon, Oded},
+  booktitle={Data mining and knowledge discovery handbook},
+  pages={321--352},
+  year={2005},
+  publisher={Springer}
+}
