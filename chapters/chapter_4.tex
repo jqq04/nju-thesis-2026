@@ -622,9 +622,9 @@ public AskResp ask(AskReq req) {
   \begin{tabular}{>{\raggedright\arraybackslash}p{0.18\linewidth}|>{\raggedright\arraybackslash}p{0.26\linewidth}|>{\raggedright\arraybackslash}p{0.48\linewidth}}
     \hline
     表名 & 关键字段（示例） & 说明 \\ \hline
-    govern\_main\_task & id, name, space\_id, session\_period, recall\_threshold, status & 治理主任务，承载会话周期、阈值等参数与计算状态。 \\ \hline
-    govern\_dup\_amb\_task & id, main\_task\_id, app\_id, task\_type, content\_id\_a, content\_id\_b, status, assignee\_id, result & 重复/歧义子任务，描述内容对、任务类型与处理结果。 \\ \hline
-    govern\_coverage\_task & id, main\_task\_id, app\_id, cluster\_title, representative\_query, query\_count, status & 覆盖度子任务，描述缺失知识簇的主题、代表性问法与热度。 \\ \hline
+    \nolinkurl{govern_main_task} & id, name, space\_id, session\_period, recall\_threshold, status & 治理主任务，承载会话周期、阈值等参数与计算状态。 \\ \hline
+    \nolinkurl{govern_dup_amb_task} & id, main\_task\_id, app\_id, task\_type, content\_id\_a, content\_id\_b, status, assignee\_id, result & 重复/歧义子任务，描述内容对、任务类型与处理结果。 \\ \hline
+    \nolinkurl{govern_coverage_task} & id, main\_task\_id, app\_id, cluster\_title, representative\_query, query\_count, status & 覆盖度子任务，描述缺失知识簇的主题、代表性问法与热度。 \\ \hline
   \end{tabular}
 \end{table}
 
@@ -806,8 +806,8 @@ public void runDupAmb(MainTask task) {
   \begin{tabular}{>{\raggedright\arraybackslash}p{0.18\linewidth}|>{\raggedright\arraybackslash}p{0.20\linewidth}|>{\raggedright\arraybackslash}p{0.54\linewidth}}
     \hline
     任务类型 & 状态 & 含义 \\ \hline
-    主任务 & NEW/RUNNING/FINISHED & 新建、计算中、计算完成 \\ \hline
-    子任务 & TODO/DOING/DONE/CLOSED & 待处理、处理中、已完成、已关闭（复检确认问题消除） \\ \hline
+    主任务 & \nolinkurl{NEW/RUNNING/FINISHED} & 新建、计算中、计算完成 \\ \hline
+    子任务 & \nolinkurl{TODO/DOING/DONE/CLOSED} & 待处理、处理中、已完成、已关闭（复检确认问题消除） \\ \hline
   \end{tabular}
 \end{table}
 
@@ -866,7 +866,7 @@ public void dailyRecheck(Date since) {
 \subsection{内容应用数据采集机制}
 \label{subsec:impl_di_collect}
 
-数据采集需要覆盖页面化消费链路与智能问答链路两类场景。在页面化链路中，采集曝光、点击、搜索输入与结果点击等行为数据；在问答链路中，采集问题输入、召回证据、生成结果与转人工等链路数据。平台对事件名与字段进行统一定义，例如page\_view、click、query\_submit、rag\_recall、llm\_generate、handoff\_intent与handoff\_success等，并统一携带app\_id、space\_id、session\_id、trace\_id与content\_id等公共维度字段，便于端到端追踪与明细还原。
+数据采集需要覆盖页面化消费链路与智能问答链路两类场景。在页面化链路中，采集曝光、点击、搜索输入与结果点击等行为数据；在问答链路中，采集问题输入、召回证据、生成结果与转人工等链路数据。平台对事件名与字段进行统一定义，例如\nolinkurl{page_view}、\nolinkurl{click}、\nolinkurl{query_submit}、\nolinkurl{rag_recall}、\nolinkurl{llm_generate}、\nolinkurl{handoff_intent}与\nolinkurl{handoff_success}等，并统一携带\nolinkurl{app_id}、\nolinkurl{space_id}、\nolinkurl{session_id}、\nolinkurl{trace_id}与\nolinkurl{content_id}等公共维度字段，便于端到端追踪与明细还原。
 
 为保证事件口径可复用且便于扩展，平台将每条事件抽象为“公共维度 + 事件特有扩展字段”的统一结构：公共维度用于跨事件关联与链路追踪，扩展字段用于承载不同事件的特有信息（例如检索关键词、召回通道、候选数量等）。事件明细的核心字段设计如表\ref{tab:di_event_schema}所示。
 
@@ -900,9 +900,9 @@ public void dailyRecheck(Date since) {
   \begin{tabular}{>{\raggedright\arraybackslash}p{0.22\linewidth}|>{\raggedright\arraybackslash}p{0.68\linewidth}}
     \hline
     事件名 & ext字段示例 \\ \hline
-    rag\_recall & query, rewritten\_query, channels(es/vec), topk, min\_score, hit\_cnt, evidence\_ids \\ \hline
-    llm\_generate & model, prompt\_len, latency\_ms, token\_out, citation\_cnt, degraded(bool) \\ \hline
-    handoff\_intent & reason, confidence, stage(recall/generate) \\ \hline
+    \nolinkurl{rag_recall} & \nolinkurl{query}, \nolinkurl{rewritten_query}, \nolinkurl{channels}(es/vec), \nolinkurl{topk}, \nolinkurl{min_score}, \nolinkurl{hit_cnt}, \nolinkurl{evidence_ids} \\ \hline
+    \nolinkurl{llm_generate} & \nolinkurl{model}, \nolinkurl{prompt_len}, \nolinkurl{latency_ms}, \nolinkurl{token_out}, \nolinkurl{citation_cnt}, \nolinkurl{degraded}(bool) \\ \hline
+    \nolinkurl{handoff_intent} & \nolinkurl{reason}, \nolinkurl{confidence}, \nolinkurl{stage}(recall/generate) \\ \hline
   \end{tabular}
 \end{table}
 
