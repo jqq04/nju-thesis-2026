@@ -28,6 +28,8 @@
 % set up labelformat and labelsep for subfigure 详见： http://www.latexstudio.net/archives/8652.html
 \captionsetup[subfigure]{labelformat=simple, labelsep=space}
 
+\renewcommand{\arraystretch}{1.25}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % % 设置《国家图书馆封面》的内容，仅博士论文才需要填写
 
@@ -214,21 +216,23 @@
 
 
 % 附录，必须放在参考文献后，backmatter前
-\appendix
-\chapter{附录示例}\label{app:1}
-\section{main函数}
-\begin{lstlisting}[language=C]
-int main()
-{
-	return 0;
-}
-\end{lstlisting}
+% \appendix
+% \chapter{附录示例}\label{app:1}
+% \section{main函数}
+% \begin{lstlisting}[language=C]
+% int main()
+% {
+% 	return 0;
+% }
+% \end{lstlisting}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % 致谢
 \begin{acknowledgement}
-致谢示例
+首先，我要感谢我的导师刘峰，他的指导和建议对我的研究工作产生了深远的影响，并且在研究过程中提供了重要的支持和帮助，使得我能够顺利并成功地完成了我的研究。
+
+其次，我要感谢我实习所在的企业，他们为我的研究提供了重要的课题
 
 \end{acknowledgement}
 

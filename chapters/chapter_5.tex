@@ -11,7 +11,8 @@
   \centering
   \caption{测试环境描述表}
   \label{tab:test_env}
-  \begin{tabular}{c|p{10.2cm}}
+  \small
+  \begin{tabularx}{\linewidth}{c|>{\raggedright\arraybackslash}X}
     \hline
     项目 & 说明 \\ \hline
     部署形态 & 服务以容器化方式部署于Linux环境，按模块拆分并独立扩缩容。 \\ \hline
@@ -21,7 +22,7 @@
     消息通知与异步链路 & 内容发布后通过消息队列触发索引增量更新与数据回收等异步任务。 \\ \hline
     外部能力 & 智能问答与治理判别依赖大模型服务，图文与图片类检索依赖多模态embedding能力。 \\ \hline
     测试工具 & 前端功能测试使用Chrome；接口与链路测试使用Postman或同类HTTP工具；必要时结合日志与trace\_id进行链路定位。 \\ \hline
-  \end{tabular}
+  \end{tabularx}
 \end{table}
 
 \section{单元测试}
@@ -70,13 +71,14 @@ def "test_content_auth_action_first"() {
   \centering
   \caption{创建空间/应用测试用例}
   \label{tab:tc01}
-  \begin{tabular}{c|p{10.2cm}}
+  \small
+  \begin{tabularx}{\linewidth}{c|>{\raggedright\arraybackslash}X}
     \hline
     用例编号 & TC01 \\ \hline
     测试内容 & 创建空间与应用 \\ \hline
-    测试步骤 & 1) 进入空间管理创建空间并填写负责人。2) 在空间内创建应用并选择支持的内容形态与组织方式。3) 进入成员与角色页面绑定默认角色。 \\ \hline
-    预期结果 & 1) 空间与应用创建成功并可查询详情。2) 默认角色初始化完成且创建人具备对应权限。3) 不同空间的数据互相隔离。 \\ \hline
-  \end{tabular}
+    测试步骤 & 1) 进入空间管理创建空间并填写负责人。\newline 2) 在空间内创建应用并选择支持的内容形态与组织方式。\newline 3) 进入成员与角色页面绑定默认角色。 \\ \hline
+    预期结果 & 1) 空间与应用创建成功并可查询详情。\newline 2) 默认角色初始化完成且创建人具备对应权限。\newline 3) 不同空间的数据互相隔离。 \\ \hline
+  \end{tabularx}
 \end{table}
 
 内容生产链路覆盖创建、编辑、提审、审批与发布等过程，且要求读链路对外仅展示已发布内容。内容发布审批的测试用例如表\ref{tab:tc02}所示。
@@ -85,13 +87,14 @@ def "test_content_auth_action_first"() {
   \centering
   \caption{内容提审与审批发布测试用例}
   \label{tab:tc02}
-  \begin{tabular}{c|p{10.2cm}}
+  \small
+  \begin{tabularx}{\linewidth}{c|>{\raggedright\arraybackslash}X}
     \hline
     用例编号 & TC02 \\ \hline
     测试内容 & 内容提审、审批通过/驳回与发布口径 \\ \hline
-    测试步骤 & 1) 创建一条knowledge内容并保存草稿。2) 发起提审进入待审批状态。3) 审批人执行驳回并填写意见。4) 再次提审并审批通过，内容进入已发布状态。5) 在门户与检索侧分别访问该内容。 \\ \hline
-    预期结果 & 1) 草稿状态不对外可见。2) 驳回后内容回到可编辑状态并保留意见。3) 审批通过后内容对外可见，门户与检索均仅返回已发布口径。 \\ \hline
-  \end{tabular}
+    测试步骤 & 1) 创建一条knowledge内容并保存草稿。\newline 2) 发起提审进入待审批状态。\newline 3) 审批人执行驳回并填写意见。\newline 4) 再次提审并审批通过，内容进入已发布状态。\newline 5) 在门户与检索侧分别访问该内容。 \\ \hline
+    预期结果 & 1) 草稿状态不对外可见。\newline 2) 驳回后内容回到可编辑状态并保留意见。\newline 3) 审批通过后内容对外可见，门户与检索均仅返回已发布口径。 \\ \hline
+  \end{tabularx}
 \end{table}
 
 \subsection{内容应用功能测试}
@@ -102,13 +105,14 @@ def "test_content_auth_action_first"() {
   \centering
   \caption{内容检索测试用例}
   \label{tab:tc04}
-  \begin{tabular}{c|p{10.2cm}}
+  \small
+  \begin{tabularx}{\linewidth}{c|>{\raggedright\arraybackslash}X}
     \hline
     用例编号 & TC04 \\ \hline
     测试内容 & 内容检索与高亮展示 \\ \hline
-    测试步骤 & 1) 在应用内准备多条不同类型内容并发布。2) 使用关键词分别命中title、summary与正文切片。3) 设置类目/标签/类型过滤并分页查询。4) 对不同权限用户重复检索。 \\ \hline
-    预期结果 & 1) 关键词命中不同字段均可召回且排序合理。2) 返回结果包含高亮片段与摘要。3) 结构化过滤与分页生效。4) 越权内容不会出现在检索结果中。 \\ \hline
-  \end{tabular}
+    测试步骤 & 1) 在应用内准备多条不同类型内容并发布。\newline 2) 使用关键词分别命中title、summary与正文切片。\newline 3) 设置类目/标签/类型过滤并分页查询。\newline 4) 对不同权限用户重复检索。 \\ \hline
+    预期结果 & 1) 关键词命中不同字段均可召回且排序合理。\newline 2) 返回结果包含高亮片段与摘要。\newline 3) 结构化过滤与分页生效。\newline 4) 越权内容不会出现在检索结果中。 \\ \hline
+  \end{tabularx}
 \end{table}
 
 智能问答用于验证“问题改写+多通道召回+重排+引用输出”的端到端链路，以及未命中与超时场景下的退化策略。智能问答测试用例如表\ref{tab:tc05}所示。
@@ -117,13 +121,14 @@ def "test_content_auth_action_first"() {
   \centering
   \caption{智能问答测试用例}
   \label{tab:tc05}
-  \begin{tabular}{c|p{10.2cm}}
+  \small
+  \begin{tabularx}{\linewidth}{c|>{\raggedright\arraybackslash}X}
     \hline
     用例编号 & TC05 \\ \hline
     测试内容 & RAG智能问答端到端链路 \\ \hline
-    测试步骤 & 1) 输入口语化问题触发问题改写。2) 观察ES与向量两路召回候选数量与MinScore过滤。3) 检查重排后TopN证据集合与content聚合情况。4) 生成回答并检查引用映射到content与slice。5) 构造未命中与大模型超时场景。 \\ \hline
-    预期结果 & 1) 改写后召回稳定性提升且不改变问题语义。2) 证据集合与问题强相关并包含可追溯引用。3) 未命中返回补充建议并进入覆盖度候选。4) 超时退化为检索摘要返回，且权限过滤始终生效。 \\ \hline
-  \end{tabular}
+    测试步骤 & 1) 输入口语化问题触发问题改写。\newline 2) 观察ES与向量两路召回候选数量与MinScore过滤。\newline 3) 检查重排后TopN证据集合与content聚合情况。\newline 4) 生成回答并检查引用映射到content与slice。\newline 5) 构造未命中与大模型超时场景。 \\ \hline
+    预期结果 & 1) 改写后召回稳定性提升且不改变问题语义。\newline 2) 证据集合与问题强相关并包含可追溯引用。\newline 3) 未命中返回补充建议并进入覆盖度候选。\newline 4) 超时退化为检索摘要返回，且权限过滤始终生效。 \\ \hline
+  \end{tabularx}
 \end{table}
 
 \subsection{内容治理与数据洞察功能测试}
@@ -134,13 +139,14 @@ def "test_content_auth_action_first"() {
   \centering
   \caption{重复/歧义治理测试用例}
   \label{tab:tc06}
-  \begin{tabular}{c|p{10.2cm}}
+  \small
+  \begin{tabularx}{\linewidth}{c|>{\raggedright\arraybackslash}X}
     \hline
     用例编号 & TC06 \\ \hline
     测试内容 & 重复/歧义检测与子任务生成 \\ \hline
-    测试步骤 & 1) 在空间内准备两条高度相似内容并发布。2) 创建治理主任务并触发重复/歧义检测计算。3) 查看生成的重复/歧义子任务与内容对。4) 修改其中一条内容并重新发布，等待日巡检复检。 \\ \hline
-    预期结果 & 1) 候选召回能够命中相似内容对并生成子任务。2) 子任务幂等写入，不重复生成。3) 内容修订后复检能够关闭已消除问题的子任务。 \\ \hline
-  \end{tabular}
+    测试步骤 & 1) 在空间内准备两条高度相似内容并发布。\newline 2) 创建治理主任务并触发重复/歧义检测计算。\newline 3) 查看生成的重复/歧义子任务与内容对。\newline 4) 修改其中一条内容并重新发布，等待日巡检复检。 \\ \hline
+    预期结果 & 1) 候选召回能够命中相似内容对并生成子任务。\newline 2) 子任务幂等写入，不重复生成。\newline 3) 内容修订后复检能够关闭已消除问题的子任务。 \\ \hline
+  \end{tabularx}
 \end{table}
 
 覆盖度治理用于验证“洞察聚类筛选薄弱主题$\rightarrow$生成覆盖任务$\rightarrow$补充内容$\rightarrow$复检回收”的闭环。覆盖度治理测试用例如表\ref{tab:tc07}所示。
@@ -149,13 +155,14 @@ def "test_content_auth_action_first"() {
   \centering
   \caption{覆盖度治理测试用例}
   \label{tab:tc07}
-  \begin{tabular}{c|p{10.2cm}}
+  \small
+  \begin{tabularx}{\linewidth}{c|>{\raggedright\arraybackslash}X}
     \hline
     用例编号 & TC07 \\ \hline
     测试内容 & 覆盖度任务生成与复检回收 \\ \hline
-    测试步骤 & 1) 在问答链路制造未命中问题并沉淀为会话数据。2) 在洞察侧聚类生成低解决率主题。3) 在治理侧创建主任务并生成覆盖子任务。4) 补充相关内容并发布。5) 等待巡检复检回收。 \\ \hline
-    预期结果 & 1) 覆盖任务能够以cluster\_id或代表性query定位问题主题。2) 内容补充发布后复检能够将覆盖任务自动关闭。3) 任务状态与处理人记录完整可追溯。 \\ \hline
-  \end{tabular}
+    测试步骤 & 1) 在问答链路制造未命中问题并沉淀为会话数据。\newline 2) 在洞察侧聚类生成低解决率主题。\newline 3) 在治理侧创建主任务并生成覆盖子任务。\newline 4) 补充相关内容并发布。\newline 5) 等待巡检复检回收。 \\ \hline
+    预期结果 & 1) 覆盖任务能够以cluster\_id或代表性query定位问题主题。\newline 2) 内容补充发布后复检能够将覆盖任务自动关闭。\newline 3) 任务状态与处理人记录完整可追溯。 \\ \hline
+  \end{tabularx}
 \end{table}
 
 数据洞察用于验证事件规范、trace\_id链路追踪与下钻能力。数据洞察测试用例如表\ref{tab:tc08}所示。
@@ -164,13 +171,14 @@ def "test_content_auth_action_first"() {
   \centering
   \caption{数据洞察链路测试用例}
   \label{tab:tc08}
-  \begin{tabular}{c|p{10.2cm}}
+  \small
+  \begin{tabularx}{\linewidth}{c|>{\raggedright\arraybackslash}X}
     \hline
     用例编号 & TC08 \\ \hline
     测试内容 & trace\_id链路追踪与会话下钻 \\ \hline
-    测试步骤 & 1) 发起一次问答请求并记录trace\_id。2) 校验rag\_recall与llm\_generate等事件明细携带相同trace\_id与session\_id。3) 在洞察侧按聚类主题下钻到会话明细。4) 按trace\_id还原证据集合与引用内容。 \\ \hline
-    预期结果 & 1) 关键事件均被采集且字段口径一致。2) 可按trace\_id复现单次问答的召回与生成链路。3) 聚类下钻可定位高频主题与薄弱点，为治理任务生成提供输入。 \\ \hline
-  \end{tabular}
+    测试步骤 & 1) 发起一次问答请求并记录trace\_id。\newline 2) 校验rag\_recall与llm\_generate等事件明细携带相同trace\_id与session\_id。\newline 3) 在洞察侧按聚类主题下钻到会话明细。\newline 4) 按trace\_id还原证据集合与引用内容。 \\ \hline
+    预期结果 & 1) 关键事件均被采集且字段口径一致。\newline 2) 可按trace\_id复现单次问答的召回与生成链路。\newline 3) 聚类下钻可定位高频主题与薄弱点，为治理任务生成提供输入。 \\ \hline
+  \end{tabularx}
 \end{table}
 
 \section{本章小结}

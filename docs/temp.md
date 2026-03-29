@@ -73,3 +73,49 @@
 - 作用：支撑你“工程化解决方案”的可信度（别太多，2–5 篇足够）
 - 关键词：RPC foundations / distributed systems design / search engine architecture
 
+<br />
+
+<br />
+
+第一章通常要用“近些年文献”去支撑三类话： （a）趋势判断 、 （b）痛点归因 、 （c）路线选择的合理性 。结合你论文主线（企业内容管理 + RAG 内容应用 + 内容治理/质量闭环 + 权限审批 + 数据洞察），第一章建议优先补下面这些方向（基本都能找 2020–2026 的综述/系统论文来撑住）：
+
+1. 企业内容管理的新趋势：从 ECM/WCM 到“内容资产平台/知识中台”
+
+- 用来支撑：内容规模增长、跨系统内容碎片化、生命周期管理与流程化的重要性。
+- 关键词：enterprise content management lifecycle, content operations, knowledge base platform, content governance in enterprises, content lifecycle management survey
+
+1. 企业搜索与语义搜索（Hybrid Search）：BM25 + Dense Retrieval + Rerank
+
+- 用来支撑：你“ES 全文检索 + Embedding 语义召回 + 重排”的并列/互补架构不是拍脑袋。
+- 关键词：hybrid retrieval sparse dense, dense retrieval survey, neural reranking cross-encoder, semantic search in enterprise, reranking efficiency deployment
+
+1. RAG 工程化与评测：检索质量、证据、可解释性、端到端评估
+
+- 用来支撑：第一章“RAG 成为主流方案，但落地关键在检索质量与评测体系”。
+- 关键词：RAG evaluation, grounded generation, attribution citation QA, retrieval-augmented generation survey, reranking for RAG
+
+1. 大模型幻觉与“有证据的回答”（可信生成/可溯源）
+
+- 用来支撑：为什么企业场景不能只靠 LLM 参数记忆，必须检索+证据+引用/溯源。
+- 关键词：LLM hallucination survey, factuality grounded generation, attribution in QA, faithfulness evaluation
+
+1. 向量数据库/向量检索基础设施（你已选 Milvus，但第一章也可补“行业趋势”）
+
+- 用来支撑：向量检索成为基础设施、ANN 索引、可扩展向量数据管理。
+- 关键词：vector database survey, ANN indexing HNSW IVF PQ, vector data management system, scalable vector search
+
+1. 内容治理与数据质量：治理框架 + 质量维度 + 治理活动闭环
+
+- 用来支撑：第一章“质量问题长期存在、需要制度化/指标化/闭环治理”，以及你后面治理模块拆分。
+- 关键词：data governance framework, data quality dimensions, data quality assurance model, governance activities lifecycle
+
+1. 语义去重/重复治理（从近重复到语义重复）
+
+- 用来支撑：第一章里“重复内容影响检索与问答效果、需要自动治理”的动机。
+- 关键词：semantic deduplication web-scale, text deduplication survey, near-duplicate detection web collections
+
+1. 观测与数据洞察（产品分析/实验）：指标体系与闭环迭代
+
+- 用来支撑：第一章“需要用数据驱动迭代与治理效果评估”，对应你洞察模块与第5章实验。
+- 关键词：online controlled experiments, A/B testing at scale, product analytics metrics, telemetry event logging, evaluation-driven development
+

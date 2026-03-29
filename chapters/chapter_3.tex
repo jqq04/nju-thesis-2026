@@ -28,14 +28,15 @@
   \centering
   \caption{用户角色表}
   \label{tab:user_role}
-  \begin{tabular}{c|p{10cm}}
+  \small
+  \begin{tabularx}{\linewidth}{c|>{\raggedright\arraybackslash}X}
     \hline
     用户角色 & 描述 \\ \hline
     平台负责人 & 平台的最高管理角色，负责整个平台的基础配置、空间管理及全局权限控制，保障平台稳定运行。 \\ \hline
     业务负责人 & 负责某一业务线或业务空间下内容体系的管理与运维，对内容结构、应用配置及业务权限进行整体把控。 \\ \hline
     业务运营 & 负责平台内容的创建、编辑和维护等日常运营工作，并在权限范围内查看相关内容使用数据。 \\ \hline
     客户 & 平台内容的消费角色，包括广告主、代理商等，通过页面浏览、搜索或智能助手等方式使用平台内容。 \\ \hline
-  \end{tabular}
+  \end{tabularx}
 \end{table}
 
 除上述用户角色外，平台还需要与上游智能应用（如智能助手）进行接口对接。该类调用方通常以系统身份访问平台的内容检索与问答能力，其行为数据将被纳入会话分析与效果评估范围。
@@ -46,7 +47,7 @@
 
 \begin{figure}[!ht]
   \centering
-  \includegraphics[width=1.0\linewidth]{./figure/figures-内容管理用例图.png}
+  \includegraphics[width=1.0\linewidth]{./figure/figures-内容管理用例图.drawio.pdf}
   \caption{内容管理用例图}
   \label{fig:cm_usecase}
 \end{figure}
@@ -59,7 +60,8 @@
   \centering
   \caption{创建空间用例描述表}
   \label{tab:cm_create_space}
-  \begin{tabular}{c|p{10cm}}
+  \small
+  \begin{tabularx}{\linewidth}{c|>{\raggedright\arraybackslash}X}
     \hline
     ID & CM-05 \\ \hline
     用例名称 & 创建空间 \\ \hline
@@ -68,16 +70,17 @@
     触发条件 & 新业务线接入或现有业务需要建立独立治理边界。 \\ \hline
     前置条件 & 1. 当前用户具备空间管理权限。 \\ \hline
     后置条件 & 1. 系统生成空间ID并创建默认成员组与默认权限策略。 \\ \hline
-    基本流程 & 1. 用户进入空间管理页面并点击新建空间。 2. 系统弹出空间信息编辑弹窗。 3. 用户填写空间名称、业务归属等信息并保存。 4. 系统校验信息并持久化保存空间配置。 \\ \hline
+    基本流程 & 1. 用户进入空间管理页面并点击新建空间。\newline 2. 系统弹出空间信息编辑弹窗。\newline 3. 用户填写空间名称、业务归属等信息并保存。\newline 4. 系统校验信息并持久化保存空间配置。 \\ \hline
     替代流程 & 1. 若空间名称重复或信息校验失败，系统提示原因并要求用户修改。 \\ \hline
-  \end{tabular}
+  \end{tabularx}
 \end{table}
 
 \begin{table}[!ht]
   \centering
   \caption{创建应用用例描述表}
   \label{tab:cm_create_app}
-  \begin{tabular}{c|p{10cm}}
+  \small
+  \begin{tabularx}{\linewidth}{c|>{\raggedright\arraybackslash}X}
     \hline
     ID & CM-06 \\ \hline
     用例名称 & 创建应用 \\ \hline
@@ -86,16 +89,17 @@
     触发条件 & 业务需要新增内容门户、帮助中心或面向智能应用的知识库入口。 \\ \hline
     前置条件 & 1. 目标空间已存在且当前用户具备应用管理权限。 \\ \hline
     后置条件 & 1. 系统生成应用ID并初始化应用配置（可用形态、类目树与标签配置等）。 \\ \hline
-    基本流程 & 1. 用户进入空间详情页并点击创建应用。 2. 用户选择应用类型并填写应用名称与基础配置。 3. 系统校验配置并创建应用。 4. 系统返回应用创建成功提示并展示应用配置入口。 \\ \hline
+    基本流程 & 1. 用户进入空间详情页并点击创建应用。\newline 2. 用户选择应用类型并填写应用名称与基础配置。\newline 3. 系统校验配置并创建应用。\newline 4. 系统返回应用创建成功提示并展示应用配置入口。 \\ \hline
     替代流程 & 1. 若应用配置不完整（如未配置可用内容形态），系统提示并阻止创建。 \\ \hline
-  \end{tabular}
+  \end{tabularx}
 \end{table}
 
 \begin{table}[!ht]
   \centering
   \caption{创建类目用例描述表}
   \label{tab:cm_create_category}
-  \begin{tabular}{c|p{10cm}}
+  \small
+  \begin{tabularx}{\linewidth}{c|>{\raggedright\arraybackslash}X}
     \hline
     ID & CM-11 \\ \hline
     用例名称 & 创建类目 \\ \hline
@@ -104,16 +108,17 @@
     触发条件 & 新增业务主题或需要调整内容目录结构。 \\ \hline
     前置条件 & 1. 目标应用已存在且当前用户具备类目维护权限。 \\ \hline
     后置条件 & 1. 系统生成类目ID并将其挂载到指定父节点下。 \\ \hline
-    基本流程 & 1. 用户进入应用配置中的类目管理页面。 2. 用户选择父节点并点击“新增类目”。 3. 用户填写类目名称等信息并保存。 4. 系统校验名称与层级合法性并持久化保存。 \\ \hline
+    基本流程 & 1. 用户进入应用配置中的类目管理页面。\newline 2. 用户选择父节点并点击“新增类目”。\newline 3. 用户填写类目名称等信息并保存。\newline 4. 系统校验名称与层级合法性并持久化保存。 \\ \hline
     替代流程 & 1. 若类目名称冲突或层级不合法，系统提示原因并要求用户修改。 \\ \hline
-  \end{tabular}
+  \end{tabularx}
 \end{table}
 
 \begin{table}[!ht]
   \centering
   \caption{创建标签用例描述表}
   \label{tab:cm_create_tag}
-  \begin{tabular}{c|p{10cm}}
+  \small
+  \begin{tabularx}{\linewidth}{c|>{\raggedright\arraybackslash}X}
     \hline
     ID & CM-12 \\ \hline
     用例名称 & 创建标签 \\ \hline
@@ -122,9 +127,9 @@
     触发条件 & 需要新增运营标签以支持内容聚合与筛选。 \\ \hline
     前置条件 & 1. 目标应用已存在且当前用户具备标签维护权限。 \\ \hline
     后置条件 & 1. 系统生成标签ID并将其加入应用标签集合。 \\ \hline
-    基本流程 & 1. 用户进入应用配置中的标签管理页面。 2. 用户点击“新增标签”并填写标签名称。 3. 系统校验标签名称合法性与重复冲突。 4. 系统保存标签并返回成功提示。 \\ \hline
+    基本流程 & 1. 用户进入应用配置中的标签管理页面。\newline 2. 用户点击“新增标签”并填写标签名称。\newline 3. 系统校验标签名称合法性与重复冲突。\newline 4. 系统保存标签并返回成功提示。 \\ \hline
     替代流程 & 1. 若标签名称重复或不合法，系统提示原因并要求用户修改。 \\ \hline
-  \end{tabular}
+  \end{tabularx}
 \end{table}
 
 （2）多形态内容管理。平台需要支持多种内容形态的统一纳管与一致化维护。不同内容形态在结构与消费方式上存在差异，但应具备统一的基础管理能力，包括创建、编辑、保存草稿以及详情读取等。多形态内容管理的典型用例包括创建内容、编辑内容与查看内容详情，其用例描述分别如表\ref{tab:cm_create_content}、表\ref{tab:cm_edit_content}与表\ref{tab:cm_get_detail}所示。
@@ -133,43 +138,46 @@
   \centering
   \caption{创建内容用例描述表}
   \label{tab:cm_create_content}
-  \begin{tabular}{c|p{10cm}}
+  \small
+  \begin{tabularx}{\linewidth}{c|>{\raggedright\arraybackslash}X}
     \hline
     ID & CM-01 \\ \hline
     用例名称 & 创建内容 \\ \hline
     参与者 & 业务运营 \\ \hline
     用例描述 & 在指定空间与应用下创建新的内容实体，支持knowledge、faq、course、case等多种形态，并生成初始草稿。 \\ \hline
     触发条件 & 业务需要新增产品说明、规则解读或运营素材等内容资产。 \\ \hline
-    前置条件 & 1. 目标空间与应用已创建并处于可用状态。 2. 当前用户拥有该空间下的内容创建权限。 \\ \hline
-    后置条件 & 1. 系统生成唯一的内容ID。 2. 内容状态置为“草稿”。 \\ \hline
-    基本流程 & 1. 用户进入内容管理列表页，点击“新建”按钮。 2. 用户选择内容形态（如文章、问答等）。 3. 系统初始化空白草稿并跳转至编辑器。 4. 用户填写标题、正文及必要的属性字段（如类目、标签）。 5. 用户点击“保存”按钮。 6. 系统校验必填项与格式，校验通过后持久化存储。 \\ \hline
+    前置条件 & 1. 目标空间与应用已创建并处于可用状态。\newline 2. 当前用户拥有该空间下的内容创建权限。 \\ \hline
+    后置条件 & 1. 系统生成唯一的内容ID。\newline 2. 内容状态置为“草稿”。 \\ \hline
+    基本流程 & 1. 用户进入内容管理列表页，点击“新建”按钮。\newline 2. 用户选择内容形态（如文章、问答等）。\newline 3. 系统初始化空白草稿并跳转至编辑器。\newline 4. 用户填写标题、正文及必要的属性字段（如类目、标签）。\newline 5. 用户点击“保存”按钮。\newline 6. 系统校验必填项与格式，校验通过后持久化存储。 \\ \hline
     替代流程 & 1. 若校验失败，系统提示具体错误字段，用户修改后可重新保存。 \\ \hline
-  \end{tabular}
+  \end{tabularx}
 \end{table}
 
 \begin{table}[!ht]
   \centering
   \caption{编辑内容用例描述表}
   \label{tab:cm_edit_content}
-  \begin{tabular}{c|p{10cm}}
+  \small
+  \begin{tabularx}{\linewidth}{c|>{\raggedright\arraybackslash}X}
     \hline
     ID & CM-02 \\ \hline
     用例名称 & 编辑内容 \\ \hline
     参与者 & 业务运营 \\ \hline
     用例描述 & 对已存在的内容进行修改，包括正文更新与属性调整，并保存修改结果以进入后续提审与发布流程。 \\ \hline
     触发条件 & 内容信息发生变更或需要优化现有内容。 \\ \hline
-    前置条件 & 1. 内容处于可编辑状态（如草稿、驳回或已发布）。 2. 当前用户拥有该内容的编辑权限。 \\ \hline
+    前置条件 & 1. 内容处于可编辑状态（如草稿、驳回或已发布）。\newline 2. 当前用户拥有该内容的编辑权限。 \\ \hline
     后置条件 & 1. 内容变更被持久化保存。 \\ \hline
-    基本流程 & 1. 用户在内容列表点击目标内容的“编辑”按钮。 2. 系统加载内容数据并进入编辑器。 3. 用户修改正文或属性信息。 4. 用户点击“保存”或“提交”。 5. 系统保存修改并记录变更。 \\ \hline
+    基本流程 & 1. 用户在内容列表点击目标内容的“编辑”按钮。\newline 2. 系统加载内容数据并进入编辑器。\newline 3. 用户修改正文或属性信息。\newline 4. 用户点击“保存”或“提交”。\newline 5. 系统保存修改并记录变更。 \\ \hline
     替代流程 & 1. 若校验失败，系统提示需要补全或修正的字段。 \\ \hline
-  \end{tabular}
+  \end{tabularx}
 \end{table}
 
 \begin{table}[!ht]
   \centering
   \caption{查看内容详情用例描述表}
   \label{tab:cm_get_detail}
-  \begin{tabular}{c|p{10cm}}
+  \small
+  \begin{tabularx}{\linewidth}{c|>{\raggedright\arraybackslash}X}
     \hline
     ID & CM-03 \\ \hline
     用例名称 & 查看内容详情 \\ \hline
@@ -178,9 +186,9 @@
     触发条件 & 用户需要核对某条内容的正文、属性或发布状态。 \\ \hline
     前置条件 & 1. 内容存在且当前用户具备访问权限。 \\ \hline
     后置条件 & 系统返回内容详情并展示。 \\ \hline
-    基本流程 & 1. 用户在内容列表点击目标内容进入详情页。 2. 系统加载内容元数据（类型、标题、摘要、状态等）。 3. 系统按内容形态读取正文或结构字段并组装详情。 4. 系统返回详情并展示。 \\ \hline
+    基本流程 & 1. 用户在内容列表点击目标内容进入详情页。\newline 2. 系统加载内容元数据（类型、标题、摘要、状态等）。\newline 3. 系统按内容形态读取正文或结构字段并组装详情。\newline 4. 系统返回详情并展示。 \\ \hline
     替代流程 & 1. 若内容无权限访问或状态不允许查看，系统拒绝并提示原因。 \\ \hline
-  \end{tabular}
+  \end{tabularx}
 \end{table}
 
 （3）权限与审批发布。平台需要构建基于角色的访问控制（RBAC）体系，并结合内容对象级的content\_auth策略授权，在空间与应用维度实现权限隔离与精细化授权。权限粒度应覆盖模块级与操作级，既能控制用户进入某一空间/应用的访问权限，也能控制内容的创建、编辑、提审、审批、上线等具体操作权限。权限与审批发布链路的代表性用例包括成员角色分配、权限策略配置、提交审核、内容审批与内容上线，其用例描述如表\ref{tab:cm_assign_role}、表\ref{tab:cm_config_permission}、表\ref{tab:cm_submit_review}、表\ref{tab:cm_approve_content}与表\ref{tab:cm_online_offline}所示。
@@ -189,25 +197,27 @@
   \centering
   \caption{成员角色分配用例描述表}
   \label{tab:cm_assign_role}
-  \begin{tabular}{c|p{10cm}}
+  \small
+  \begin{tabularx}{\linewidth}{c|>{\raggedright\arraybackslash}X}
     \hline
     ID & CM-07 \\ \hline
     用例名称 & 成员角色分配 \\ \hline
     参与者 & 平台负责人，业务负责人 \\ \hline
     用例描述 & 为目标用户在空间或应用维度分配角色，以确定其可访问范围与可执行操作集合。 \\ \hline
     触发条件 & 新成员加入空间/应用或成员职责变更需要调整权限。 \\ \hline
-    前置条件 & 1. 目标空间与应用已存在。 2. 当前用户具备成员管理权限。 \\ \hline
+    前置条件 & 1. 目标空间与应用已存在。\newline 2. 当前用户具备成员管理权限。 \\ \hline
     后置条件 & 1. 系统更新用户角色映射并立即生效。 \\ \hline
-    基本流程 & 1. 管理员进入空间或应用的成员管理页面。 2. 管理员选择目标用户并设置角色。 3. 系统校验管理权限与角色合法性。 4. 系统保存变更并返回成功提示。 \\ \hline
+    基本流程 & 1. 管理员进入空间或应用的成员管理页面。\newline 2. 管理员选择目标用户并设置角色。\newline 3. 系统校验管理权限与角色合法性。\newline 4. 系统保存变更并返回成功提示。 \\ \hline
     替代流程 & 1. 若当前用户无权限执行授权操作，系统拒绝并提示原因。 \\ \hline
-  \end{tabular}
+  \end{tabularx}
 \end{table}
 
 \begin{table}[!ht]
   \centering
   \caption{权限策略配置用例描述表}
   \label{tab:cm_config_permission}
-  \begin{tabular}{c|p{10cm}}
+  \small
+  \begin{tabularx}{\linewidth}{c|>{\raggedright\arraybackslash}X}
     \hline
     ID & CM-08 \\ \hline
     用例名称 & 权限策略配置 \\ \hline
@@ -216,9 +226,9 @@
     触发条件 & 业务治理要求调整默认权限口径或新增权限项。 \\ \hline
     前置条件 & 1. 当前用户具备全局权限配置能力。 \\ \hline
     后置条件 & 1. 系统更新权限策略并对后续鉴权生效。 \\ \hline
-    基本流程 & 1. 用户进入权限配置页面选择目标空间/应用。 2. 用户配置角色与权限项映射关系并保存。 3. 系统校验配置合法性并持久化保存。 \\ \hline
+    基本流程 & 1. 用户进入权限配置页面选择目标空间/应用。\newline 2. 用户配置角色与权限项映射关系并保存。\newline 3. 系统校验配置合法性并持久化保存。 \\ \hline
     替代流程 & 1. 若配置导致关键角色缺失必要权限，系统提示风险并阻止保存。 \\ \hline
-  \end{tabular}
+  \end{tabularx}
 \end{table}
 
 内容对外可用的前提是准确性与合规性可控。平台提供流程化的审核与发布机制，对内容状态流转进行约束。内容在生命周期中至少包含草稿、待审批、已发布、已下线等状态，状态变更需满足权限校验与流程条件。
@@ -227,43 +237,46 @@
   \centering
   \caption{提交审核用例描述表}
   \label{tab:cm_submit_review}
-  \begin{tabular}{c|p{10cm}}
+  \small
+  \begin{tabularx}{\linewidth}{c|>{\raggedright\arraybackslash}X}
     \hline
     ID & CM-09 \\ \hline
     用例名称 & 提交审核 \\ \hline
     参与者 & 业务运营 \\ \hline
     用例描述 & 将内容草稿提交进入审批流程，申请将内容上线并对外可用。 \\ \hline
     触发条件 & 草稿内容完成编辑，需要上线以支撑页面展示、检索或智能问答。 \\ \hline
-    前置条件 & 1. 内容处于可提交状态且基础校验通过。 2. 当前用户具备提审权限。 \\ \hline
-    后置条件 & 1. 系统创建审批记录并将内容状态更新为待审批。 2. 通知审批者。 \\ \hline
-    基本流程 & 1. 用户在内容详情页点击提交审核。 2. 系统执行内容完整性校验与权限校验。 3. 系统创建审批单并将内容状态置为待审批。 4. 系统向用户返回提审成功提示。 \\ \hline
-    替代流程 & 1. 若权限校验失败，系统拒绝提交并提示原因。 2. 若内容校验失败，系统提示需要补全或修正的字段。 \\ \hline
-  \end{tabular}
+    前置条件 & 1. 内容处于可提交状态且基础校验通过。\newline 2. 当前用户具备提审权限。 \\ \hline
+    后置条件 & 1. 系统创建审批记录并将内容状态更新为待审批。\newline 2. 通知审批者。 \\ \hline
+    基本流程 & 1. 用户在内容详情页点击提交审核。\newline 2. 系统执行内容完整性校验与权限校验。\newline 3. 系统创建审批单并将内容状态置为待审批。\newline 4. 系统向用户返回提审成功提示。 \\ \hline
+    替代流程 & 1. 若权限校验失败，系统拒绝提交并提示原因。\newline 2. 若内容校验失败，系统提示需要补全或修正的字段。 \\ \hline
+  \end{tabularx}
 \end{table}
 
 \begin{table}[!ht]
   \centering
   \caption{内容审批用例描述表}
   \label{tab:cm_approve_content}
-  \begin{tabular}{c|p{10cm}}
+  \small
+  \begin{tabularx}{\linewidth}{c|>{\raggedright\arraybackslash}X}
     \hline
     ID & CM-10 \\ \hline
     用例名称 & 内容审批 \\ \hline
     参与者 & 业务负责人 \\ \hline
     用例描述 & 对待审批内容进行审核并给出通过或拒绝结论，决定内容能否上线并对外可见。 \\ \hline
     触发条件 & 审批者在审批列表中发现待处理任务或收到待审批通知。 \\ \hline
-    前置条件 & 1. 内容状态为待审批。 2. 当前用户具备审批权限。 \\ \hline
-    后置条件 & 1. 若审批通过，系统将内容状态更新为已发布，并发布内容变更事件供下游消费。 2. 若审批拒绝，系统将内容状态更新为未通过并记录拒绝原因。 \\ \hline
-    基本流程 & 1. 审批者进入审批列表并打开目标审批单。 2. 审批者查看内容关键信息与变更点。 3. 审批者选择通过或拒绝并提交意见。 4. 系统更新审批单状态并回写内容状态。 \\ \hline
+    前置条件 & 1. 内容状态为待审批。\newline 2. 当前用户具备审批权限。 \\ \hline
+    后置条件 & 1. 若审批通过，系统将内容状态更新为已发布，并发布内容变更事件供下游消费。\newline 2. 若审批拒绝，系统将内容状态更新为未通过并记录拒绝原因。 \\ \hline
+    基本流程 & 1. 审批者进入审批列表并打开目标审批单。\newline 2. 审批者查看内容关键信息与变更点。\newline 3. 审批者选择通过或拒绝并提交意见。\newline 4. 系统更新审批单状态并回写内容状态。 \\ \hline
     替代流程 & 1. 若审批者选择拒绝，系统要求填写拒绝原因并通知发布者。 \\ \hline
-  \end{tabular}
+  \end{tabularx}
 \end{table}
 
 \begin{table}[!ht]
   \centering
   \caption{内容上线用例描述表}
   \label{tab:cm_online_offline}
-  \begin{tabular}{c|p{10cm}}
+  \small
+  \begin{tabularx}{\linewidth}{c|>{\raggedright\arraybackslash}X}
     \hline
     ID & CM-04 \\ \hline
     用例名称 & 内容上线 \\ \hline
@@ -271,10 +284,10 @@
     用例描述 & 控制内容在应用端的可见性。上线即发布内容使其对外可见。 \\ \hline
     触发条件 & 内容审核通过需发布。 \\ \hline
     前置条件 & 1. 上线前需通过审批流程。 \\ \hline
-    后置条件 & 1. 更新内容发布状态（已发布）。 2. 触发索引更新事件，同步搜索与问答端数据。 \\ \hline
-    基本流程 & 1. 用户对“待发布”内容点击“上线”。 2. 系统校验当前状态与权限。 3. 系统更新内容状态并发布更新事件到MQ。 \\ \hline
+    后置条件 & 1. 更新内容发布状态（已发布）。\newline 2. 触发索引更新事件，同步搜索与问答端数据。 \\ \hline
+    基本流程 & 1. 用户对“待发布”内容点击“上线”。\newline 2. 系统校验当前状态与权限。\newline 3. 系统更新内容状态并发布更新事件到MQ。 \\ \hline
     替代流程 & 1. 若状态校验失败或权限不足，系统拒绝操作并提示原因。 \\ \hline
-  \end{tabular}
+  \end{tabularx}
 \end{table}
 
 \subsection{内容应用功能需求}
@@ -282,7 +295,7 @@
 
 \begin{figure}[!ht]
   \centering
-  \includegraphics[width=1.0\linewidth]{./figure/figures-内容应用用例图 (1).png}
+  \includegraphics[width=1.0\linewidth]{./figure/figures-内容应用用例图.drawio.pdf}
   \caption{内容应用用例图}
   \label{fig:ca_usecase}
 \end{figure}
@@ -301,54 +314,57 @@
   \centering
   \caption{内容展示用例描述表}
   \label{tab:ca_display}
-  \begin{tabular}{c|p{10cm}}
+  \small
+  \begin{tabularx}{\linewidth}{c|>{\raggedright\arraybackslash}X}
     \hline
     ID & CA-01 \\ \hline
     用例名称 & 内容展示 \\ \hline
     参与者 & 客户，业务运营 \\ \hline
     用例描述 & 用户在内容门户或管理后台按目录导航与列表聚合浏览内容，并查看内容详情。 \\ \hline
     触发条件 & 用户希望通过类目、标签或列表入口快速定位并阅读内容。 \\ \hline
-    前置条件 & 1. 目标应用存在已发布内容。 2. 用户具备对应空间与应用的访问权限。 \\ \hline
+    前置条件 & 1. 目标应用存在已发布内容。\newline 2. 用户具备对应空间与应用的访问权限。 \\ \hline
     后置条件 & 系统展示内容列表与详情，并记录访问行为数据用于后续分析。 \\ \hline
-    基本流程 & 1. 用户进入内容门户或管理后台。 2. 用户通过类目树或标签进入内容列表。 3. 用户点击某一条内容进入详情页查看正文与关联信息。 \\ \hline
+    基本流程 & 1. 用户进入内容门户或管理后台。\newline 2. 用户通过类目树或标签进入内容列表。\newline 3. 用户点击某一条内容进入详情页查看正文与关联信息。 \\ \hline
     替代流程 & 1. 若内容无权限访问或已下线，系统提示并返回可访问的替代内容或上级列表。 \\ \hline
-  \end{tabular}
+  \end{tabularx}
 \end{table}
 
 \begin{table}[!ht]
   \centering
   \caption{内容检索用例描述表}
   \label{tab:ca_search}
-  \begin{tabular}{c|p{10cm}}
+  \small
+  \begin{tabularx}{\linewidth}{c|>{\raggedright\arraybackslash}X}
     \hline
     ID & CA-02 \\ \hline
     用例名称 & 内容检索 \\ \hline
     参与者 & 客户，业务运营 \\ \hline
     用例描述 & 用户通过关键词与筛选条件检索内容，系统返回权限范围内的相关结果列表。 \\ \hline
     触发条件 & 用户需要定位某一产品说明、业务规则或典型案例。 \\ \hline
-    前置条件 & 1. 目标空间与应用存在已发布内容。 2. 用户具备对应空间与应用的访问权限。 \\ \hline
+    前置条件 & 1. 目标空间与应用存在已发布内容。\newline 2. 用户具备对应空间与应用的访问权限。 \\ \hline
     后置条件 & 系统返回结果列表并记录检索行为数据用于后续分析。 \\ \hline
-    基本流程 & 1. 用户进入内容门户或管理后台的搜索页面。 2. 用户输入关键词并选择筛选条件。 3. 系统执行权限过滤与检索召回。 4. 系统按相关性与业务规则排序并返回结果。 \\ \hline
+    基本流程 & 1. 用户进入内容门户或管理后台的搜索页面。\newline 2. 用户输入关键词并选择筛选条件。\newline 3. 系统执行权限过滤与检索召回。\newline 4. 系统按相关性与业务规则排序并返回结果。 \\ \hline
     替代流程 & 1. 若无匹配结果，系统提示并引导用户调整关键词或筛选条件。 \\ \hline
-  \end{tabular}
+  \end{tabularx}
 \end{table}
 
 \begin{table}[!ht]
   \centering
-  \caption{生成式问答用例描述表}
+  \caption{智能问答用例描述表}
   \label{tab:ca_qa}
-  \begin{tabular}{c|p{10cm}}
+  \small
+  \begin{tabularx}{\linewidth}{c|>{\raggedright\arraybackslash}X}
     \hline
     ID & CA-03 \\ \hline
-    用例名称 & 生成式问答 \\ \hline
+    用例名称 & 智能问答 \\ \hline
     参与者 & 客户 \\ \hline
     用例描述 & 用户以自然语言提问，系统结合召回证据生成回答并返回引用来源。 \\ \hline
     触发条件 & 用户希望通过对话快速获取业务规则解释或操作指导。 \\ \hline
-    前置条件 & 1. 用户具备问答入口的访问权限。 2. 系统可获取足够的召回证据或具备降级策略。 \\ \hline
+    前置条件 & 1. 用户具备问答入口的访问权限。\newline 2. 系统可获取足够的召回证据或具备降级策略。 \\ \hline
     后置条件 & 系统返回回答与引用，并记录会话明细与反馈信息用于评估。 \\ \hline
-    基本流程 & 1. 用户在智能助手中输入问题。 2. 系统完成内容召回与证据组织。 3. 生成模型基于证据生成回答。 4. 系统返回回答与引用来源。 \\ \hline
+    基本流程 & 1. 用户在智能助手中输入问题。\newline 2. 系统完成内容召回与证据组织。\newline 3. 生成模型基于证据生成回答。\newline 4. 系统返回回答与引用来源。 \\ \hline
     替代流程 & 1. 若问题不在知识覆盖范围内，系统提示并引导用户转人工或查看相关内容列表。 \\ \hline
-  \end{tabular}
+  \end{tabularx}
 \end{table}
 
 \subsection{内容治理功能需求}
@@ -356,7 +372,7 @@
 
 \begin{figure}[!ht]
   \centering
-  \fbox{\parbox{0.92\linewidth}{\vspace{18mm}\centering 内容治理用例图占位（待补充）\vspace{18mm}}}
+  \includegraphics[width=1.0\linewidth]{./figure/figures-内容治理用例图.drawio.pdf}
   \caption{内容治理用例图}
   \label{fig:cg_usecase}
 \end{figure}
@@ -375,25 +391,27 @@
   \centering
   \caption{质量检测用例描述表}
   \label{tab:cg_dup_detect}
-  \begin{tabular}{c|p{10cm}}
+  \small
+  \begin{tabularx}{\linewidth}{c|>{\raggedright\arraybackslash}X}
     \hline
     ID & CG-01 \\ \hline
     用例名称 & 质量检测 \\ \hline
     参与者 & 平台负责人 \\ \hline
     用例描述 & 系统对指定范围内内容执行重复度、歧义度或覆盖度检测，输出可定位的问题集合与治理建议。 \\ \hline
     触发条件 & 需要对内容体系的质量问题进行阶段性治理或例行巡检。 \\ \hline
-    前置条件 & 1. 指定空间与应用范围可用。 2. 已具备相似度计算、冲突判定或缺口识别能力。 \\ \hline
+    前置条件 & 1. 指定空间与应用范围可用。\newline 2. 已具备相似度计算、冲突判定或缺口识别能力。 \\ \hline
     后置条件 & 系统生成检测结果并可转化为治理任务。 \\ \hline
-    基本流程 & 1. 用户在治理模块选择检测范围与检测类型。 2. 系统执行对应检测并生成问题定位与影响范围。 3. 系统输出问题集合与建议处理方式。 \\ \hline
+    基本流程 & 1. 用户在治理模块选择检测范围与检测类型。\newline 2. 系统执行对应检测并生成问题定位与影响范围。\newline 3. 系统输出问题集合与建议处理方式。 \\ \hline
     替代流程 & 1. 若检测范围过大导致资源不足，系统支持分批检测并输出进度。 \\ \hline
-  \end{tabular}
+  \end{tabularx}
 \end{table}
 
 \begin{table}[!ht]
   \centering
   \caption{治理任务创建用例描述表}
   \label{tab:cg_task_create}
-  \begin{tabular}{c|p{10cm}}
+  \small
+  \begin{tabularx}{\linewidth}{c|>{\raggedright\arraybackslash}X}
     \hline
     ID & CG-02 \\ \hline
     用例名称 & 治理任务创建 \\ \hline
@@ -401,28 +419,29 @@
     用例描述 & 将检测结果转化为可分发的治理任务，明确责任人与处理要求。 \\ \hline
     触发条件 & 检测结果需要进入治理闭环并推动相关人员处理。 \\ \hline
     前置条件 & 已产生可定位的质量问题集合。 \\ \hline
-    后置条件 & 1. 系统创建治理任务并进入待处理状态。 2. 系统通知责任人。 \\ \hline
-    基本流程 & 1. 用户在检测结果中选择问题条目并点击创建任务。 2. 用户设置任务类型、优先级与责任人。 3. 系统创建任务并生成问题定位与建议处理内容。 \\ \hline
+    后置条件 & 1. 系统创建治理任务并进入待处理状态。\newline 2. 系统通知责任人。 \\ \hline
+    基本流程 & 1. 用户在检测结果中选择问题条目并点击创建任务。\newline 2. 用户设置任务类型、优先级与责任人。\newline 3. 系统创建任务并生成问题定位与建议处理内容。 \\ \hline
     替代流程 & 1. 若同一问题已存在未完成任务，系统提示合并或追加处理。 \\ \hline
-  \end{tabular}
+  \end{tabularx}
 \end{table}
 
 \begin{table}[!ht]
   \centering
   \caption{治理任务处理用例描述表}
   \label{tab:cg_task_handle}
-  \begin{tabular}{c|p{10cm}}
+  \small
+  \begin{tabularx}{\linewidth}{c|>{\raggedright\arraybackslash}X}
     \hline
     ID & CG-03 \\ \hline
     用例名称 & 治理任务处理 \\ \hline
     参与者 & 业务运营 \\ \hline
     用例描述 & 责任人根据任务定位对内容进行合并、修订、补充或下线，并提交处理结果。 \\ \hline
     触发条件 & 责任人收到治理任务并需要完成内容修订。 \\ \hline
-    前置条件 & 1. 责任人具备对应内容的编辑权限。 2. 任务处于可处理状态。 \\ \hline
-    后置条件 & 1. 内容变更进入相应发布流程。 2. 任务状态更新并记录处理结果。 \\ \hline
-    基本流程 & 1. 责任人打开治理任务查看问题定位与建议。 2. 责任人跳转至对应内容进行修订或合并。 3. 责任人提交任务处理说明并完成。 4. 系统更新任务状态并触发后续校验或复检。 \\ \hline
+    前置条件 & 1. 责任人具备对应内容的编辑权限。\newline 2. 任务处于可处理状态。 \\ \hline
+    后置条件 & 1. 内容变更进入相应发布流程。\newline 2. 任务状态更新并记录处理结果。 \\ \hline
+    基本流程 & 1. 责任人打开治理任务查看问题定位与建议。\newline 2. 责任人跳转至对应内容进行修订或合并。\newline 3. 责任人提交任务处理说明并完成。\newline 4. 系统更新任务状态并触发后续校验或复检。 \\ \hline
     替代流程 & 1. 若处理涉及多内容协同，系统支持拆分子任务并分别跟踪。 \\ \hline
-  \end{tabular}
+  \end{tabularx}
 \end{table}
 
 
@@ -431,7 +450,7 @@
 
 \begin{figure}[!ht]
   \centering
-  \fbox{\parbox{0.92\linewidth}{\vspace{18mm}\centering 数据洞察用例图占位（待补充）\vspace{18mm}}}
+  \includegraphics[width=1.0\linewidth]{./figure/figures-数据洞察用例图.drawio.pdf}
   \caption{数据洞察用例图}
   \label{fig:di_usecase}
 \end{figure}
@@ -442,72 +461,76 @@
   \centering
   \caption{页面数据监控用例描述表}
   \label{tab:di_page_monitor}
-  \begin{tabular}{c|p{10cm}}
+  \small
+  \begin{tabularx}{\linewidth}{c|>{\raggedright\arraybackslash}X}
     \hline
     ID & DI-01 \\ \hline
     用例名称 & 页面数据监控 \\ \hline
     参与者 & 业务负责人，业务运营 \\ \hline
     用例描述 & 用户查看页面层面的访问数据统计与趋势，分析PV、UV与点击率等指标，评估页面化展示的使用情况。 \\ \hline
     触发条件 & 需要评估某一空间/应用下页面化展示入口的访问与转化效果。 \\ \hline
-    前置条件 & 1. 页面曝光与点击等事件已采集。 2. 指标已完成聚合计算。 \\ \hline
+    前置条件 & 1. 页面曝光与点击等事件已采集。\newline 2. 指标已完成聚合计算。 \\ \hline
     后置条件 & 无 \\ \hline
-    基本流程 & 1. 用户进入数据洞察模块并选择时间范围与空间/应用。 2. 系统展示页面PV/UV/点击率趋势与TopN。 3. 用户按页面/组件维度筛选并下钻查看访问或点击明细。 \\ \hline
+    基本流程 & 1. 用户进入数据洞察模块并选择时间范围与空间/应用。\newline 2. 系统展示页面PV/UV/点击率趋势与TopN。\newline 3. 用户按页面/组件维度筛选并下钻查看访问或点击明细。 \\ \hline
     替代流程 & 1. 若数据量过大，系统按时间粒度或分页方式展示明细。 \\ \hline
-  \end{tabular}
+  \end{tabularx}
 \end{table}
 
 \begin{table}[!ht]
   \centering
   \caption{会话维度分析用例描述表}
   \label{tab:di_session_analysis}
-  \begin{tabular}{c|p{10cm}}
+  \small
+  \begin{tabularx}{\linewidth}{c|>{\raggedright\arraybackslash}X}
     \hline
     ID & DI-02 \\ \hline
     用例名称 & 会话维度分析 \\ \hline
     参与者 & 平台负责人，业务负责人 \\ \hline
     用例描述 & 用户在会话维度对相似Query进行聚类分析，查看会话数量、模型识别解决率、意向转人工率与转人工率等指标，定位高频问题与异常会话簇。 \\ \hline
     触发条件 & 需要从会话视角评估智能问答链路效果或定位问题分布。 \\ \hline
-    前置条件 & 1. 会话数据与问答链路事件已采集。 2. 会话聚类结果与指标已完成聚合计算。 \\ \hline
+    前置条件 & 1. 会话数据与问答链路事件已采集。\newline 2. 会话聚类结果与指标已完成聚合计算。 \\ \hline
     后置条件 & 无 \\ \hline
-    基本流程 & 1. 用户进入会话维度分析视图并选择时间范围与空间/应用。 2. 系统展示整体会话指标与聚类列表。 3. 用户选择某一聚类下钻查看聚类内的Query与会话明细。 \\ \hline
+    基本流程 & 1. 用户进入会话维度分析视图并选择时间范围与空间/应用。\newline 2. 系统展示整体会话指标与聚类列表。\newline 3. 用户选择某一聚类下钻查看聚类内的Query与会话明细。 \\ \hline
     替代流程 & 1. 用户可按时间粒度、聚类标题或转人工率等条件筛选聚类。 \\ \hline
-  \end{tabular}
+  \end{tabularx}
 \end{table}
 
 \begin{table}[!ht]
   \centering
   \caption{内容维度分析用例描述表}
   \label{tab:di_content_analysis}
-  \begin{tabular}{c|p{10cm}}
+  \small
+  \begin{tabularx}{\linewidth}{c|>{\raggedright\arraybackslash}X}
     \hline
     ID & DI-03 \\ \hline
     用例名称 & 内容维度分析 \\ \hline
     参与者 & 业务负责人，业务运营 \\ \hline
     用例描述 & 用户从内容视角查看内容的被召回次数、被生成次数、意向转人工次数与转人工次数等指标，评估内容在智能问答场景中的实际使用效果。 \\ \hline
     触发条件 & 需要评估内容体系的使用效果并识别高价值或低效内容。 \\ \hline
-    前置条件 & 1. 召回与生成链路事件已采集并关联到内容。 2. 内容维度指标已完成聚合计算。 \\ \hline
+    前置条件 & 1. 召回与生成链路事件已采集并关联到内容。\newline 2. 内容维度指标已完成聚合计算。 \\ \hline
     后置条件 & 无 \\ \hline
-    基本流程 & 1. 用户进入内容维度分析视图并选择时间范围与空间/应用。 2. 系统展示内容指标列表与TopN。 3. 用户选择某一内容下钻查看命中的会话或Query明细。 \\ \hline
+    基本流程 & 1. 用户进入内容维度分析视图并选择时间范围与空间/应用。\newline 2. 系统展示内容指标列表与TopN。\newline 3. 用户选择某一内容下钻查看命中的会话或Query明细。 \\ \hline
     替代流程 & 1. 用户可按内容类型、类目与标签筛选内容集合。 \\ \hline
-  \end{tabular}
+  \end{tabularx}
 \end{table}
 
 \begin{table}[!ht]
   \centering
   \caption{会话明细用例描述表}
   \label{tab:di_session_detail}
-  \begin{tabular}{c|p{10cm}}
+  \small
+  \begin{tabularx}{\linewidth}{c|>{\raggedright\arraybackslash}X}
     \hline
     ID & DI-04 \\ \hline
     用例名称 & 会话明细 \\ \hline
     参与者 & 平台负责人，业务负责人，业务运营 \\ \hline
     用例描述 & 用户查看单个会话的详细信息，包括聚类类型、原始Query、改写Query、召回内容以及是否转人工等信息，用于定位会话异常与内容支撑问题。 \\ \hline
     触发条件 & 需要对某一聚类或某一异常指标进行下钻分析与问题定位。 \\ \hline
-    前置条件 & 1. 会话事件已采集并能关联到会话ID。 2. 会话明细数据可按权限查询。 \\ \hline
+    前置条件 & 1. 会话事件已采集并能关联到会话ID。\newline 2. 会话明细数据可按权限查询。 \\ \hline
     后置条件 & 无 \\ \hline
-    基本流程 & 1. 用户从会话维度分析或内容维度分析页面下钻进入会话明细。 2. 系统展示会话的原始Query与改写Query、召回内容、回复内容与转人工信息。 3. 用户按时间轴查看多轮交互细节。 \\ \hline
+    基本流程 & 1. 用户从会话维度分析或内容维度分析页面下钻进入会话明细。\newline 2. 系统展示会话的原始Query与改写Query、召回内容、回复内容与转人工信息。\newline 3. 用户按时间轴查看多轮交互细节。 \\ \hline
     替代流程 & 1. 若用户无权限查看敏感字段，系统对用户标识与原始文本等字段脱敏展示。 \\ \hline
-  \end{tabular}
+  \end{tabularx}
 \end{table}
 
 \subsection{系统非功能需求}
@@ -527,19 +550,19 @@
 
 \begin{figure}[!ht]
   \centering
-  \includegraphics[width=1.0\linewidth]{./figure/figures-系统架构图.pdf}
+  \includegraphics[width=1.0\linewidth]{./figure/figures-系统架构图.drawio.pdf}
   \caption{系统架构图}
   \label{fig:system}
 \end{figure}
 
 为便于从不同角度理解平台的整体设计，本文在系统架构图基础上，引入逻辑视图、开发视图与物理视图对平台进行补充说明。逻辑视图强调业务能力与闭环关系，开发视图强调工程模块划分与依赖关系，物理视图强调部署形态与基础设施选型。
 
-（1）逻辑视图。图\ref{fig:system_logic_view}为平台的逻辑视图，用于从业务能力与数据能力角度描述系统的主要功能模块及其协作关系。平台在逻辑上由内容管理、内容应用、内容治理与数据洞察四个核心域构成：内容管理负责空间与应用组织、内容生产维护、内容权限（content\_auth）与审批发布，将knowledge、faq、course与case等多形态内容纳入统一内容资产；内容应用面向门户与管理后台提供展示与检索能力，并面向上游智能助手提供生成式问答能力，支持返回可追溯的引用来源；内容治理对内容质量进行重复、歧义与覆盖等维度的检测，并通过治理任务推动修订与复检；数据洞察对访问、检索与问答行为进行统计分析，评估内容效果与治理收益并反哺运营策略。四个核心域以统一内容模型作为数据输入口径，并通过发布事件与任务事件实现跨域协同，形成“生产—发布—应用—治理—评估”的闭环体系。
+（1）逻辑视图。图\ref{fig:system_logic_view}为平台的逻辑视图，用于从业务能力与数据能力角度描述系统的主要功能模块及其协作关系。平台在逻辑上由内容管理、内容应用、内容治理与数据洞察四个核心域构成：内容管理负责空间与应用组织、内容生产维护、内容权限（content\_auth）与审批发布，将knowledge、faq、course与case等多形态内容纳入统一内容资产；内容应用面向前台与管理后台提供展示与检索能力，并面向上游智能助手提供智能问答能力，支持返回可追溯的引用来源；内容治理对内容质量进行重复、歧义与覆盖等维度的检测，并通过治理任务推动修订与复检；数据洞察对访问、检索与问答行为进行统计分析，评估内容效果与治理收益并反哺运营策略。四个核心域以统一内容模型作为数据输入口径，并通过发布事件与任务事件实现跨域协同，形成“生产—发布—应用—治理—评估”的闭环体系。
 
 \begin{figure}[!ht]
   \centering
-  \fbox{\parbox{0.92\linewidth}{\vspace{14mm}\centering 系统逻辑视图占位（待补充）\vspace{14mm}}}
-  \caption{系统逻辑视图}
+  \includegraphics[width=1.0\linewidth]{./figure/figures-逻辑视图.drawio.pdf}
+  \caption{逻辑视图}
   \label{fig:system_logic_view}
 \end{figure}
 
@@ -547,7 +570,7 @@
 
 \begin{figure}[!ht]
   \centering
-  \fbox{\parbox{0.92\linewidth}{\vspace{14mm}\centering 开发视图占位（待补充）\vspace{14mm}}}
+  \includegraphics[width=1.0\linewidth]{./figure/figures-开发视图.drawio.pdf}
   \caption{开发视图}
   \label{fig:system_dev_view}
 \end{figure}
@@ -556,7 +579,7 @@
 
 \begin{figure}[!ht]
   \centering
-  \fbox{\parbox{0.92\linewidth}{\vspace{14mm}\centering 物理视图占位（待补充）\vspace{14mm}}}
+  \includegraphics[width=1.0\linewidth]{./figure/figures-物理视图.drawio.pdf}
   \caption{物理视图}
   \label{fig:system_physical_view}
 \end{figure}
@@ -576,39 +599,25 @@
 \item \textbf{标签（Tag）}：作为跨类目的扁平化属性集合，用于灵活的内容聚合与运营筛选。
 \end{itemize}
 
-空间与应用管理的关键交互过程如图\ref{fig:cm_space_app_seq}所示。
+空间与应用管理的关键交互过程如图\ref{fig:cm_space_app_seq}所示。用户先创建空间，然后再空间下创建应用，创建空间和应用时，都会通过权限服务校验用户的权限。
 
 \begin{figure}[!ht]
   \centering
-  \fbox{\parbox{0.92\linewidth}{\vspace{14mm}\centering 空间与应用管理时序图占位（待补充）\vspace{14mm}}}
+  \includegraphics[width=1.0\linewidth]{./figure/figures-空间与应用管理时序图.drawio.pdf}
   \caption{空间与应用管理时序图}
   \label{fig:cm_space_app_seq}
 \end{figure}
 
-（2）多形态内容管理。平台在内容层引入统一内容模型，使用content\_type区分knowledge、faq、course与case四类内容形态，并由一张内容表（content）维护所有内容的公共元数据字段（内容ID、类型、标题、摘要、正文引用、创建时间、更新时间、状态等）。不同内容类型的正文或结构字段存储在对应子表或文档库中，如knowledge、faq、course等；其中case为适配结构化字段灵活演进，其详情存储在MongoDB中。该设计保证了多形态内容在管理侧具备一致的生命周期操作，并为内容创编与详情能力提供基础。平台核心领域对象及其关联关系可用类图表达，如图\ref{fig:cm_domain_class}所示。
+（2）多形态内容管理。平台在内容层引入统一内容模型，使用content\_type区分knowledge、faq、course与case四类内容形态，并由一张内容表（content）维护所有内容的公共元数据字段（内容ID、类型、标题、摘要、正文引用、创建时间、更新时间、状态等）。不同内容类型的正文或结构字段存储在对应子表或文档库中，如knowledge、faq、course等；其中case为适配结构化字段灵活演进，其详情存储在MongoDB中。该设计保证了多形态内容在管理侧具备一致的生命周期操作，并为内容创编与详情能力提供基础。
 
 \begin{figure}[!ht]
   \centering
-  \fbox{\parbox{0.92\linewidth}{\vspace{18mm}\centering 平台核心领域模型类图占位（待补充）\vspace{18mm}}}
-  \caption{平台核心领域模型类图}
-  \label{fig:cm_domain_class}
-\end{figure}
-
-\begin{figure}[!ht]
-  \centering
-  \fbox{\parbox{0.92\linewidth}{\vspace{14mm}\centering 内容创建与维护时序图占位（待补充）\vspace{14mm}}}
-  \caption{内容创建与维护时序图}
-  \label{fig:cm_content_version_seq}
-\end{figure}
-
-\begin{figure}[!ht]
-  \centering
-  \fbox{\parbox{0.92\linewidth}{\vspace{14mm}\centering 内容状态机图占位（待补充）\vspace{14mm}}}
+  \includegraphics[width=1.0\linewidth]{./figure/figures-内容状态机图.drawio.pdf}
   \caption{内容状态机图}
   \label{fig:cm_content_state}
 \end{figure}
 
-（3）权限与审批发布。平台在空间与应用维度进行访问隔离，并在内容粒度通过content\_auth实现策略式授权，以满足精细化操作控制需求。对于管理端操作，平台结合RBAC角色体系完成基础权限控制；对于内容对象，平台通过“授权对象+策略+变量+权限码”的模型表达细粒度权限。RBAC权限矩阵如表\ref{tab:rbac_matrix}所示。鉴权决策流程与审批发布链路分别如图\ref{fig:cm_auth_flow}与图\ref{fig:content_publish}所示。
+（3）权限与审批发布。平台在空间与应用维度进行访问隔离，并在内容粒度通过content\_auth实现策略式授权，以满足精细化操作控制需求。对于管理端操作，平台结合RBAC角色体系完成基础权限控制；对于内容对象，平台通过“授权对象+策略+变量+权限码”的模型表达细粒度权限。RBAC权限矩阵如表\ref{tab:rbac_matrix}所示。审批发布链路如图\ref{fig:content_publish}所示。
 
 \begin{table}[!ht]
   \centering
@@ -623,95 +632,44 @@
   \end{tabular}
 \end{table}
 
-权限体系在工程实现中由RBAC与content\_auth两部分叠加组成：RBAC负责模块与操作级的基础权限，content\_auth负责内容对象级的策略授权。两类对象及其关系可用类图表达，如图\ref{fig:cm_auth_class}所示。
-
-\begin{figure}[!ht]
-  \centering
-  \fbox{\parbox{0.92\linewidth}{\vspace{18mm}\centering 权限与授权领域类图占位（待补充）\vspace{18mm}}}
-  \caption{权限与授权领域类图}
-  \label{fig:cm_auth_class}
-\end{figure}
-
-\begin{figure}[!ht]
-  \centering
-  \fbox{\parbox{0.92\linewidth}{\vspace{14mm}\centering 内容权限鉴权流程图占位（待补充）\vspace{14mm}}}
-  \caption{内容权限鉴权流程图}
-  \label{fig:cm_auth_flow}
-\end{figure}
+权限体系在工程实现中由RBAC与content\_auth两部分叠加组成：RBAC负责模块与操作级的基础权限，content\_auth负责内容对象级的策略授权。
 
 在内容发布环节，平台遵循“编辑—提审—审批—发布”的流转机制：内容上线前需要通过审批流程，审批通过后内容服务更新内容状态为已发布，并发布内容更新事件到消息队列，供下游索引更新与相关统计链路异步消费，以降低主链路耦合并提升整体吞吐。
 
 \begin{figure}[!ht]
   \centering
-  \includegraphics[width=1.0\linewidth]{./figure/figures-内容发布事件时序图.png}
+  \includegraphics[width=1.0\linewidth]{./figure/figures-内容发布事件时序图.drawio.pdf}
   \caption{内容发布流程时序图}
   \label{fig:content_publish}
 \end{figure}
 
-审批与发布链路涉及内容状态、审批记录与发布事件等核心对象，其数据关系与状态约束可用类图表达，如图\ref{fig:cm_publish_class}所示。
-
-\begin{figure}[!ht]
-  \centering
-  \fbox{\parbox{0.92\linewidth}{\vspace{18mm}\centering 审批与发布领域类图占位（待补充）\vspace{18mm}}}
-  \caption{审批与发布领域类图}
-  \label{fig:cm_publish_class}
-\end{figure}
-
 \subsection{内容应用模块设计}
 
-内容应用模块负责将管理好的内容资产转化为可被消费的服务，支持“页面化展示”与“生成式问答”两大核心场景。
+内容应用模块负责将管理好的内容资产转化为可被消费的服务，支持“页面化展示”与“智能问答”两大核心场景。
 
-（1）多形态内容前置处理与索引构建。为支撑高效检索与问答，内容在发布后需经过前置处理与索引构建流程。对于页面化展示与搜索，系统构建基于ES的全文索引（包含标题、摘要、元数据与权限信息）；对于生成式问答，系统构建基于向量数据库的切片索引（将正文切分为语义完整的片段并向量化）。该过程由MQ消息驱动，确保索引与数据库状态准实时一致；在包含结构化字段或多模态信息的内容场景中，类似的前置归一与索引组织同样是提升检索可用性的关键环节\cite{gondhalekar2025multifinrag}。索引构建流程如图\ref{fig:index_build_flow}所示。
+（1）多形态内容前置处理与索引构建。为支撑高效检索与问答，内容在发布后需经过前置处理与索引构建流程。对于页面化展示与搜索，系统构建基于ES的全文索引（包含标题、摘要、元数据与权限信息）；对于智能问答，系统构建基于向量数据库的切片索引（将正文切分为语义完整的片段并向量化）。该过程由MQ消息驱动，确保索引与数据库状态准实时一致；在包含结构化字段或多模态信息的内容场景中，类似的前置归一与索引组织同样是提升检索可用性的关键环节\cite{gondhalekar2025multifinrag}。索引构建流程如图\ref{fig:index_build_flow}所示。
 
 \begin{figure}[!ht]
   \centering
-  \fbox{\parbox{0.9\linewidth}{\vspace{2cm}\centering 索引构建流程图占位（待补充）\vspace{2cm}}}
+  \includegraphics[width=1.0\linewidth]{./figure/figures-索引构建流程示意图.drawio.pdf}
   \caption{索引构建流程图}
   \label{fig:index_build_flow}
 \end{figure}
 
-（2）页面化内容应用机制。面向门户与管理后台，提供基于ES索引的统一内容展示服务，包括类目导航、标签筛选、列表分页与全文检索。系统利用ES的倒排索引能力实现全量字段过滤（含权限控制），并结合数据库回查机制保障详情页的强一致性。页面化内容展示流程如图\ref{fig:ca_display_flow}所示。
+（2）页面化内容应用机制。面向门户与管理后台，提供基于ES索引的统一内容展示服务，包括类目导航、标签筛选、列表分页与全文检索。系统利用ES的倒排索引能力实现全量字段过滤（含权限控制），并结合数据库回查机制保障详情页的强一致性。
+
+（3）多通道召回。面向智能问答场景，系统采用“ES全文检索 + Embedding向量召回”的双路架构。全文通道侧重精确关键词匹配与元数据过滤，向量通道侧重语义理解与长尾问法覆盖。两路召回结果经融合去重与重排后，输出TopN高质量切片作为回答依据，这类“多路召回+融合重排”的组合在工程实践中能够有效提升召回质量与可控性\cite{ravishankar2025novel,wang2025finsage}。
+
+（4）智能问答流程。系统将召回的证据切片注入大模型Prompt，结合业务约束生成回答，并在输出中附带可溯源的引用标记。该流程实现了“问答-证据-治理”的闭环，有效降低了模型幻觉风险。完整的智能问答流程如图\ref{fig:ca_rag_flow}所示。
 
 \begin{figure}[!ht]
   \centering
-  \fbox{\parbox{0.9\linewidth}{\vspace{2cm}\centering 页面化内容展示流程图占位（待补充）\vspace{2cm}}}
-  \caption{页面化内容展示流程图}
-  \label{fig:ca_display_flow}
-\end{figure}
-
-（3）多通道召回。面向生成式问答场景，系统采用“ES全文检索 + Embedding向量召回”的双路架构。全文通道侧重精确关键词匹配与元数据过滤，向量通道侧重语义理解与长尾问法覆盖。两路召回结果经融合去重与重排后，输出TopN高质量切片作为回答依据，这类“多路召回+融合重排”的组合在工程实践中能够有效提升召回质量与可控性\cite{ravishankar2025novel,wang2025finsage}。内容检索流程如图\ref{fig:ca_search_flow}所示。
-
-\begin{figure}[!ht]
-  \centering
-  \fbox{\parbox{0.9\linewidth}{\vspace{2cm}\centering 内容检索流程图占位（待补充）\vspace{2cm}}}
-  \caption{内容检索流程图}
-  \label{fig:ca_search_flow}
-\end{figure}
-
-（4）生成式问答流程。系统将召回的证据切片注入大模型Prompt，结合业务约束生成回答，并在输出中附带可溯源的引用标记。该流程实现了“问答-证据-治理”的闭环，有效降低了模型幻觉风险。生成式问答流程如图\ref{fig:ca_rag_flow}所示。
-
-\begin{figure}[!ht]
-  \centering
-  \fbox{\parbox{0.9\linewidth}{\vspace{2cm}\centering 生成式问答流程图占位（待补充）\vspace{2cm}}}
-  \caption{生成式问答流程图}
+  \includegraphics[width=1.0\linewidth]{./figure/figures-智能问答完整流程图.drawio.pdf}
+  \caption{智能问答流程图}
   \label{fig:ca_rag_flow}
 \end{figure}
 
-内容应用模块涉及的关键类图如图\ref{fig:ca_index_class}与图\ref{fig:ca_qa_class}所示。
-
-\begin{figure}[!ht]
-  \centering
-  \fbox{\parbox{0.9\linewidth}{\vspace{2cm}\centering 切片与索引领域类图占位（待补充）\vspace{2cm}}}
-  \caption{切片与索引领域类图}
-  \label{fig:ca_index_class}
-\end{figure}
-
-\begin{figure}[!ht]
-  \centering
-  \fbox{\parbox{0.9\linewidth}{\vspace{2cm}\centering 生成式问答领域类图占位（待补充）\vspace{2cm}}}
-  \caption{生成式问答领域类图}
-  \label{fig:ca_qa_class}
-\end{figure}
+内容应用模块涉及的关键对象包括内容切片、索引条目以及问答证据引用等。
 
 
 \subsection{内容治理模块设计}
@@ -720,61 +678,47 @@
 
 （1）治理目标与度量。内容质量体系从内容覆盖、内容质量与效果评估三个方向建立指标口径，并结合客观质量与主观反馈实现质量度量。在内容覆盖方面，关注在给定阈值下用户原声是否能够召回到相关知识；在内容质量方面，关注内容重复与口径冲突带来的冗余与歧义，其中内容元数据的完整性与一致性等维度同样会影响质量评估口径\cite{kumar2025exploring}；在效果评估方面，关注内容在检索与问答链路中的命中、引用与会话解决效果等指标，为治理优先级与策略调整提供依据\cite{mahanti2019data,stvilia2024data}。
 
-（2）重复度/歧义度检测模型。重复度与歧义度检测的核心目标是降低内容冗余、消除逻辑冲突。系统设计了“粗召回+精判别”的两阶段检测模型：首先利用向量检索引擎快速筛选出高相似度的候选内容对，将计算范围从全量空间缩小至局部邻域；随后引入大语言模型作为裁判员，对候选内容对进行深层语义比对。若发现内容高度重叠则判定为重复，若发现同一主体下的描述存在逻辑冲突则判定为歧义。该模型在保证检测精度的同时，有效解决了大规模内容库两两比对的性能瓶颈问题。
+（2）重复度/歧义度检测模型。重复度与歧义度检测的核心目标是降低内容冗余、消除逻辑冲突。系统设计了“粗召回+精判别”的两阶段检测模型：首先利用向量检索引擎快速筛选出高相似度的候选内容对，将计算范围从全量空间缩小至局部邻域；随后引入大语言模型作为裁判员，对候选内容对进行深层语义比对。若发现内容高度重叠则判定为重复，若发现同一主体下的描述存在逻辑冲突则判定为歧义。该模型在保证检测精度的同时，有效解决了大规模内容库两两比对的性能瓶颈问题\cite{kim2026survey,abbas2023semdedup,gartner2024automated}。
 
-（3）覆盖度检测机制。覆盖度检测旨在持续发现知识盲区。系统采用“需求驱动”的检测机制，以用户的真实会话日志为输入：首先通过意图分类筛选出业务咨询类Query，再结合语义聚类技术将零散的未命中Query聚合为“高频缺失问题簇”。通过计算代表性Query的召回率与回答质量，系统能够精准定位内容缺失点，并生成对应的覆盖度治理任务，推动知识库的针对性补充。
+重复度与歧义度检测的整体流程示意如图\ref{fig:cg_dup_amb_model_flow}所示。
+
+\begin{figure}[!ht]
+  \centering
+  \includegraphics[width=1.0\linewidth]{./figure/figures-重复度_歧义度模型检测流程示意图.drawio.pdf}
+  \caption{重复度与歧义度模型检测流程示意图}
+  \label{fig:cg_dup_amb_model_flow}
+\end{figure}
+
+（3）覆盖度检测机制。覆盖度检测旨在持续发现知识盲区。系统采用“需求驱动”的检测机制，以用户的真实会话日志为输入：首先通过意图分类筛选出业务咨询类Query，再结合语义聚类技术将零散的未命中Query聚合为“高频缺失问题簇”。通过计算代表性Query的召回率与回答质量，系统能够精准定位内容缺失点，并生成对应的覆盖度治理任务，推动知识库的针对性补充\cite{jain1999data,rokach2005clustering}。
 
 （4）质量治理任务线上化。为将质量治理从离线跑数与人工推动升级为线上闭环，平台将治理过程抽象为主任务与子任务两层结构。主任务负责一次治理计算的配置与状态管理，包含任务名称、空间、会话周期与召回阈值等上下文信息；主任务进入计算中后生成治理任务列表，并在计算完成后对外展示结果。子任务主要包含覆盖任务与重复歧义任务两类：覆盖任务承载缺知识聚类结果，支持人工标记“无需补充/需要补充”并填写说明，系统每日巡检若发现已可召回到相关答案则自动完成；重复歧义任务承载重复对与歧义对结果，支持人工判断是否需要下线并完成处理标记，系统每日巡检若发现内容变更、下线或删除后不再存在重复/歧义，则自动完成。此外，针对算法误判等特殊场景，支持责任人申请“强制完成”，经审批通过后直接关闭任务，防止无效治理。质量治理任务线上化的结构与关键流程如图\ref{fig:cg_task_flow}所示。
 
 \begin{figure}[!ht]
   \centering
-  \fbox{\parbox{0.92\linewidth}{\vspace{14mm}\centering 质量治理任务线上化流程示意图占位（待补充）\vspace{14mm}}}
+  \includegraphics[width=1.0\linewidth]{./figure/figures-质量治理任务线上化流程示意图.drawio.pdf}
   \caption{质量治理任务线上化流程示意图}
   \label{fig:cg_task_flow}
 \end{figure}
 
-治理任务线上化涉及主任务、覆盖任务、重复/歧义任务以及任务处理记录等对象，并需表达任务状态机与关联关系，其领域模型类图如图\ref{fig:cg_task_class}所示。
-
-\begin{figure}[!ht]
-  \centering
-  \fbox{\parbox{0.92\linewidth}{\vspace{18mm}\centering 治理任务领域类图占位（待补充）\vspace{18mm}}}
-  \caption{治理任务领域类图}
-  \label{fig:cg_task_class}
-\end{figure}
-
-（5）复检回收与链路一致性。治理任务处理通常会引发内容修订与再次发布，平台需要保证“内容资产—索引—问答结果”在治理后保持一致。对于需要修订的内容，治理处理应与内容管理的提审与发布流程打通，发布后由索引构建服务消费发布事件完成增量索引更新；随后对任务范围执行复检回收，确认质量问题是否消除，并将复检结果与指标变化回收至数据洞察体系，用于形成治理前后对比与策略迭代。跨域协同链路示意如图\ref{fig:cg_fix_publish_seq}所示。
-
-\begin{figure}[!ht]
-  \centering
-  \fbox{\parbox{0.92\linewidth}{\vspace{14mm}\centering 治理修订-发布-复检时序图占位（待补充）\vspace{14mm}}}
-  \caption{治理修订-发布-复检时序图}
-  \label{fig:cg_fix_publish_seq}
-\end{figure}
+（5）复检回收与链路一致性。治理任务处理通常会引发内容修订与再次发布，平台需要保证“内容资产—索引—问答结果”在治理后保持一致。对于需要修订的内容，治理处理应与内容管理的提审与发布流程打通，发布后由索引构建服务消费发布事件完成增量索引更新；随后对任务范围执行复检回收，确认质量问题是否消除，并将复检结果与指标变化回收至数据洞察体系，用于形成治理前后对比与策略迭代。
 
 \subsection{数据洞察模块设计}
 数据洞察模块为平台提供效果评估与问题定位能力，是“应用驱动生产、数据反哺治理”的关键闭环环节。该模块的实现链路采用“前端埋点与服务端事件采集$\rightarrow$数仓统一加工与指标口径沉淀$\rightarrow$洞察服务查询与权限控制$\rightarrow$前端可视化与下钻明细”的模式：数据加工与指标口径由数仓侧负责，本平台侧重点在事件规范、采集链路、与数仓/BI的对接以及查询服务建设。数据采集与指标生成链路示意如图\ref{fig:di_pipeline}所示。
 
 \begin{figure}[!ht]
   \centering
-  \fbox{\parbox{0.92\linewidth}{\vspace{14mm}\centering 数据采集与指标生成链路示意图占位（待补充）\vspace{14mm}}}
+  \includegraphics[width=1.0\linewidth]{./figure/figures-数据采集与指标生成链路示意图.drawio.pdf}
   \caption{数据采集与指标生成链路示意图}
   \label{fig:di_pipeline}
 \end{figure}
 
 （1）数据采集。数据采集需要覆盖页面化消费链路与智能问答链路两类场景。在页面化链路中，平台采集曝光、点击、搜索输入与结果点击等行为数据；在问答链路中，平台采集问题输入、召回证据、生成结果与转人工等链路数据。为避免采集口径不一致导致分析偏差，平台对埋点事件与字段进行统一定义，例如page\_view、click、query\_submit、rag\_recall、llm\_generate、handoff\_intent与handoff\_success等，并统一携带app\_id、space\_id、session\_id、trace\_id与content\_id等公共维度字段，便于端到端追踪与明细还原。
 
-为支撑事件的可扩展与跨链路关联，平台将事件抽象为“公共维度 + ext扩展字段”的统一模型，并以trace\_id与session\_id建立会话与链路关联。事件数据模型与关键维度关系如图\ref{fig:di_event_class}所示。
-
-\begin{figure}[!ht]
-  \centering
-  \fbox{\parbox{0.92\linewidth}{\vspace{18mm}\centering 事件采集与维度模型类图占位（待补充）\vspace{18mm}}}
-  \caption{事件采集与维度模型类图}
-  \label{fig:di_event_class}
-\end{figure}
+为支撑事件的可扩展与跨链路关联，平台将事件抽象为“公共维度 + ext扩展字段”的统一模型，并以trace\_id与session\_id建立会话与链路关联。
 
 （2）指标体系与分析模型设计。为全面评估平台运行效果，平台构建了覆盖页面、会话与内容三个视角的指标体系，并支持从聚合指标下钻至会话明细。页面视角关注页面访问量（PV）、用户量（UV）与点击率，评估内容门户的使用情况；会话视角以会话为单位，关注会话总量、模型识别解决率、意向转人工率与实际转人工率，评估智能问答链路的整体效能；内容视角关注内容在RAG链路中的被召回次数、被生成引用次数以及关联的转人工会话数，识别高价值内容与低效内容。此外，平台提供会话明细查询能力，支持追溯单个会话的原始Query、改写结果、召回证据与生成回答，为问题定位与策略优化提供微观依据。
 
-（3）会话聚类机制设计。会话聚类是平台从统计视角识别高频问题与知识盲区的核心机制。该机制通过语义向量技术将海量零散的历史Query归并为有限的语义主题簇，将非结构化的日志转化为结构化的“问题簇”。聚类结果包含聚类中心（代表性Query）、聚类规模（热度）以及聚类主题标签（由大模型总结生成）。通过会话聚类，运营人员可以快速发现高频且低解决率的头部问题，并将其作为覆盖度治理任务的输入，从而实现“数据反哺治理”的闭环。
+（3）会话聚类机制设计。会话聚类是平台从统计视角识别高频问题与知识盲区的核心机制。该机制通过语义向量技术将海量零散的历史Query归并为有限的语义主题簇，将非结构化的日志转化为结构化的“问题簇”。聚类结果包含聚类中心（代表性Query）、聚类规模（热度）以及聚类主题标签（由大模型总结生成）。通过会话聚类，运营人员可以快速发现高频且低解决率的头部问题，并将其作为覆盖度治理任务的输入，从而实现“数据反哺治理”的闭环\cite{jain1999data,rokach2005clustering}。
 
 \section{数据库设计}
 平台的持久化存储围绕“统一内容资产 + 权限控制”展开：空间、应用、内容元数据、审批流转与内容权限（content\_auth）等结构化数据落在关系型数据库中；案例（case）的详情数据因字段结构灵活存储在MongoDB中。检索与问答链路使用全文检索与语义向量两类索引以支撑页面检索与RAG召回；数据洞察的离线聚合结果由数仓侧产出，平台侧以查询接口承接并展示。
@@ -782,9 +726,11 @@
 \subsection{概念结构设计}
 平台以空间与应用作为组织边界：空间（Space）用于区分不同业务线并形成权限边界，应用（Application）用于表示空间下的具体业务领域或使用场景。内容（Content）作为统一抽象实体，通过内容类型字段区分knowledge、faq、course与case四类内容形态，并与类目、标签共同构成内容组织方式。权限体系由两部分叠加：一是平台管理权限，采用“角色-权限-作用域”的RBAC模型；二是内容级可见性与可操作范围，由content\_auth模块在内容粒度再判一层，以支持免登录可见、员工/部门/角色匹配等策略。
 
+数据库E-R图如图\ref{fig:db_er}所示。
+
 \begin{figure}[!ht]
   \centering
-  \fbox{\parbox{0.92\linewidth}{\vspace{14mm}\centering 数据库E-R图占位（待补充）\vspace{14mm}}}
+  \includegraphics[width=1.0\linewidth]{./figure/figures-数据库E-R图.drawio.pdf}
   \caption{数据库E-R图}
   \label{fig:db_er}
 \end{figure}
@@ -798,7 +744,8 @@
   \centering
   \caption{空间表（space）}
   \label{tab:db_space}
-  \begin{tabular}{c|c|c|p{6.3cm}}
+  \small
+  \begin{tabular}{>{\raggedright\arraybackslash}p{0.20\linewidth}|>{\raggedright\arraybackslash}p{0.16\linewidth}|>{\raggedright\arraybackslash}p{0.16\linewidth}|>{\raggedright\arraybackslash}p{0.32\linewidth}}
     \hline
     字段名 & 字段中文名 & 字段类型 & 说明 \\ \hline
     id & 空间ID & bigint & 主键 \\ \hline
@@ -814,7 +761,8 @@
   \centering
   \caption{应用表（application）}
   \label{tab:db_application}
-  \begin{tabular}{c|c|c|p{6.3cm}}
+  \small
+  \begin{tabular}{>{\raggedright\arraybackslash}p{0.20\linewidth}|>{\raggedright\arraybackslash}p{0.16\linewidth}|>{\raggedright\arraybackslash}p{0.16\linewidth}|>{\raggedright\arraybackslash}p{0.32\linewidth}}
     \hline
     字段名 & 字段中文名 & 字段类型 & 说明 \\ \hline
     id & 应用ID & bigint & 主键 \\ \hline
@@ -833,7 +781,8 @@
   \centering
   \caption{内容表（content）}
   \label{tab:db_content}
-  \begin{tabular}{c|c|c|p{6.3cm}}
+  \small
+  \begin{tabular}{>{\raggedright\arraybackslash}p{0.20\linewidth}|>{\raggedright\arraybackslash}p{0.16\linewidth}|>{\raggedright\arraybackslash}p{0.16\linewidth}|>{\raggedright\arraybackslash}p{0.32\linewidth}}
     \hline
     字段名 & 字段中文名 & 字段类型 & 说明 \\ \hline
     id & 内容ID & bigint & 主键 \\ \hline
@@ -842,7 +791,7 @@
     content\_type & 内容类型 & varchar(50) & knowledge/faq/course/case \\ \hline
     title & 标题 & varchar(255) & \\ \hline
     summary & 摘要 & varchar(1024) & \\ \hline
-    status & 状态 & varchar(50) & DRAFT/PENDING\_REVIEW/PUBLISHED/OFFLINE/DELETED \\ \hline
+    status & 状态 & varchar(50) & DRAFT / PENDING\_REVIEW / PUBLISHED / OFFLINE / DELETED \\ \hline
     create\_time & 创建时间 & datetime & \\ \hline
     modify\_time & 更新时间 & datetime & \\ \hline
   \end{tabular}
@@ -854,7 +803,8 @@
   \centering
   \caption{知识内容表（knowledge）}
   \label{tab:db_knowledge}
-  \begin{tabular}{c|c|c|p{6.3cm}}
+  \small
+  \begin{tabular}{>{\raggedright\arraybackslash}p{0.20\linewidth}|>{\raggedright\arraybackslash}p{0.16\linewidth}|>{\raggedright\arraybackslash}p{0.16\linewidth}|>{\raggedright\arraybackslash}p{0.32\linewidth}}
     \hline
     字段名 & 字段中文名 & 字段类型 & 说明 \\ \hline
     id & 主键ID & bigint & 主键 \\ \hline
@@ -867,41 +817,45 @@
   \centering
   \caption{问答内容表（faq）}
   \label{tab:db_faq}
-  \begin{tabular}{c|c|c|p{6.3cm}}
+  \small
+  \begin{tabular}{>{\raggedright\arraybackslash}p{0.20\linewidth}|>{\raggedright\arraybackslash}p{0.16\linewidth}|>{\raggedright\arraybackslash}p{0.16\linewidth}|>{\raggedright\arraybackslash}p{0.32\linewidth}}
     \hline
     字段名 & 字段中文名 & 字段类型 & 说明 \\ \hline
     id & 主键ID & bigint & 主键 \\ \hline
     content\_id & 内容ID & bigint & 外键，关联content \\ \hline
     question & 标准问题 & varchar(1024) & \\ \hline
+    similar\_questions & 相似问 & varchar(1024) & 可选 \\ \hline
     answer & 答案 & longtext & \\ \hline
   \end{tabular}
 \end{table}
 
-\begin{table}[!ht]
-  \centering
-  \caption{相似问表（faq\_similar\_question）}
-  \label{tab:db_faq_similar_question}
-  \begin{tabular}{c|c|c|p{6.3cm}}
-    \hline
-    字段名 & 字段中文名 & 字段类型 & 说明 \\ \hline
-    id & 主键ID & bigint & 主键 \\ \hline
-    faq\_id & 问答ID & bigint & 外键，关联faq \\ \hline
-    question & 相似问 & varchar(1024) & \\ \hline
-    create\_time & 创建时间 & datetime & \\ \hline
-  \end{tabular}
-\end{table}
+% \begin{table}[!ht]
+%   \centering
+%   \caption{相似问表（faq\_similar\_question）}
+%   \label{tab:db_faq_similar_question}
+%   \small
+%   \begin{tabular}{>{\raggedright\arraybackslash}p{0.20\linewidth}|>{\raggedright\arraybackslash}p{0.16\linewidth}|>{\raggedright\arraybackslash}p{0.16\linewidth}|>{\raggedright\arraybackslash}p{0.32\linewidth}}
+%     \hline
+%     字段名 & 字段中文名 & 字段类型 & 说明 \\ \hline
+%     id & 主键ID & bigint & 主键 \\ \hline
+%     faq\_id & 问答ID & bigint & 外键，关联faq \\ \hline
+%     question & 相似问 & varchar(1024) & \\ \hline
+%     create\_time & 创建时间 & datetime & \\ \hline
+%   \end{tabular}
+% \end{table}
 
 \begin{table}[!ht]
   \centering
   \caption{课程内容表（course）}
   \label{tab:db_course}
-  \begin{tabular}{c|c|c|p{6.3cm}}
+  \small
+  \begin{tabular}{>{\raggedright\arraybackslash}p{0.20\linewidth}|>{\raggedright\arraybackslash}p{0.16\linewidth}|>{\raggedright\arraybackslash}p{0.16\linewidth}|>{\raggedright\arraybackslash}p{0.32\linewidth}}
     \hline
     字段名 & 字段中文名 & 字段类型 & 说明 \\ \hline
     id & 主键ID & bigint & 主键 \\ \hline
     content\_id & 内容ID & bigint & 外键，关联content \\ \hline
     cover\_url & 封面 & varchar(1024) & 可选 \\ \hline
-    level & 难度等级 & varchar(50) & 可选 \\ \hline
+    
   \end{tabular}
 \end{table}
 
@@ -909,7 +863,8 @@
   \centering
   \caption{课节表（course\_lesson）}
   \label{tab:db_course_lesson}
-  \begin{tabular}{c|c|c|p{6.3cm}}
+  \small
+  \begin{tabular}{>{\raggedright\arraybackslash}p{0.20\linewidth}|>{\raggedright\arraybackslash}p{0.16\linewidth}|>{\raggedright\arraybackslash}p{0.16\linewidth}|>{\raggedright\arraybackslash}p{0.32\linewidth}}
     \hline
     字段名 & 字段中文名 & 字段类型 & 说明 \\ \hline
     id & 主键ID & bigint & 主键 \\ \hline
@@ -924,7 +879,8 @@
   \centering
   \caption{案例详情集合（MongoDB：case\_detail）}
   \label{tab:db_case_detail_mongo}
-  \begin{tabular}{c|c|c|p{6.3cm}}
+  \small
+  \begin{tabular}{>{\raggedright\arraybackslash}p{0.20\linewidth}|>{\raggedright\arraybackslash}p{0.16\linewidth}|>{\raggedright\arraybackslash}p{0.16\linewidth}|>{\raggedright\arraybackslash}p{0.32\linewidth}}
     \hline
     字段名 & 字段中文名 & 字段类型 & 说明 \\ \hline
     \_id & 主键ID & ObjectId & MongoDB主键 \\ \hline
@@ -939,12 +895,14 @@
   \centering
   \caption{标签表（tag）}
   \label{tab:db_tag}
-  \begin{tabular}{c|c|c|p{6.3cm}}
+  \small
+  \begin{tabular}{>{\raggedright\arraybackslash}p{0.20\linewidth}|>{\raggedright\arraybackslash}p{0.16\linewidth}|>{\raggedright\arraybackslash}p{0.16\linewidth}|>{\raggedright\arraybackslash}p{0.32\linewidth}}
     \hline
     字段名 & 字段中文名 & 字段类型 & 说明 \\ \hline
     id & 标签ID & bigint & 主键 \\ \hline
     app\_id & 应用ID & bigint & 标签所属应用 \\ \hline
     name & 标签名称 & varchar(255) & \\ \hline
+    type & 标签类型 & varchar(50) &  \\ \hline
     status & 状态 & varchar(50) & ENABLED/DISABLED \\ \hline
     create\_time & 创建时间 & datetime & \\ \hline
     modify\_time & 更新时间 & datetime & \\ \hline
@@ -955,7 +913,8 @@
   \centering
   \caption{内容-标签关联表（content\_tag\_ref）}
   \label{tab:db_content_tag_ref}
-  \begin{tabular}{c|c|c|p{6.3cm}}
+  \small
+  \begin{tabular}{>{\raggedright\arraybackslash}p{0.20\linewidth}|>{\raggedright\arraybackslash}p{0.16\linewidth}|>{\raggedright\arraybackslash}p{0.16\linewidth}|>{\raggedright\arraybackslash}p{0.32\linewidth}}
     \hline
     字段名 & 字段中文名 & 字段类型 & 说明 \\ \hline
     id & 主键ID & bigint & 主键 \\ \hline
@@ -969,7 +928,8 @@
   \centering
   \caption{类目表（category）}
   \label{tab:db_category}
-  \begin{tabular}{c|c|c|p{6.3cm}}
+  \small
+  \begin{tabular}{>{\raggedright\arraybackslash}p{0.20\linewidth}|>{\raggedright\arraybackslash}p{0.16\linewidth}|>{\raggedright\arraybackslash}p{0.16\linewidth}|>{\raggedright\arraybackslash}p{0.32\linewidth}}
     \hline
     字段名 & 字段中文名 & 字段类型 & 说明 \\ \hline
     id & 类目ID & bigint & 主键 \\ \hline
@@ -987,7 +947,8 @@
   \centering
   \caption{内容-类目关联表（content\_category\_ref）}
   \label{tab:db_content_category_ref}
-  \begin{tabular}{c|c|c|p{6.3cm}}
+  \small
+  \begin{tabular}{>{\raggedright\arraybackslash}p{0.20\linewidth}|>{\raggedright\arraybackslash}p{0.16\linewidth}|>{\raggedright\arraybackslash}p{0.16\linewidth}|>{\raggedright\arraybackslash}p{0.32\linewidth}}
     \hline
     字段名 & 字段中文名 & 字段类型 & 说明 \\ \hline
     id & 主键ID & bigint & 主键 \\ \hline
@@ -1003,7 +964,8 @@
   \centering
   \caption{用户表（user）}
   \label{tab:db_user}
-  \begin{tabular}{c|c|c|p{6.3cm}}
+  \small
+  \begin{tabular}{>{\raggedright\arraybackslash}p{0.20\linewidth}|>{\raggedright\arraybackslash}p{0.16\linewidth}|>{\raggedright\arraybackslash}p{0.16\linewidth}|>{\raggedright\arraybackslash}p{0.32\linewidth}}
     \hline
     字段名 & 字段中文名 & 字段类型 & 说明 \\ \hline
     id & 用户ID & bigint & 主键 \\ \hline
@@ -1016,7 +978,8 @@
   \centering
   \caption{角色表（role）}
   \label{tab:db_role}
-  \begin{tabular}{c|c|c|p{6.3cm}}
+  \small
+  \begin{tabular}{>{\raggedright\arraybackslash}p{0.20\linewidth}|>{\raggedright\arraybackslash}p{0.16\linewidth}|>{\raggedright\arraybackslash}p{0.16\linewidth}|>{\raggedright\arraybackslash}p{0.32\linewidth}}
     \hline
     字段名 & 字段中文名 & 字段类型 & 说明 \\ \hline
     id & 角色ID & bigint & 主键 \\ \hline
@@ -1028,7 +991,8 @@
   \centering
   \caption{权限表（permission）}
   \label{tab:db_permission}
-  \begin{tabular}{c|c|c|p{6.3cm}}
+  \small
+  \begin{tabular}{>{\raggedright\arraybackslash}p{0.20\linewidth}|>{\raggedright\arraybackslash}p{0.16\linewidth}|>{\raggedright\arraybackslash}p{0.16\linewidth}|>{\raggedright\arraybackslash}p{0.32\linewidth}}
     \hline
     字段名 & 字段中文名 & 字段类型 & 说明 \\ \hline
     id & 权限ID & bigint & 主键 \\ \hline
@@ -1041,7 +1005,8 @@
   \centering
   \caption{角色-权限关联表（role\_permission）}
   \label{tab:db_role_permission}
-  \begin{tabular}{c|c|c|p{6.3cm}}
+  \small
+  \begin{tabular}{>{\raggedright\arraybackslash}p{0.20\linewidth}|>{\raggedright\arraybackslash}p{0.16\linewidth}|>{\raggedright\arraybackslash}p{0.16\linewidth}|>{\raggedright\arraybackslash}p{0.32\linewidth}}
     \hline
     字段名 & 字段中文名 & 字段类型 & 说明 \\ \hline
     id & 主键ID & bigint & 主键 \\ \hline
@@ -1054,7 +1019,8 @@
   \centering
   \caption{用户-角色绑定表（user\_role\_binding）}
   \label{tab:db_user_role_binding}
-  \begin{tabular}{c|c|c|p{6.3cm}}
+  \small
+  \begin{tabular}{>{\raggedright\arraybackslash}p{0.20\linewidth}|>{\raggedright\arraybackslash}p{0.16\linewidth}|>{\raggedright\arraybackslash}p{0.16\linewidth}|>{\raggedright\arraybackslash}p{0.32\linewidth}}
     \hline
     字段名 & 字段中文名 & 字段类型 & 说明 \\ \hline
     id & 主键ID & bigint & 主键 \\ \hline
@@ -1072,7 +1038,8 @@
   \centering
   \caption{内容权限表（content\_auth）}
   \label{tab:db_content_auth}
-  \begin{tabular}{c|c|c|p{6.8cm}}
+  \small
+  \begin{tabular}{>{\raggedright\arraybackslash}p{0.20\linewidth}|>{\raggedright\arraybackslash}p{0.16\linewidth}|>{\raggedright\arraybackslash}p{0.16\linewidth}|>{\raggedright\arraybackslash}p{0.32\linewidth}}
     \hline
     字段名 & 描述 & 类型 & 备注 \\ \hline
     id & 主键ID & bigint & 自增主键 \\ \hline
@@ -1089,14 +1056,15 @@
   \centering
   \caption{内容审批表（content\_approval）}
   \label{tab:db_content_approval}
-  \begin{tabular}{c|c|c|p{6.3cm}}
+  \small
+  \begin{tabular}{>{\raggedright\arraybackslash}p{0.20\linewidth}|>{\raggedright\arraybackslash}p{0.16\linewidth}|>{\raggedright\arraybackslash}p{0.16\linewidth}|>{\raggedright\arraybackslash}p{0.32\linewidth}}
     \hline
     字段名 & 字段中文名 & 字段类型 & 说明 \\ \hline
     id & 审批单ID & bigint & 主键 \\ \hline
     content\_id & 内容ID & bigint & 外键，关联content \\ \hline
     submitter\_id & 提交人ID & bigint & 平台用户标识 \\ \hline
     reviewer\_id & 审批人ID & bigint & 平台用户标识 \\ \hline
-    status & 审批状态 & varchar(50) & PENDING/APPROVED/REJECTED \\ \hline
+    status & 审批状态 & varchar(50) & PENDING / APPROVED / REJECTED \\ \hline
     comment & 审批意见 & varchar(1024) & 可选 \\ \hline
     create\_time & 创建时间 & datetime & \\ \hline
     modify\_time & 更新时间 & datetime & \\ \hline
@@ -1109,12 +1077,13 @@
   \centering
   \caption{主任务表（govern\_main\_task）}
   \label{tab:db_govern_main_task}
-  \begin{tabular}{c|c|c|p{6.3cm}}
+  \small
+  \begin{tabular}{>{\raggedright\arraybackslash}p{0.20\linewidth}|>{\raggedright\arraybackslash}p{0.16\linewidth}|>{\raggedright\arraybackslash}p{0.16\linewidth}|>{\raggedright\arraybackslash}p{0.32\linewidth}}
     \hline
     字段名 & 字段中文名 & 字段类型 & 说明 \\ \hline
     id & 主任务ID & bigint & 主键 \\ \hline
     name & 任务名称 & varchar(255) & \\ \hline
-    space\_id & 业务空间 & bigint & 外键，关联space \\ \hline
+    app\_id & 应用ID & bigint & 外键，关联application \\ \hline
     session\_period & 会话周期 & varchar(50) & 天/周/月等 \\ \hline
     recall\_threshold & 召回阈值 & decimal(10,4) & 相似度/覆盖阈值 \\ \hline
     status & 状态 & varchar(50) & 计算中/计算完成/已完成等 \\ \hline
@@ -1127,16 +1096,16 @@
   \centering
   \caption{重复歧义任务表（govern\_dup\_amb\_task）}
   \label{tab:db_govern_dup_amb_task}
-  \begin{tabular}{c|c|c|p{6.3cm}}
+  \small
+  \begin{tabular}{>{\raggedright\arraybackslash}p{0.20\linewidth}|>{\raggedright\arraybackslash}p{0.16\linewidth}|>{\raggedright\arraybackslash}p{0.16\linewidth}|>{\raggedright\arraybackslash}p{0.32\linewidth}}
     \hline
     字段名 & 字段中文名 & 字段类型 & 说明 \\ \hline
     id & 任务ID & bigint & 主键 \\ \hline
     main\_task\_id & 主任务ID & bigint & 外键，关联govern\_main\_task \\ \hline
-    app\_id & 应用ID & bigint & 外键，关联application \\ \hline
     task\_type & 子任务类型 & varchar(50) & DUPLICATE/AMBIGUOUS \\ \hline
     content\_id\_a & 内容A & bigint & 外键，关联content \\ \hline
     content\_id\_b & 内容B & bigint & 外键，关联content \\ \hline
-    status & 状态 & varchar(50) & TODO/DONE等 \\ \hline
+    status & 状态 & varchar(50) & TODO / DONE等 \\ \hline
     assignee\_id & 责任人 & bigint & 平台用户标识 \\ \hline
     result & 处理结果 & varchar(255) & 下线/保留/合并等 \\ \hline
     create\_time & 创建时间 & datetime & \\ \hline
@@ -1148,17 +1117,17 @@
   \centering
   \caption{覆盖度任务表（govern\_coverage\_task）}
   \label{tab:db_govern_coverage_task}
-  \begin{tabular}{c|c|c|p{6.3cm}}
+  \small
+  \begin{tabular}{>{\raggedright\arraybackslash}p{0.20\linewidth}|>{\raggedright\arraybackslash}p{0.16\linewidth}|>{\raggedright\arraybackslash}p{0.16\linewidth}|>{\raggedright\arraybackslash}p{0.32\linewidth}}
     \hline
     字段名 & 字段中文名 & 字段类型 & 说明 \\ \hline
     id & 任务ID & bigint & 主键 \\ \hline
     main\_task\_id & 主任务ID & bigint & 外键，关联govern\_main\_task \\ \hline
-    app\_id & 应用ID & bgint & 外键，关联application \\ \hline
     cluster\_title & 聚类标题 & varchar(255) & 缺失知识簇的主题摘要 \\ \hline
     representative\_query & 代表性Query & varchar(1024) & 用于召回检测的代表性问法 \\ \hline
     query\_count & 涉及会话数 & int & 该问题簇包含的历史会话数量 \\ \hline
     example\_queries & 典型原声 & json & 簇内典型用户原声列表，用于辅助治理 \\ \hline
-    status & 状态 & varchar(50) & TODO/DONE等 \\ \hline
+    status & 状态 & varchar(50) & TODO / DONE等 \\ \hline
     assignee\_id & 责任人 & bigint & 平台用户标识 \\ \hline
     create\_time & 创建时间 & datetime & \\ \hline
     modify\_time & 更新时间 & datetime & \\ \hline
@@ -1171,17 +1140,18 @@
   \centering
   \caption{事件明细表（ODS：di\_event\_ods）}
   \label{tab:db_di_event_ods}
-  \begin{tabular}{c|c|c|p{6.3cm}}
+  \small
+  \begin{tabular}{>{\raggedright\arraybackslash}p{0.20\linewidth}|>{\raggedright\arraybackslash}p{0.16\linewidth}|>{\raggedright\arraybackslash}p{0.16\linewidth}|>{\raggedright\arraybackslash}p{0.32\linewidth}}
     \hline
     字段名 & 字段中文名 & 字段类型 & 说明 \\ \hline
-    event\_name & 事件名 & string & page\_view/click/query\_submit/rag\_recall等 \\ \hline
-    app\_id & 应用ID & bigint & \\ \hline
-    space\_id & 空间ID & bigint & \\ \hline
-    user\_id & 用户ID & bigint & 可为空 \\ \hline
-    visitor\_id & 匿名访客ID & string & 可为空 \\ \hline
-    session\_id & 会话ID & string & \\ \hline
-    trace\_id & 链路标识 & string & \\ \hline
-    content\_id & 内容ID & bigint & 可为空 \\ \hline
+    \nolinkurl{event_name} & 事件名 & string & \nolinkurl{page_view}/\nolinkurl{click}/\nolinkurl{query_submit}/\nolinkurl{rag_recall}等 \\ \hline
+    \nolinkurl{app_id} & 应用ID & bigint & \\ \hline
+    \nolinkurl{space_id} & 空间ID & bigint & \\ \hline
+    \nolinkurl{user_id} & 用户ID & bigint & 可为空 \\ \hline
+    \nolinkurl{visitor_id} & 匿名访客ID & string & 可为空 \\ \hline
+    \nolinkurl{session_id} & 会话ID & string & \\ \hline
+    \nolinkurl{trace_id} & 链路标识 & string & \\ \hline
+    \nolinkurl{content_id} & 内容ID & bigint & 可为空 \\ \hline
     timestamp & 时间戳 & datetime & \\ \hline
     channel & 渠道 & string & 可为空 \\ \hline
     device & 设备 & string & 可为空 \\ \hline
@@ -1193,7 +1163,8 @@
   \centering
   \caption{页面指标宽表（DWS：di\_page\_metric\_d）}
   \label{tab:db_di_page_metric_d}
-  \begin{tabular}{c|c|c|p{6.3cm}}
+  \small
+  \begin{tabular}{>{\raggedright\arraybackslash}p{0.20\linewidth}|>{\raggedright\arraybackslash}p{0.16\linewidth}|>{\raggedright\arraybackslash}p{0.16\linewidth}|>{\raggedright\arraybackslash}p{0.32\linewidth}}
     \hline
     字段名 & 字段中文名 & 字段类型 & 说明 \\ \hline
     dt & 统计日期 & date & 分区字段 \\ \hline
@@ -1211,7 +1182,8 @@
   \centering
   \caption{会话聚类指标宽表（DWS：di\_session\_cluster\_d）}
   \label{tab:db_di_session_cluster_d}
-  \begin{tabular}{c|c|c|p{6.3cm}}
+  \small
+  \begin{tabular}{>{\raggedright\arraybackslash}p{0.20\linewidth}|>{\raggedright\arraybackslash}p{0.16\linewidth}|>{\raggedright\arraybackslash}p{0.16\linewidth}|>{\raggedright\arraybackslash}p{0.32\linewidth}}
     \hline
     字段名 & 字段中文名 & 字段类型 & 说明 \\ \hline
     dt & 统计日期 & date & 分区字段 \\ \hline
@@ -1222,7 +1194,7 @@
     session\_cnt & 会话数 & bigint & \\ \hline
     query\_cnt & Query数 & bigint & \\ \hline
     solve\_rate & 解决率 & decimal(10,4) & 模型识别解决率 \\ \hline
-    handoff\_intent\_rate & 意向转人工率 & decimal(10,4) & \\ \hline
+    \nolinkurl{handoff_intent_rate} & 意向转人工率 & decimal(10,4) & \\ \hline
     handoff\_rate & 实际转人工率 & decimal(10,4) & \\ \hline
   \end{tabular}
 \end{table}
@@ -1231,19 +1203,20 @@
   \centering
   \caption{内容指标宽表（DWS：di\_content\_metric\_d）}
   \label{tab:db_di_content_metric_d}
-  \begin{tabular}{c|c|c|p{6.3cm}}
+  \small
+  \begin{tabular}{>{\raggedright\arraybackslash}p{0.20\linewidth}|>{\raggedright\arraybackslash}p{0.16\linewidth}|>{\raggedright\arraybackslash}p{0.16\linewidth}|>{\raggedright\arraybackslash}p{0.32\linewidth}}
     \hline
     字段名 & 字段中文名 & 字段类型 & 说明 \\ \hline
     dt & 统计日期 & date & 分区字段 \\ \hline
-    app\_id & 应用ID & bigint & \\ \hline
-    space\_id & 空间ID & bigint & \\ \hline
-    content\_id & 内容ID & bigint & \\ \hline
-    content\_type & 内容类型 & string & knowledge/faq/course/case \\ \hline
-    category\_id & 类目ID & bigint & 可为空 \\ \hline
-    recall\_session\_cnt & 被召回会话数 & bigint & \\ \hline
-    generate\_session\_cnt & 被生成会话数 & bigint & \\ \hline
-    handoff\_intent\_session\_cnt & 意向转人工会话数 & bigint & \\ \hline
-    handoff\_session\_cnt & 转人工会话数 & bigint & \\ \hline
+    \nolinkurl{app_id} & 应用ID & bigint & \\ \hline
+    \nolinkurl{space_id} & 空间ID & bigint & \\ \hline
+    \nolinkurl{content_id} & 内容ID & bigint & \\ \hline
+    \nolinkurl{content_type} & 内容类型 & string & knowledge / faq / course / case \\ \hline
+    \nolinkurl{category_id} & 类目ID & bigint & 可为空 \\ \hline
+    \nolinkurl{recall_session_cnt} & 被召回会话数 & bigint & \\ \hline
+    \nolinkurl{generate_session_cnt} & 被生成会话数 & bigint & \\ \hline
+    \nolinkurl{handoff_intent_session_cnt} & 意向转人工会话数 & bigint & \\ \hline
+    \nolinkurl{handoff_session_cnt} & 转人工会话数 & bigint & \\ \hline
   \end{tabular}
 \end{table}
 
@@ -1251,20 +1224,21 @@
   \centering
   \caption{会话明细表（DWD：di\_session\_detail）}
   \label{tab:db_di_session_detail}
-  \begin{tabular}{c|c|c|p{6.3cm}}
+  \small
+  \begin{tabular}{>{\raggedright\arraybackslash}p{0.20\linewidth}|>{\raggedright\arraybackslash}p{0.16\linewidth}|>{\raggedright\arraybackslash}p{0.16\linewidth}|>{\raggedright\arraybackslash}p{0.32\linewidth}}
     \hline
     字段名 & 字段中文名 & 字段类型 & 说明 \\ \hline
-    session\_id & 会话ID & string & 主键之一 \\ \hline
-    cluster\_id & 聚类ID & string & 可为空 \\ \hline
-    raw\_query & 用户原声 & string & 可脱敏 \\ \hline
-    rewritten\_query & 改写Query & string & 可脱敏 \\ \hline
-    recalled\_contents & 召回内容 & json & 含content\_id\&title等 \\ \hline
+    \nolinkurl{session_id} & 会话ID & string & 主键之一 \\ \hline
+    \nolinkurl{cluster_id} & 聚类ID & string & 可为空 \\ \hline
+    \nolinkurl{raw_query} & 用户原声 & string & 可脱敏 \\ \hline
+    \nolinkurl{rewritten_query} & 改写Query & string & 可脱敏 \\ \hline
+    \nolinkurl{recalled_contents} & 召回内容 & json & 含\texttt{content\_id}\&title等 \\ \hline
     answer & 回复内容 & string & 可脱敏 \\ \hline
-    handoff\_intent & 意向转人工 & tinyint & 0/1 \\ \hline
-    handoff\_success & 是否转人工 & tinyint & 0/1 \\ \hline
-    user\_id & 用户ID & bigint & 可脱敏 \\ \hline
-    user\_type & 用户类型 & string & 内部/外部/匿名等 \\ \hline
-    session\_time & 会话时间 & datetime & \\ \hline
+    \nolinkurl{handoff_intent} & 意向转人工 & tinyint & 0/1 \\ \hline
+    \nolinkurl{handoff_success} & 是否转人工 & tinyint & 0/1 \\ \hline
+    \nolinkurl{user_id} & 用户ID & bigint & 可脱敏 \\ \hline
+    \nolinkurl{user_type} & 用户类型 & string & 内部 / 外部 / 匿名等 \\ \hline
+    \nolinkurl{session_time} & 会话时间 & datetime & \\ \hline
   \end{tabular}
 \end{table}
 
