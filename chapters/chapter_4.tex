@@ -236,7 +236,7 @@ public void approve(ApproveReq req) {
 \subsection{多形态内容前置处理与索引构建}
 \label{subsec:impl_ca_index}
 
-为支持“页面化展示/搜索”与“RAG召回”两大核心场景，平台构建了基于ES的全文索引与基于Embedding的向量索引（底层为Milvus向量数据库）\cite{wang2021milvus,lewis2020retrieval,cheng2025survey}。该链路由统一的MQ消息（content\_update/publish）驱动：当内容发生更新或发布时，索引服务消费消息，执行“数据同步$\rightarrow$切片处理$\rightarrow$双路索引”的流程，确保索引状态与数据库保持准实时一致。
+为支持“页面化展示/搜索”与“RAG召回”两大核心场景，平台构建了基于ES的全文索引与基于Embedding的向量索引（底层为Milvus向量数据库）\cite{wang2021milvus,lewis2020retrieval}。该链路由统一的MQ消息（content\_update/publish）驱动：当内容发生更新或发布时，索引服务消费消息，执行“数据同步$\rightarrow$切片处理$\rightarrow$双路索引”的流程，确保索引状态与数据库保持准实时一致。
 
 （1）切片处理策略。切片是RAG检索的基础，其粒度直接影响召回的准确性与答案生成的质量。若切片过大，包含过多无关信息，会干扰模型生成；若切片过小，语义不完整，模型难以理解上下文。平台针对不同形态制定了差异化的切片策略：
 \begin{enumerate}
@@ -406,10 +406,10 @@ public ContentDetailDTO getDetail(DetailReq req) {
 （1）双路召回机制。平台并行执行两条召回链路：
 \begin{itemize}
 \item \textbf{全文检索通道}：基于ES的Match/MultiMatch查询，利用BM25算法对Title、Summary、Text进行相关性算分。此通道优势在于精确关键词命中（如错误码、专有名词），且天然支持类目、标签与权限的Filter过滤。
-\item \textbf{向量召回通道}：基于Embedding模型将用户Query转化为向量，在向量数据库中检索TopK相似切片。此通道优势在于语义理解与跨词匹配（如“如何退款”匹配“退货流程”），且同样支持基于元数据（如权限、类目、标签）的Filter过滤，弥补了关键词匹配的不足。
+\item \textbf{向量召回通道}：基于Embedding模型将用户Query转化为向量，在向量数据库中检索TopK相似切片。此通道优势在于语义理解与跨词匹配（如“如何退款”匹配“退货流程”），且同样支持基于元数据（如权限、类目、标签）的Filter过滤，弥补了关键词匹配的不足。在工程实践中，稠密检索往往需与BM25插值以提升召回稳定性\cite{wang2021bert}。
 \end{itemize}
 
-（2）融合与重排。两路召回结果在服务层进行加权融合与去重，保留得分最高的切片版本。融合后的候选集进入重排阶段（可选Cross-Encoder精排或规则排序），综合相关性分数、发布时间与点击热度等特征输出最终TopN。
+（2）融合与重排。两路召回结果在服务层进行加权融合与去重，保留得分最高的切片版本。融合后的候选集进入重排阶段（可选Cross-Encoder精排或规则排序），综合相关性分数、发布时间与点击热度等特征输出最终TopN\cite{pradeep2022squeezing}。
 
 （3）关键参数与实现。召回阶段的关键参数包括TopK与MinScore：TopK用于控制返回候选切片数量，MinScore用于设置最小相似度阈值以过滤低相关候选。表\ref{tab:rag_params}给出了关键参数的工程含义。
 

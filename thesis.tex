@@ -29,6 +29,8 @@
 \captionsetup[subfigure]{labelformat=simple, labelsep=space}
 
 \renewcommand{\arraystretch}{1.25}
+\let\origcite\cite
+\renewcommand{\cite}[1]{\textsuperscript{\origcite{#1}}}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % % 设置《国家图书馆封面》的内容，仅博士论文才需要填写
