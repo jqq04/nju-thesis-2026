@@ -1,13 +1,13 @@
 
-\chapter{内容管理、应用与治理平台测试}
+\chapter{内容应用与管理平台测试}
 
-本章按“测试环境—单元测试—功能测试”的结构展开，对内容管理、应用与治理平台进行测试说明。测试目标包括：验证平台核心功能满足第三章需求分析中定义的业务用例；验证关键技术链路（发布口径、权限过滤、事件驱动索引、RAG问答与治理闭环）在典型场景下能够稳定运行；并通过单元测试降低回归成本，提升迭代效率。
+本章按“测试环境—单元测试—功能测试”的结构展开，对内容应用与管理平台进行测试说明。测试目标包括：验证平台核心功能满足第三章需求分析中定义的业务用例；验证关键技术链路（发布口径、权限过滤、事件驱动索引、RAG问答与治理闭环）在典型场景下能够稳定运行；并通过单元测试降低回归成本，提升迭代效率。
 
 \section{系统测试环境}
 
 平台在实现上由内容管理、内容应用、内容治理与数据洞察等模块构成，依赖关系型数据库与文档数据库存储内容资产，并在内容发布后构建全文索引与向量索引以支撑检索与智能问答。由于论文工程无法直接提供企业内部真实部署细节，本节从“部署形态+关键依赖组件+测试工具链”三个维度描述测试环境口径，便于复现测试结论。平台测试环境描述如表\ref{tab:test_env}所示。
 
-\begin{table}[!ht]
+\begin{table}[!htbp]
   \centering
   \caption{测试环境描述表}
   \label{tab:test_env}
@@ -34,31 +34,6 @@
 （2）可重复执行。对时间、随机数与外部依赖进行固定化处理，避免测试随运行环境变化而不稳定。
 （3）覆盖关键分支。对成功路径、非法状态、权限拒绝、幂等重试与异常退化等关键分支分别构造用例，降低线上故障风险。
 
-以content\_auth的“动作优先”裁决为例，单元测试需要覆盖不同auth\_tactic与auth\_code组合下的匹配结果，并验证“命中任一规则即放行、无规则命中则拒绝”的裁决逻辑。单元测试用例示例如图\ref{fig:unit_test_example}所示。
-
-\begin{figure}[!ht]
-  \centering
-  \begin{minipage}{0.94\linewidth}
-    \begin{lstlisting}[basicstyle=\ttfamily\small,numbers=left,numberstyle=\tiny,frame=single,breaklines=true]
-def "test_content_auth_action_first"() {
-  given: "构造访问者属性与授权规则集合"
-  def visitor = new Visitor(isInternal: true, employeeId: 1001, deptPath: ["d1","d2"])
-  def rules = [
-    new AuthRule(authTactic: "department", authVariable: "d2", authCode: "r"),
-    new AuthRule(authTactic: "employee", authVariable: "1002", authCode: "w")
-  ]
-  authDao.listRules(contentId) >> rules
-
-  expect: "读动作命中部门规则放行，写动作不命中则拒绝"
-  service.checkContentAuth(contentId, "r", visitor) == true
-  service.checkContentAuth(contentId, "w", visitor) == false
-}
-    \end{lstlisting}
-  \end{minipage}
-  \caption{单元测试用例示例}
-  \label{fig:unit_test_example}
-\end{figure}
-
 \section{功能测试}
 
 功能测试用于验证平台对外可见能力与关键链路在真实交互下满足预期。本节基于第三章的核心用例集合，对内容管理、内容应用、内容治理与数据洞察模块设计功能测试用例。测试用例采用“步骤-预期结果”形式描述，覆盖正常流程、非法状态、权限约束、异步一致性与退化策略等场景。
@@ -67,7 +42,7 @@ def "test_content_auth_action_first"() {
 
 创建空间与应用是平台组织与权限的起点，用例用于验证空间隔离与应用边界能够正确生效。创建空间/应用的测试用例如表\ref{tab:tc01}所示。
 
-\begin{table}[!ht]
+\begin{table}[!htbp]
   \centering
   \caption{创建空间/应用测试用例}
   \label{tab:tc01}
@@ -83,7 +58,7 @@ def "test_content_auth_action_first"() {
 
 内容生产链路覆盖创建、编辑、提审、审批与发布等过程，且要求读链路对外仅展示已发布内容。内容发布审批的测试用例如表\ref{tab:tc02}所示。
 
-\begin{table}[!ht]
+\begin{table}[!htbp]
   \centering
   \caption{内容提审与审批发布测试用例}
   \label{tab:tc02}
@@ -101,7 +76,7 @@ def "test_content_auth_action_first"() {
 
 内容检索用于验证多字段召回、高亮与过滤逻辑是否正确。内容检索测试用例如表\ref{tab:tc04}所示。
 
-\begin{table}[!ht]
+\begin{table}[!htbp]
   \centering
   \caption{内容检索测试用例}
   \label{tab:tc04}
@@ -117,7 +92,7 @@ def "test_content_auth_action_first"() {
 
 智能问答用于验证“问题改写+多通道召回+重排+引用输出”的端到端链路，以及未命中与超时场景下的退化策略。智能问答测试用例如表\ref{tab:tc05}所示。
 
-\begin{table}[!ht]
+\begin{table}[!htbp]
   \centering
   \caption{智能问答测试用例}
   \label{tab:tc05}
@@ -135,7 +110,7 @@ def "test_content_auth_action_first"() {
 
 重复/歧义治理用于验证候选召回、LLM判别与任务生成的闭环过程。重复/歧义治理测试用例如表\ref{tab:tc06}所示。
 
-\begin{table}[!ht]
+\begin{table}[!htbp]
   \centering
   \caption{重复/歧义治理测试用例}
   \label{tab:tc06}
@@ -151,7 +126,7 @@ def "test_content_auth_action_first"() {
 
 覆盖度治理用于验证“洞察聚类筛选薄弱主题$\rightarrow$生成覆盖任务$\rightarrow$补充内容$\rightarrow$复检回收”的闭环。覆盖度治理测试用例如表\ref{tab:tc07}所示。
 
-\begin{table}[!ht]
+\begin{table}[!htbp]
   \centering
   \caption{覆盖度治理测试用例}
   \label{tab:tc07}
@@ -167,7 +142,7 @@ def "test_content_auth_action_first"() {
 
 数据洞察用于验证事件规范、trace\_id链路追踪与下钻能力。数据洞察测试用例如表\ref{tab:tc08}所示。
 
-\begin{table}[!ht]
+\begin{table}[!htbp]
   \centering
   \caption{数据洞察链路测试用例}
   \label{tab:tc08}
@@ -183,4 +158,4 @@ def "test_content_auth_action_first"() {
 
 \section{本章小结}
 
-本章对内容管理、应用与治理平台的测试环境、单元测试与功能测试进行了说明。测试结果表明：平台在组织与权限边界、内容发布口径、事件驱动索引更新、RAG问答引用可追溯、以及治理任务线上化闭环等关键链路上能够满足预期；数据洞察侧通过统一事件模型与trace\_id关联实现链路还原与主题聚类下钻，为覆盖度治理与持续优化提供了数据基础。
+本章对内容应用与管理平台的测试环境、单元测试与功能测试进行了说明。测试结果表明：平台在组织与权限边界、内容发布口径、事件驱动索引更新、RAG问答引用可追溯、以及治理任务线上化闭环等关键链路上能够满足预期；数据洞察侧通过统一事件模型与trace\_id关联实现链路还原与主题聚类下钻，为覆盖度治理与持续优化提供了数据基础。

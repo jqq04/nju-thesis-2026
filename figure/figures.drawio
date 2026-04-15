@@ -829,7 +829,7 @@
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-        <mxCell id="slv_core" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=2;fillColor=none;verticalAlign=top;dashed=1;fontSize=16;dashPattern=1 1;align=left;" value="内容管理、应用与治理平台" vertex="1">
+        <mxCell id="slv_core" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=2;fillColor=none;verticalAlign=top;dashed=1;fontSize=16;dashPattern=1 1;align=left;" value="内容应用与管理平台" vertex="1">
           <mxGeometry height="840" width="1110" x="210" y="30" as="geometry" />
         </mxCell>
         <mxCell id="LY8QTn6TGIZbTiwVPXcK-36" edge="1" parent="1" source="slv_cm" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;fontSize=16;" target="LY8QTn6TGIZbTiwVPXcK-10">
@@ -953,7 +953,7 @@
     </mxGraphModel>
   </diagram>
   <diagram id="fig_system_dev_view_01" name="开发视图">
-    <mxGraphModel dx="1838" dy="1172" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="1562" dy="1030" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -1009,7 +1009,7 @@
         <mxCell id="Q-bPx-o2VO_N-1homhKO-10" parent="1" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;fontSize=15;" value="内容管理服务" vertex="1">
           <mxGeometry height="160" width="230" x="200" y="320" as="geometry" />
         </mxCell>
-        <mxCell id="Q-bPx-o2VO_N-1homhKO-11" parent="1" style="shape=module;align=left;spacingLeft=20;align=center;verticalAlign=middle;whiteSpace=wrap;html=1;" value="&lt;span style=&quot;font-size: 15px;&quot;&gt;Kitex&lt;/span&gt;" vertex="1">
+        <mxCell id="Q-bPx-o2VO_N-1homhKO-11" parent="1" style="shape=module;align=left;spacingLeft=20;align=center;verticalAlign=middle;whiteSpace=wrap;html=1;" value="&lt;span style=&quot;font-size: 15px;&quot;&gt;SpringBoot&lt;/span&gt;" vertex="1">
           <mxGeometry height="70" width="140" x="224" y="370" as="geometry" />
         </mxCell>
         <mxCell id="Q-bPx-o2VO_N-1homhKO-21" edge="1" parent="1" source="Q-bPx-o2VO_N-1homhKO-12" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="Q-bPx-o2VO_N-1homhKO-8">
@@ -1049,7 +1049,7 @@
         <mxCell id="Q-bPx-o2VO_N-1homhKO-12" parent="1" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;fontSize=15;" value="内容应用服务" vertex="1">
           <mxGeometry height="160" width="230" x="520" y="320" as="geometry" />
         </mxCell>
-        <mxCell id="Q-bPx-o2VO_N-1homhKO-13" parent="1" style="shape=module;align=left;spacingLeft=20;align=center;verticalAlign=middle;whiteSpace=wrap;html=1;" value="&lt;span style=&quot;font-size: 15px;&quot;&gt;Kitex&lt;/span&gt;" vertex="1">
+        <mxCell id="Q-bPx-o2VO_N-1homhKO-13" parent="1" style="shape=module;align=left;spacingLeft=20;align=center;verticalAlign=middle;whiteSpace=wrap;html=1;" value="&lt;span style=&quot;font-size: 15px;&quot;&gt;SpringBoot&lt;/span&gt;" vertex="1">
           <mxGeometry height="70" width="140" x="560" y="370" as="geometry" />
         </mxCell>
         <mxCell id="Q-bPx-o2VO_N-1homhKO-19" edge="1" parent="1" source="Q-bPx-o2VO_N-1homhKO-14" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="Q-bPx-o2VO_N-1homhKO-4">
@@ -1063,7 +1063,7 @@
         <mxCell id="Q-bPx-o2VO_N-1homhKO-14" parent="1" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;fontSize=15;" value="内容治理服务" vertex="1">
           <mxGeometry height="160" width="230" x="840" y="320" as="geometry" />
         </mxCell>
-        <mxCell id="Q-bPx-o2VO_N-1homhKO-15" parent="1" style="shape=module;align=left;spacingLeft=20;align=center;verticalAlign=middle;whiteSpace=wrap;html=1;" value="&lt;span style=&quot;font-size: 15px;&quot;&gt;Kitex&lt;/span&gt;" vertex="1">
+        <mxCell id="Q-bPx-o2VO_N-1homhKO-15" parent="1" style="shape=module;align=left;spacingLeft=20;align=center;verticalAlign=middle;whiteSpace=wrap;html=1;" value="&lt;span style=&quot;font-size: 15px;&quot;&gt;SpringBoot&lt;/span&gt;" vertex="1">
           <mxGeometry height="70" width="140" x="890" y="370" as="geometry" />
         </mxCell>
         <mxCell id="Q-bPx-o2VO_N-1homhKO-20" edge="1" parent="1" source="Q-bPx-o2VO_N-1homhKO-16" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="Q-bPx-o2VO_N-1homhKO-4">
@@ -1082,7 +1082,7 @@
         <mxCell id="Q-bPx-o2VO_N-1homhKO-16" parent="1" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;fontSize=15;" value="数据洞察服务" vertex="1">
           <mxGeometry height="160" width="230" x="1160" y="320" as="geometry" />
         </mxCell>
-        <mxCell id="Q-bPx-o2VO_N-1homhKO-17" parent="1" style="shape=module;align=left;spacingLeft=20;align=center;verticalAlign=middle;whiteSpace=wrap;html=1;" value="&lt;span style=&quot;font-size: 15px;&quot;&gt;Kitex&lt;/span&gt;" vertex="1">
+        <mxCell id="Q-bPx-o2VO_N-1homhKO-17" parent="1" style="shape=module;align=left;spacingLeft=20;align=center;verticalAlign=middle;whiteSpace=wrap;html=1;" value="&lt;span style=&quot;font-size: 15px;&quot;&gt;SpringBoot&lt;/span&gt;" vertex="1">
           <mxGeometry height="70" width="140" x="1200" y="370" as="geometry" />
         </mxCell>
         <mxCell id="PiC4TyFR-JbUUp4zfGom-3" parent="1" style="shape=module;align=left;spacingLeft=20;align=center;verticalAlign=middle;whiteSpace=wrap;html=1;fontSize=15;" value="RAG" vertex="1">
@@ -1145,7 +1145,7 @@
     </mxGraphModel>
   </diagram>
   <diagram id="fig_system_physical_view_01" name="物理视图">
-    <mxGraphModel dx="1644" dy="1048" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="1562" dy="1030" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />

@@ -290,6 +290,11 @@ INPUT /usr/local/texlive/2025/texmf-dist/tex/latex/algorithms/algorithmic.sty
 INPUT /usr/local/texlive/2025/texmf-dist/tex/latex/algorithms/algorithmic.sty
 INPUT /usr/local/texlive/2025/texmf-dist/tex/latex/placeins/placeins.sty
 INPUT /usr/local/texlive/2025/texmf-dist/tex/latex/placeins/placeins.sty
+INPUT /usr/local/texlive/2025/texmf-dist/tex/latex/base/flafter.sty
+INPUT /usr/local/texlive/2025/texmf-dist/tex/latex/base/flafter.sty
+INPUT /usr/local/texlive/2025/texmf-dist/tex/latex/listings/lstlang1.sty
+INPUT /usr/local/texlive/2025/texmf-dist/tex/latex/listings/lstlang1.sty
+INPUT /usr/local/texlive/2025/texmf-dist/tex/latex/listings/lstlang1.sty
 INPUT ./thesis.aux
 INPUT ./thesis.aux
 INPUT thesis.aux
@@ -484,9 +489,6 @@ OUTPUT chapters/chapter_2.aux
 INPUT ./chapters/chapter_2.tex
 INPUT ./chapters/chapter_2.tex
 INPUT chapters/chapter_2.tex
-INPUT ./figure/figures-RPC架构图.drawio.pdf
-INPUT ./figure/figures-RPC架构图.drawio.pdf
-INPUT ./figure/figures-RPC架构图.drawio.pdf
 INPUT ./figure/figures-RocketMQ架构图.drawio.pdf
 INPUT ./figure/figures-RocketMQ架构图.drawio.pdf
 INPUT ./figure/figures-RocketMQ架构图.drawio.pdf
@@ -590,6 +592,12 @@ INPUT ./figure/应用管理效果图.png
 INPUT ./figure/文章管理效果图.png
 INPUT ./figure/文章管理效果图.png
 INPUT ./figure/文章管理效果图.png
+INPUT ./figure/文章创编效果图.png
+INPUT ./figure/文章创编效果图.png
+INPUT ./figure/文章创编效果图.png
+INPUT ./figure/发布申请效果图.png
+INPUT ./figure/发布申请效果图.png
+INPUT ./figure/发布申请效果图.png
 INPUT ./figure/前台界面效果图.png
 INPUT ./figure/前台界面效果图.png
 INPUT ./figure/前台界面效果图.png

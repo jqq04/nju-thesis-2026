@@ -5,29 +5,6 @@
 % 参考文献
 
 %%%%%%%%%%%%%%%%%%%%%%%% 相关技术综述 %%%%%%%%%%%%%%%%%%%%%%%%%%
-%% 第一篇把 RPC 从“概念”推进到“工程可用系统”的论文，RPC奠基之作。
-@article{birrell1984implementing,
-  title={Implementing remote procedure calls},
-  author={Birrell, Andrew D and Nelson, Bruce Jay},
-  journal={ACM Transactions on Computer Systems (TOCS)},
-  volume={2},
-  number={1},
-  pages={39--59},
-  year={1984},
-  publisher={ACM New York, NY, USA}
-}
-
-%% RPC 通信模型 研究报告
-@article{tay1990survey,
-  title={A survey of remote procedure calls},
-  author={Tay, Beng Hang and Ananda, Akkihebbal L},
-  journal={ACM SIGOPS Operating Systems Review},
-  volume={24},
-  number={3},
-  pages={68--79},
-  year={1990},
-  publisher={ACM New York, NY, USA}
-}
 
 %% 一篇从信息检索研究视角，对 Lucene 4 的工程设计、索引结构、测试哲学与评测困境进行系统性“学术解释”的论文
 @inproceedings{bialecki2012apache,
@@ -37,39 +14,6 @@
   pages={17},
   year={2012},
   organization={sn}
-}
-
-% 文档数据库 MongoDB
-%% MongoDB 官方文档
-@online{mongodb_manual,
-  title        = {MongoDB Manual},
-  organization = {MongoDB, Inc.},
-  url          = {https://www.mongodb.com/docs/manual/},
-  urldate      = {2026-03-28},
-  note         = {Accessed: 2026-03-28}
-}
-
-%% mongodb 多维度分析
-@article{chauhan2019review,
-  title={A review on various aspects of MongoDB databases},
-  author={Chauhan, Anjali},
-  journal={International Journal of Engineering Research \& Technology (IJERT)},
-  volume={8},
-  number={05},
-  pages={90--92},
-  year={2019}
-}
-
-
-
-% 消息队列 RocketMQ
-%% Apache RocketMQ 官方文档
-@online{apache_rocketmq_docs,
-  title        = {Apache RocketMQ Documentation},
-  organization = {Apache Software Foundation},
-  url          = {https://rocketmq.apache.org/docs/},
-  urldate      = {2026-03-28},
-  note         = {Accessed: 2026-03-28}
 }
 
 % 向量数据库 Milvus
@@ -85,6 +29,12 @@
 
 
 %%%%%%%%%%%%%%%%%%%%%%%% 内容管理 %%%%%%%%%%%%%%%%%%%%%%%%%%
+@book{rockley2003managing,
+  title={Managing enterprise content: A unified content strategy},
+  author={Rockley, Ann and Kostur, Pamela},
+  year={2003},
+  publisher={New Riders}
+}
 
 %% 微软 SharePoint 作为协作和项目知识共享的启用器
 @article{khumalo2019sharepoint,
@@ -152,6 +102,18 @@
   publisher={IEEE}
 }
 
+% 企业内容管理架构——用户界面、组件、解决方案和存储库。记录和信息管理、信息治理。实施路线图策略。企业内容管理 (ECM) 对业务流程效率的影响。企业内容管理 (ECM) 解决方案提供强大的功能来控制和分析信息。ECM 解决方案有助于缩短搜索时间、管理数据，并帮助机构遵守监管规定。本文论证了 ECM 实施阶段对业务流程的影响，并验证了 Reimer (2002) 提出的假设。本文旨在提供：(1) 一个典型的 ECM 架构；(2) 识别实施过程中的关键挑战；(3) 实施路线图策略。
+@article{hullavarad2015enterprise,
+  title={Enterprise Content Management solutions—Roadmap strategy and implementation challenges},
+  author={Hullavarad, Shiva and O’Hare, Russell and Roy, Ashok K},
+  journal={International Journal of Information Management},
+  volume={35},
+  number={2},
+  pages={260--265},
+  year={2015},
+  publisher={Elsevier}
+}
+
 %% 知识管理
 @article{grant1996toward,
   title={Toward a knowledge-based theory of the firm},
@@ -176,6 +138,14 @@
   publisher={MCB UP Ltd}
 }
 %%%%%%%%%%%%%%%%%%%%%%%% RAG %%%%%%%%%%%%%%%%%%%%%%%%%%
+% 评估了向量数据库在带有结构化条件过滤（混合检索）场景下的性能，直接对应电商 / 广告业务中 “多通道属性 + 向量” 的联合召回挑战。
+@article{amanbayev2026filtered,
+  title={Filtered Approximate Nearest Neighbor Search in Vector Databases: System Design and Performance Analysis},
+  author={Amanbayev, Abylay and Tsan, Brian and Dang, Tri and Rusu, Florin},
+  journal={arXiv preprint arXiv:2602.11443},
+  year={2026}
+}
+
 %% 大模型幻觉研究
 @article{huang2025survey,
   title={A survey on hallucination in large language models: Principles, taxonomy, challenges, and open questions},
@@ -315,6 +285,24 @@
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%% 内容质量、内容治理 %%%%%%%%%%%%%%%%%%%%%%%%%%
+%提供了无监督模式下对海量商业长尾 Query 进行序列化语义聚类与打标的方案，对意图泛化和覆盖度检测有高度指导意义。
+@inproceedings{cheung2012sequence,
+  title={Sequence clustering and labeling for unsupervised query intent discovery},
+  author={Cheung, Jackie Chi Kit and Li, Xiao},
+  booktitle={Proceedings of the fifth ACM international conference on Web search and data mining},
+  pages={383--392},
+  year={2012}
+}
+
+% 从指标体系和数据分析角度，量化了 “内容质量（Content Quality）” 与商业用户长期留存意愿之间的映射链路。
+@inproceedings{xu2023commerce,
+  title={E-commerce Platform Quality, User satisfaction and Continuous Use Intention under Data-driven marketing},
+  author={Xu, Yihong and Huang, Fengyan},
+  booktitle={Proceedings of the 2023 9th International Conference on Industrial and Business Engineering},
+  pages={56--62},
+  year={2023}
+}
+
 %% 文本去重：从语法到语义
 @article{kim2026survey,
   title={A Survey of Text Deduplication: From Syntactic Matching to Semantic Understanding},
@@ -458,4 +446,21 @@
   pages={321--352},
   year={2005},
   publisher={Springer}
+}
+
+@inproceedings{10.1145/3308560.3316606,
+author = {Alonso, Omar and Kandylas, Vasileios and Tremblay, Serge-Eric},
+title = {Exploration of Product Search Intents via Clustering of Query Clusters},
+year = {2019},
+isbn = {9781450366755},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/3308560.3316606},
+doi = {10.1145/3308560.3316606},
+abstract = {We describe a system that organizes search results in the context of an exploratory product search session where the user is researching goods. Compared to existing approaches that use predefined categories to filter results by attributes, we organize information needs based on queries instead of documents. The idea is to organize queries around the same topic and produce a hierarchical representation of intents that describe information about a product from different perspectives. We present a prototype implementation using a real-world data set of 24M queries.},
+booktitle = {Companion Proceedings of The 2019 World Wide Web Conference},
+pages = {344–347},
+numpages = {4},
+location = {San Francisco, USA},
+series = {WWW '19}
 }

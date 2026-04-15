@@ -16,6 +16,17 @@
 \let\Oldsubsubsection\subsubsection
 \renewcommand{\subsubsection}{\FloatBarrier\Oldsubsubsection}
 
+% Ensure floats appear after their definition point and reduce large blank areas
+% caused by float placement constraints.
+\usepackage{flafter}
+\renewcommand{\topfraction}{0.9}
+\renewcommand{\bottomfraction}{0.8}
+\renewcommand{\textfraction}{0.07}
+\renewcommand{\floatpagefraction}{0.85}
+\setcounter{topnumber}{2}
+\setcounter{bottomnumber}{2}
+\setcounter{totalnumber}{4}
+
 %% njuthesis 文档类的可选参数有：
 %%   winfonts, linuxfonts, macfonts, adobefonts winfonts 选项使得文档使用Windows 系统提供的字体；linuxfonts 选项使得文档使用Linux 系统提供的字体；macfonts 选项使得文档使用Mac 系统提供的字体；adobefonts 选项使得文档使用Adobe提供的OTF中文字体(需自行下载安转)
 %%   phd/master/bachelor 选择博士/硕士/学士论文
@@ -31,6 +42,33 @@
 \renewcommand{\arraystretch}{1.25}
 \setcitestyle{super,square}
 \setcounter{tocdepth}{2}
+
+\lstdefinestyle{javastyle}{
+    language=Java,
+    basicstyle=\footnotesize\ttfamily,           % 基础字体
+    keywordstyle=\color{blue},            % 关键字蓝色
+    stringstyle=\color{orange},           % 字符串橙色
+    commentstyle=\color{teal},            % 注释青色
+    morecomment=[s][\color{teal}]{/*}{*/},% 多行注释
+    morecomment=[l][\color{teal}]{//},    % 单行注释
+    frame=single,                         % 单线边框
+    rulecolor=\color{black},            % 边框颜色
+    backgroundcolor=\color{white},        % 背景白色
+    breaklines=true,                      % 自动换行
+    breakatwhitespace=true,               % 在空白处换行
+    tabsize=4,                            % Tab宽度
+    showstringspaces=false,               % 不显示字符串中的空格
+    numbers=left,                         % 不显示行号
+    xleftmargin=0.5em,                    % 左边距
+    xrightmargin=0.5em,                   % 右边距
+    aboveskip=0.5em,                        % 上边距
+    belowskip=0.5em,                      % 下边距
+    escapeinside={(*@}{@*)},              % 转义字符（用于在代码中插入LaTeX）
+    morekeywords={String, List, Map, Set, var, record}, % 额外关键字
+    literate={@}{{\textcolor{blue}{@}}}1  % @符号也用蓝色
+}
+
+\lstset{style=javastyle}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % % 设置《国家图书馆封面》的内容，仅博士论文才需要填写
@@ -64,13 +102,13 @@
 % 设置论文的中文封面
 
 % 单行论文标题，不可换行
-\title{面向广告与商业化内容的管理、应用与治理平台的设计与实现}
+\title{面向广告与商业化场景的内容应用与管理平台的设计与实现}
 
 % 如果论文标题过长，可以分两行，第一行用\titlea{}定义，第二行用\titleb{}定义，
 % 使用以下3行：
 \title{} %用于覆盖单行标题内容为空
-\titlea{面向广告与商业化内容的}  %第一行标题写这里
-\titleb{管理、应用与治理平台的设计与实现} %第二行标题写这里
+\titlea{面向广告与商业化场景的}  %第一行标题写这里
+\titleb{内容应用与管理平台的设计与实现} %第二行标题写这里
 % 注意： \title 不能都注释，它用于控制标题选择双行还是单行。\title{}如果内容为空，则编译\titlea{},titleb{}双行标题，否则编译单行标题
 
 
@@ -110,7 +148,7 @@
 % 设置论文的英文封面
 
 % 论文的英文标题，不可换行
-\englishtitle{Design and Implementation of a Platform for the Management, Application, and Governance of Advertising and Commercial Content}
+\englishtitle{Design and Implementation of a Content Application and Management Platform for Advertising and Commercial Scenarios}
 % 论文作者姓名的拼音
 \englishauthor{QiQing Jin}
 % 导师姓名职称的英文
@@ -132,20 +170,20 @@
 
 % 设置中文摘要页面的论文标题及副标题的第一行。
 % 此属性可选，其默认值为使用|\title|命令所设置的论文标题
-\abstracttitlea{面向广告与商业化内容的}
+\abstracttitlea{面向广告与商业化场景的}
 % 设置中文摘要页面的论文标题及副标题的第二行。
 % 此属性可选，其默认值为空白
-\abstracttitleb{管理、应用与治理平台的设计与实现}
+\abstracttitleb{内容应用与管理平台的设计与实现}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % 设置论文的英文摘要
 
 % 设置英文摘要页面的论文标题及副标题的第一行。
 % 此属性可选，其默认值为使用|\englishtitle|命令所设置的论文标题
-\englishabstracttitlea{Design and Implementation of a Platform for the Management, }
+\englishabstracttitlea{Design and Implementation of a }
 % 设置英文摘要页面的论文标题及副标题的第二行。
 % 此属性可选，其默认值为空白
-\englishabstracttitleb{Application, and Governance of Advertising and Commercial Content}
+\englishabstracttitleb{Content Application and Management Platform for Advertising and Commercial Scenarios}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 盲审命令，空白字段设置请看 .cls文件 \newcommand*{\blind}
