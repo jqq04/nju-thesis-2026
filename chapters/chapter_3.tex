@@ -1178,7 +1178,11 @@
   \end{tabular}
 \end{table}
 
-（9）数据洞察数仓表。数据洞察模块的指标计算与口径沉淀由数仓侧负责，平台侧通过查询接口对接数仓侧宽表与明细表。为保证论文写作与实现口径一致，本节给出数据洞察侧核心数据表（数仓侧）的字段设计，如表\ref{tab:db_di_event_ods}至表\ref{tab:db_di_session_detail}所示。
+\FloatBarrier
+
+（9）数据洞察数仓表。数据洞察模块的指标计算与口径沉淀主要在数仓侧完成，平台侧通过查询接口对接数仓侧明细表与指标宽表。其数据组织可概括为“事件明细沉淀原始行为、指标宽表汇总页面/内容/聚类等统计结果、会话明细表保留分析与追溯所需的会话级信息”，从而共同支撑页面分析、内容分析、会话分析与会话聚类等能力。相关核心数据表字段设计如表\ref{tab:db_di_event_ods}至表\ref{tab:db_di_session_detail}所示。
+
+其中，事件明细表用于统一沉淀页面浏览、点击、检索提交与召回等原始行为，是后续统计计算与链路追踪的基础数据来源，其字段设计如表\ref{tab:db_di_event_ods}所示。
 
 \begin{table}[!htbp]
   \centering
@@ -1203,6 +1207,10 @@
   \end{tabular}
 \end{table}
 
+\FloatBarrier
+
+在事件明细沉淀的基础上，页面指标宽表、内容指标宽表与会话聚类指标宽表分别面向页面运营效果、内容使用效果与问题聚类效果做日粒度汇总，用于支撑管理端的数据洞察与指标查询，其字段设计如表\ref{tab:db_di_page_metric_d}至表\ref{tab:db_di_session_cluster_d}所示。
+
 \begin{table}[!htbp]
   \centering
   \caption{页面指标宽表（DWS：di\_page\_metric\_d）}
@@ -1219,6 +1227,27 @@
     uv & UV & bigint & \\ \hline
     click\_cnt & 点击数 & bigint & \\ \hline
     ctr & 点击率 & decimal(10,4) & 可选 \\ \hline
+  \end{tabular}
+\end{table}
+
+\begin{table}[!htbp]
+  \centering
+  \caption{内容指标宽表（DWS：di\_content\_metric\_d）}
+  \label{tab:db_di_content_metric_d}
+  \small
+  \begin{tabular}{>{\raggedright\arraybackslash}p{0.20\linewidth}|>{\raggedright\arraybackslash}p{0.16\linewidth}|>{\raggedright\arraybackslash}p{0.16\linewidth}|>{\raggedright\arraybackslash}p{0.32\linewidth}}
+    \hline
+    字段名 & 字段中文名 & 字段类型 & 说明 \\ \hline
+    dt & 统计日期 & date & 分区字段 \\ \hline
+    \nolinkurl{app_id} & 应用ID & bigint & \\ \hline
+    \nolinkurl{space_id} & 空间ID & bigint & \\ \hline
+    \nolinkurl{content_id} & 内容ID & bigint & \\ \hline
+    \nolinkurl{content_type} & 内容类型 & string & knowledge / faq / course / case \\ \hline
+    \nolinkurl{category_id} & 类目ID & bigint & 可为空 \\ \hline
+    \nolinkurl{recall_session_cnt} & 被召回会话数 & bigint & \\ \hline
+    \nolinkurl{generate_session_cnt} & 被生成会话数 & bigint & \\ \hline
+    \nolinkurl{handoff_intent_session_cnt} & 意向转人工会话数 & bigint & \\ \hline
+    \nolinkurl{handoff_session_cnt} & 转人工会话数 & bigint & \\ \hline
   \end{tabular}
 \end{table}
 
@@ -1243,26 +1272,9 @@
   \end{tabular}
 \end{table}
 
-\begin{table}[!htbp]
-  \centering
-  \caption{内容指标宽表（DWS：di\_content\_metric\_d）}
-  \label{tab:db_di_content_metric_d}
-  \small
-  \begin{tabular}{>{\raggedright\arraybackslash}p{0.20\linewidth}|>{\raggedright\arraybackslash}p{0.16\linewidth}|>{\raggedright\arraybackslash}p{0.16\linewidth}|>{\raggedright\arraybackslash}p{0.32\linewidth}}
-    \hline
-    字段名 & 字段中文名 & 字段类型 & 说明 \\ \hline
-    dt & 统计日期 & date & 分区字段 \\ \hline
-    \nolinkurl{app_id} & 应用ID & bigint & \\ \hline
-    \nolinkurl{space_id} & 空间ID & bigint & \\ \hline
-    \nolinkurl{content_id} & 内容ID & bigint & \\ \hline
-    \nolinkurl{content_type} & 内容类型 & string & knowledge / faq / course / case \\ \hline
-    \nolinkurl{category_id} & 类目ID & bigint & 可为空 \\ \hline
-    \nolinkurl{recall_session_cnt} & 被召回会话数 & bigint & \\ \hline
-    \nolinkurl{generate_session_cnt} & 被生成会话数 & bigint & \\ \hline
-    \nolinkurl{handoff_intent_session_cnt} & 意向转人工会话数 & bigint & \\ \hline
-    \nolinkurl{handoff_session_cnt} & 转人工会话数 & bigint & \\ \hline
-  \end{tabular}
-\end{table}
+\FloatBarrier
+
+最后，会话明细表用于保留单次问答会话的检索、回答与转人工等关键信息，既支撑会话分析与聚类回溯，也为问题排查与效果复核提供明细依据，其字段设计如表\ref{tab:db_di_session_detail}所示。
 
 \begin{table}[!htbp]
   \centering
