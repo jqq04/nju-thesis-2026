@@ -621,7 +621,7 @@
 
 \begin{figure}[!htbp]
   \centering
-  \includegraphics[width=1.0\linewidth]{./figure/figures-物理视图.drawio.pdf}
+  \includegraphics[width=0.9\linewidth]{./figure/figures-物理视图.drawio.pdf}
   \caption{物理视图}
   \label{fig:system_physical_view}
 \end{figure}
@@ -731,7 +731,7 @@
   \label{fig:cg_dup_amb_model_flow}
 \end{figure}
 
-（3）覆盖度检测机制。覆盖度检测旨在持续发现知识盲区。系统采用“需求驱动”的检测机制，以用户的真实会话日志为输入：首先通过意图分类筛选出业务咨询类Query，再结合语义聚类技术将零散的未命中Query聚合为“高频缺失问题簇”。在查询意图发现研究中，针对海量 Query 的序列聚类、聚类标签生成与聚类间探索式组织也被用于从无监督日志中抽取稳定主题，这与本平台通过问题簇识别知识缺口的思路具有一致性\cite{cheung2012sequence,10.1145/3308560.3316606}。通过计算代表性Query的召回率与回答质量，系统能够精准定位内容缺失点，并生成对应的覆盖度治理任务，推动知识库的针对性补充\cite{jain1999data,rokach2005clustering}。
+（3）覆盖度检测机制。覆盖度检测旨在持续发现知识盲区。系统采用“需求驱动”的检测机制，以用户的真实会话日志为输入：首先通过意图分类筛选出业务咨询类Query，再结合语义聚类技术将零散的未命中Query聚合为“高频缺失问题簇”。在查询意图发现研究中，针对海量 Query 的序列聚类、聚类标签生成与聚类间探索式组织也被用于从无监督日志中抽取稳定主题，这与本平台通过问题簇识别知识缺口的思路具有一致性\cite{cheung2012sequence,10.1145/3308560.3316606}。通过计算代表性Query的召回率与回答质量，系统能够精准定位内容缺失点，并生成对应的覆盖度治理任务，推动知识库的针对性补充\cite{zhou2024comprehensive,ran2023comprehensive}。
 
 （4）质量治理任务线上化。为将质量治理从离线跑数与人工推动升级为线上闭环，平台将治理过程抽象为主任务与子任务两层结构。主任务负责一次治理计算的配置与状态管理，包含任务名称、空间、会话周期与召回阈值等上下文信息；主任务进入计算中后生成治理任务列表，并在计算完成后对外展示结果。子任务主要包含覆盖任务与重复歧义任务两类：覆盖任务承载缺知识聚类结果，支持人工标记“无需补充/需要补充”并填写说明，系统每日巡检若发现已可召回到相关答案则自动完成；重复歧义任务承载重复对与歧义对结果，支持人工判断是否需要下线并完成处理标记，系统每日巡检若发现内容变更、下线或删除后不再存在重复/歧义，则自动完成。此外，针对算法误判等特殊场景，支持责任人申请“强制完成”，经审批通过后直接关闭任务，防止无效治理。质量治理任务线上化的结构与关键流程如图\ref{fig:cg_task_flow}所示。
 
@@ -754,21 +754,16 @@
   \label{fig:di_pipeline}
 \end{figure}
 
-（1）数据采集。数据采集需要覆盖页面化消费链路与智能问答链路两类场景。在页面化链路中，平台采集曝光、点击、搜索输入与结果点击等行为数据；在问答链路中，平台采集问题输入、召回证据、生成结果与转人工等链路数据。为避免采集口径不一致导致分析偏差，平台对埋点事件与字段进行统一定义，例如page\_view、click、query\_submit、rag\_recall、llm\_generate、handoff\_intent与handoff\_success等，并统一携带app\_id、space\_id、session\_id、trace\_id与content\_id等公共维度字段，便于端到端追踪与明细还原。
+（1）数据采集。数据采集需要覆盖页面化消费链路与智能问答链路两类场景。在页面化链路中，平台采集曝光、点击、搜索输入与结果点击等行为数据；在问答链路中，平台采集问题输入、召回证据、生成结果与转人工等链路数据。为避免采集口径不一致导致分析偏差，平台对埋点事件与字段进行统一定义，例如page\_\allowbreak view、click、query\_\allowbreak submit、rag\_\allowbreak recall、llm\_\allowbreak generate、handoff\_\allowbreak intent与handoff\_\allowbreak success等，并统一携带app\_\allowbreak id、space\_\allowbreak id、session\_\allowbreak id、trace\_\allowbreak id与content\_\allowbreak id等公共维度字段，便于端到端追踪与明细还原。
 
 为支撑事件的可扩展与跨链路关联，平台将事件抽象为“公共维度 + ext扩展字段”的统一模型，并以trace\_id与session\_id建立会话与链路关联。
 
 （2）指标体系与分析模型设计。为全面评估平台运行效果，平台构建了覆盖页面、会话与内容三个视角的指标体系，并支持从聚合指标下钻至会话明细。页面视角关注页面访问量（PV）、用户量（UV）与点击率，评估内容门户的使用情况；会话视角以会话为单位，关注会话总量、模型识别解决率、意向转人工率与实际转人工率，评估智能问答链路的整体效能；内容视角关注内容在RAG链路中的被召回次数、被生成引用次数以及关联的转人工会话数，识别高价值内容与低效内容。围绕平台质量、用户满意度与持续使用意愿之间关系的研究也表明，访问与交互效果指标对于评估平台应用价值具有直接意义\cite{xu2023commerce}。此外，平台提供会话明细查询能力，支持追溯单个会话的原始Query、改写结果、召回证据与生成回答，为问题定位与策略优化提供微观依据。
 
-（3）会话聚类机制设计。会话聚类是平台从统计视角识别高频问题与知识盲区的核心机制。该机制通过语义向量技术将海量零散的历史Query归并为有限的语义主题簇，将非结构化的日志转化为结构化的“问题簇”。聚类结果包含聚类中心（代表性Query）、聚类规模（热度）以及聚类主题标签（由大模型总结生成）。通过会话聚类，运营人员可以快速发现高频且低解决率的头部问题，并将其作为覆盖度治理任务的输入，从而实现“数据反哺治理”的闭环\cite{jain1999data,rokach2005clustering}。
+（3）会话聚类机制设计。会话聚类是平台从统计视角识别高频问题与知识盲区的核心机制。该机制通过语义向量技术将海量零散的历史Query归并为有限的语义主题簇，将非结构化的日志转化为结构化的“问题簇”。聚类结果包含聚类中心（代表性Query）、聚类规模（热度）以及聚类主题标签（由大模型总结生成）。通过会话聚类，运营人员可以快速发现高频且低解决率的头部问题，并将其作为覆盖度治理任务的输入，从而实现“数据反哺治理”的闭环\cite{zhou2024comprehensive,ran2023comprehensive}。
 
 \section{数据库设计}
-平台的持久化存储围绕“统一内容资产 + 权限控制”展开：空间、应用、内容元数据、审批流转与内容权限（content\_auth）等结构化数据落在关系型数据库中；案例（case）的详情数据因字段结构灵活存储在MongoDB中。检索与问答链路使用全文检索与语义向量两类索引以支撑页面检索与RAG召回；数据洞察的离线聚合结果由数仓侧产出，平台侧以查询接口承接并展示。
-
-\subsection{概念结构设计}
-平台以空间与应用作为组织边界：空间（Space）用于区分不同业务线并形成权限边界，应用（Application）用于表示空间下的具体业务领域或使用场景。内容（Content）作为统一抽象实体，通过内容类型字段区分knowledge、faq、course与case四类内容形态，并与类目、标签共同构成内容组织方式。权限体系由两部分叠加：一是平台管理权限，采用“角色-权限-作用域”的RBAC模型；二是内容级可见性与可操作范围，由content\_auth模块在内容粒度再判一层，以支持免登录可见、员工/部门/角色匹配等策略。
-
-数据库E-R图如图\ref{fig:db_er}所示，注意其中并不包含离线表。
+图\ref{fig:db_er}所示为平台数据库的关键实体关系图，图中给出了内容、组织边界、权限控制、治理任务与数据洞察相关的核心实体及其关系。整体上，平台以内容（content）为核心业务对象，由空间（space）与应用（application）形成组织边界，由类目、标签与多形态内容子表支撑内容组织，由RBAC、内容权限与审批表支撑访问控制与发布流程，由治理任务表支撑治理闭环，由数仓侧明细/指标表支撑数据洞察模块。
 
 \begin{figure}[!htbp]
   \centering
@@ -777,10 +772,9 @@
   \label{fig:db_er}
 \end{figure}
 
-\subsection{表结构设计}
-本节给出平台数据库关键表结构。平台数据模型遵循“内容统一、组织分层、权限叠加”的设计原则：内容资产以空间与应用为组织边界，内容采用统一内容模型承接knowledge、faq、course、case四类形态；权限采用RBAC与content\_auth两层叠加；内容上线依赖审批表记录审批状态。
+下面结合各表的字段设计对关键数据对象进行说明。
 
-（1）空间与应用表。空间与应用是内容组织与权限隔离的基础边界，其表结构如表\ref{tab:db_space}与表\ref{tab:db_application}所示。
+（1）空间与应用表。空间与应用是平台进行内容组织、权限隔离与场景划分的基础边界。空间表详情如表\ref{tab:db_space}所示，用于存储业务线级别的顶层组织信息，是应用归属、内容隔离和管理范围划分的基础。其中，id为主键，name用于标识空间名称，owner\_\allowbreak id用于记录空间负责人，status用于控制空间是否启用，create\_\allowbreak time与modify\_\allowbreak time用于记录创建与变更时间，便于后续审计和运维管理。
 
 \begin{table}[!htbp]
   \centering
@@ -798,6 +792,8 @@
     modify\_time & 更新时间 & datetime & \\ \hline
   \end{tabular}
 \end{table}
+
+应用表详情如表\ref{tab:db_application}所示，用于描述空间下的具体业务载体，不同应用可以承载门户、智能助手等不同内容消费场景。表中space\_\allowbreak id用于建立应用与空间之间的从属关系，name用于标识应用名称，type用于区分应用类型，status用于控制应用启停，create\_\allowbreak time与modify\_\allowbreak time则用于记录应用生命周期中的时间信息。空间表与应用表共同定义了平台的组织边界，也为后续内容归属、权限控制和数据统计提供了统一作用域。
 
 \begin{table}[!htbp]
   \centering
@@ -817,7 +813,9 @@
   \end{tabular}
 \end{table}
 
-（2）统一内容表。内容表承接所有内容形态的公共字段，其表结构如表\ref{tab:db_content}所示。
+\FloatBarrier
+
+（2）统一内容表。内容表是整套数据库设计中的核心主表，表结构如表\ref{tab:db_content}所示，用于统一记录各类内容的归属信息、基础元数据和生命周期状态。表中space\_\allowbreak id与app\_\allowbreak id分别标识内容所属空间和创建应用，content\_\allowbreak type用于区分知识、问答、课程和案例等不同内容类型，title与summary承担检索、展示和列表摘要等作用，status用于标识草稿、待审、已发布、下线与删除等状态，create\_\allowbreak time与modify\_\allowbreak time用于记录内容的创建与更新时间。通过该表，平台可以在统一模型下管理多形态内容，并将共性字段从具体子表中抽离出来。
 
 \begin{table}[!htbp]
   \centering
@@ -839,7 +837,9 @@
   \end{tabular}
 \end{table}
 
-（3）多形态内容子表。不同内容类型的差异字段存储在对应子表中：knowledge/faq/course落在关系型数据库中，case详情存储在MongoDB中。其中faq除标准问与答案外，还需要维护相似问集合以支撑相似问召回与口径统一。相关表结构如表\ref{tab:db_knowledge}至表\ref{tab:db_case_detail_mongo}所示。
+（3）多形态内容子表。不同内容类型的差异字段存储在对应子表中，以保持统一内容模型的同时兼顾字段扩展性。
+
+知识内容表详情如表\ref{tab:db_knowledge}所示，用于存储知识类内容的正文信息。该表通过content\_\allowbreak id与统一内容表关联，body字段承载富文本或Markdown等正文内容，是后续内容切片、语义检索和问答引用的主要文本来源。由于知识类内容以长文本为主，因此将正文单独拆分到子表中，有助于控制主表宽度并提升扩展性。
 
 \begin{table}[!htbp]
   \centering
@@ -854,6 +854,8 @@
     body & 正文 & longtext & 富文本/Markdown等 \\ \hline
   \end{tabular}
 \end{table}
+
+问答内容表详情如表\ref{tab:db_faq}所示，用于存储FAQ类内容的核心问答对。表中question用于记录标准问题，similar\_\allowbreak questions用于维护相似问集合，以支撑问法归并与召回扩展，answer用于记录标准答案，以上字段均通过content\_\allowbreak id与内容主表关联。该表使平台能够在统一内容模型下对问答内容进行结构化管理，并支撑标准问匹配和答案直接返回等场景。
 
 \begin{table}[!htbp]
   \centering
@@ -871,20 +873,7 @@
   \end{tabular}
 \end{table}
 
-% \begin{table}[!htbp]
-%   \centering
-%   \caption{相似问表（faq\_similar\_question）}
-%   \label{tab:db_faq_similar_question}
-%   \small
-%   \begin{tabular}{>{\raggedright\arraybackslash}p{0.20\linewidth}|>{\raggedright\arraybackslash}p{0.16\linewidth}|>{\raggedright\arraybackslash}p{0.16\linewidth}|>{\raggedright\arraybackslash}p{0.32\linewidth}}
-%     \hline
-%     字段名 & 字段中文名 & 字段类型 & 说明 \\ \hline
-%     id & 主键ID & bigint & 主键 \\ \hline
-%     faq\_id & 问答ID & bigint & 外键，关联faq \\ \hline
-%     question & 相似问 & varchar(1024) & \\ \hline
-%     create\_time & 创建时间 & datetime & \\ \hline
-%   \end{tabular}
-% \end{table}
+课程内容表详情如表\ref{tab:db_course}所示，用于存储课程类内容的扩展信息。该表通过content\_\allowbreak id与内容主表建立一对一关系，cover\_\allowbreak url用于记录课程封面等展示属性，便于在课程列表、推荐卡片等场景中进行可视化呈现。由于课程的展示形态与普通知识内容存在差异，因此平台通过独立子表补充其专属字段。
 
 \begin{table}[!htbp]
   \centering
@@ -900,6 +889,8 @@
     
   \end{tabular}
 \end{table}
+
+课节表详情如表\ref{tab:db_course_lesson}所示，用于细化课程内部结构，将一门课程拆分为多个可独立编排和展示的课节单元。表中course\_\allowbreak id用于关联所属课程，title记录课节标题，lesson\_\allowbreak no用于定义课节顺序，content用于承载课节文本、字幕或讲义内容。该表支持课程内容按章节组织，也便于后续按课节维度进行展示和检索。
 
 \begin{table}[!htbp]
   \centering
@@ -917,6 +908,8 @@
   \end{tabular}
 \end{table}
 
+案例详情集合详情如表\ref{tab:db_case_detail_mongo}所示。由于案例类内容的详情字段差异较大、变化较快，平台将其扩展信息聚合存储在MongoDB集合中。集合中content\_\allowbreak id用于关联统一内容表中的案例主记录，detail以JSON形式承载其余结构化与非结构化扩展字段，\_\allowbreak id作为MongoDB主键保证文档唯一性。该设计有利于在保持主数据统一管理的同时，为案例类内容提供更灵活的字段扩展能力。
+
 \begin{table}[!htbp]
   \centering
   \caption{案例详情集合（MongoDB：case\_detail）}
@@ -931,7 +924,11 @@
   \end{tabular}
 \end{table}
 
-（4）类目与标签表。为支撑内容在页面化展示与检索场景下的组织与聚合，平台提供类目树与标签体系，并通过关联表建立内容与类目/标签的绑定关系。相关表结构如表\ref{tab:db_tag}至表\ref{tab:db_content_category_ref}所示。
+\FloatBarrier
+
+（4）类目与标签表。为支撑内容在页面化展示与检索场景下的组织与聚合，平台提供类目树与标签体系，并通过关联表建立内容与类目、标签之间的绑定关系。
+
+标签表详情如表\ref{tab:db_tag}所示，用于维护应用维度下的标签字典，是内容打标、筛选与聚合展示的重要基础。表中app\_\allowbreak id限定标签的作用域，name用于记录标签名称，type用于区分标签类别，status用于控制标签是否生效，时间字段用于记录标签创建和修改时间。通过该表，平台可以在应用范围内维护统一的标签语义。
 
 \begin{table}[!htbp]
   \centering
@@ -951,6 +948,8 @@
   \end{tabular}
 \end{table}
 
+内容-标签关联表详情如表\ref{tab:db_content_tag_ref}所示，用于建立内容与标签之间的多对多绑定关系。表中content\_\allowbreak id与tag\_\allowbreak id分别关联内容表和标签表，create\_\allowbreak time用于记录绑定建立时间。该表使同一内容可以被打上多个标签，也使同一标签可以服务于多条内容，从而支撑内容检索、标签聚合和推荐分析等功能。
+
 \begin{table}[!htbp]
   \centering
   \caption{内容-标签关联表（content\_tag\_ref）}
@@ -965,6 +964,8 @@
     create\_time & 创建时间 & datetime & \\ \hline
   \end{tabular}
 \end{table}
+
+类目表详情如表\ref{tab:db_category}所示，用于维护应用内的树状类目结构，是平台进行目录化展示与导航管理的基础。表中parent\_\allowbreak id用于构建父子层级关系，name用于记录类目名称，path用于保存祖先链路编码，便于快速定位和批量查询，status用于控制类目是否启用，时间字段则用于记录类目维护过程中的变更信息。类目表与标签表相互补充，分别承担层级组织与语义标注的职责。
 
 \begin{table}[!htbp]
   \centering
@@ -985,6 +986,8 @@
   \end{tabular}
 \end{table}
 
+内容-类目关联表详情如表\ref{tab:db_content_category_ref}所示，用于记录内容与类目之间的归属关系，支撑内容按目录体系进行管理、导航展示与聚合查询。表中content\_\allowbreak id和category\_\allowbreak id分别关联内容与类目，create\_\allowbreak time用于记录建立关联的时间。通过该表，平台可以灵活维护内容在类目体系中的挂载关系，而无需在内容主表中直接固化复杂层级字段。
+
 \begin{table}[!htbp]
   \centering
   \caption{内容-类目关联表（content\_category\_ref）}
@@ -1000,7 +1003,11 @@
   \end{tabular}
 \end{table}
 
-（5）平台RBAC表。平台管理权限使用五张表落地：user、role、permission、role\_permission、user\_role\_binding。用户-角色绑定关系区分GLOBAL/SPACE/APP作用域，以实现“平台负责人（GLOBAL）、业务负责人（SPACE）、业务运营（APP|SPACE）”的权限隔离与授权。其表结构如表\ref{tab:db_user}至表\ref{tab:db_user_role_binding}所示。
+\FloatBarrier
+
+（5）平台RBAC表。平台管理权限采用RBAC模型落地，通过用户、角色、权限及其关联表表达授权关系，并通过作用域字段实现全局、空间和应用级授权隔离。
+
+用户表详情如表\ref{tab:db_user}所示，用于存储平台内的用户身份信息，是权限绑定和操作审计的基础。表中id为用户主键，name用于展示用户名或账号标识，status用于控制用户是否可用。该表保存的是平台侧管理所需的用户基础信息，为角色分配和审批流转等功能提供主体标识。
 
 \begin{table}[!htbp]
   \centering
@@ -1016,6 +1023,8 @@
   \end{tabular}
 \end{table}
 
+角色表详情如表\ref{tab:db_role}所示，用于抽象平台中的职责类别，是权限聚合与授权配置的核心载体。表中id为角色主键，name用于定义平台负责人、业务负责人、业务运营等不同职责类型。通过角色这一中间层，平台可以将多个原子权限进行组合，降低直接面向用户授权的复杂度。
+
 \begin{table}[!htbp]
   \centering
   \caption{角色表（role）}
@@ -1028,6 +1037,8 @@
     name & 角色名称 & varchar(255) & 平台负责人/业务负责人/业务运营等 \\ \hline
   \end{tabular}
 \end{table}
+
+权限表详情如表\ref{tab:db_permission}所示，用于维护系统中的原子权限点。表中code为权限码，例如SPACE\_\allowbreak CREATE、CONTENT\_\allowbreak PUBLISH，用于在程序中进行精确鉴权；name用于记录权限的可读描述，便于后台管理和权限配置。角色表与权限表共同构成RBAC模型中的能力定义层。
 
 \begin{table}[!htbp]
   \centering
@@ -1043,6 +1054,8 @@
   \end{tabular}
 \end{table}
 
+角色-权限关联表详情如表\ref{tab:db_role_permission}所示，用于建立角色与权限之间的多对多映射关系。表中role\_\allowbreak id与permission\_\allowbreak id分别关联角色和权限，使一个角色可以聚合多项权限，也允许同一权限被多个角色复用。该表是将权限定义转化为可配置角色能力的关键纽带。
+
 \begin{table}[!htbp]
   \centering
   \caption{角色-权限关联表（role\_permission）}
@@ -1056,6 +1069,8 @@
     permission\_id & 权限ID & bigint & 外键，关联permission \\ \hline
   \end{tabular}
 \end{table}
+
+用户-角色绑定表详情如表\ref{tab:db_user_role_binding}所示，用于记录用户在不同作用域下拥有的角色，是RBAC模型真正落地到用户授权的核心表。表中user\_\allowbreak id和role\_\allowbreak id分别关联用户与角色，scope\_\allowbreak type用于区分全局、空间和应用三类授权范围，scope\_\allowbreak id用于标识具体的空间或应用对象。通过该表，平台能够实现同一用户在不同空间或应用下拥有不同管理职责的分层授权能力。
 
 \begin{table}[!htbp]
   \centering
@@ -1073,8 +1088,10 @@
   \end{tabular}
 \end{table}
 
+\FloatBarrier
 
-（6）内容权限表（content\_auth）。内容级权限以“内容 + 策略 + 变量 + 权限码”的方式表达，其表结构如表\ref{tab:db_content_auth}所示；auth\_tactic支持免登录可见、所有外部用户可见、所有内部员工可见、员工匹配、部门匹配、角色匹配以及自定义匹配等策略。
+
+（6）内容权限表（content\_auth）。内容级权限以“内容 + 策略 + 变量 + 权限码”的方式表达，其表结构如表\ref{tab:db_content_auth}所示。该表用于表达内容粒度的可见性与可操作性约束，是对平台级RBAC模型的进一步补充。表中content\_\allowbreak id用于标识被授权的具体内容，auth\_\allowbreak tactic用于定义权限策略类型，如员工匹配、部门匹配或角色匹配，auth\_\allowbreak variable用于记录策略变量值，auth\_\allowbreak code用于定义可执行操作集合。通过该表，平台能够在统一角色权限之外，对特定内容设置更细粒度的访问控制规则。
 
 \begin{table}[!htbp]
   \centering
@@ -1092,7 +1109,7 @@
   \end{tabular}
 \end{table}
 
-（7）内容审批表。内容上线依赖审批表记录审批状态与审批意见，其表结构如表\ref{tab:db_content_approval}所示。
+（7）内容审批表。内容审批表详情如表\ref{tab:db_content_approval}所示，用于记录内容从提审到审批完成的全过程信息，是内容发布流程中的关键过程表。表中content\_\allowbreak id用于关联被审批内容，submitter\_\allowbreak id和reviewer\_\allowbreak id分别记录提交人与审批人，status用于标识待审、通过和驳回等审批状态，comment用于补充审批意见，create\_\allowbreak time与modify\_\allowbreak time用于追踪流转时间。该表为内容发布、审批留痕和责任追踪提供了结构化依据。
 
 \begin{table}[!htbp]
   \centering
@@ -1113,7 +1130,11 @@
   \end{tabular}
 \end{table}
 
-（8）治理任务表。内容治理模块将检测结果以治理任务形式线上化流转，主任务负责配置与状态管理，重复歧义任务与覆盖度任务承载具体治理问题。其表结构如表\ref{tab:db_govern_main_task}至表\ref{tab:db_govern_coverage_task}所示。
+\FloatBarrier
+
+（8）治理任务表。内容治理模块将检测结果以治理任务形式线上化流转，主任务负责配置与状态管理，重复歧义任务与覆盖度任务承载具体治理问题。
+
+主任务表详情如表\ref{tab:db_govern_main_task}所示，用于记录一次治理任务的整体配置与执行状态，是治理流程的主控表。表中app\_\allowbreak id限定任务所属应用范围，name用于标识任务名称，session\_\allowbreak period用于定义统计窗口，recall\_\allowbreak threshold用于配置召回或覆盖阈值，status用于标识任务处于计算中、计算完成或已完成等阶段，时间字段则用于记录任务执行过程。该表统一管理一次治理计算的上下文信息。
 
 \begin{table}[!htbp]
   \centering
@@ -1133,6 +1154,8 @@
     modify\_time & 更新时间 & datetime & \\ \hline
   \end{tabular}
 \end{table}
+
+重复歧义任务表详情如表\ref{tab:db_govern_dup_amb_task}所示，用于记录重复或歧义内容对的治理问题。表中main\_\allowbreak task\_\allowbreak id用于关联所属主任务，task\_\allowbreak type用于区分重复和歧义两类问题，content\_\allowbreak id\_\allowbreak a与content\_\allowbreak id\_\allowbreak b用于标识待处理的内容对，status用于记录任务状态，assignee\_\allowbreak id与result分别记录责任人与处理结论。通过该表，平台可以对重复和歧义问题进行逐条分派、处理和回收。
 
 \begin{table}[!htbp]
   \centering
@@ -1154,6 +1177,8 @@
     modify\_time & 更新时间 & datetime & \\ \hline
   \end{tabular}
 \end{table}
+
+覆盖度任务表详情如表\ref{tab:db_govern_coverage_task}所示，用于记录高频但覆盖不足的问题簇，是覆盖度治理的主要承载表。表中cluster\_\allowbreak title用于概括缺失知识主题，representative\_\allowbreak query用于记录代表性问法，example\_\allowbreak queries用于保存典型原声样本，query\_\allowbreak count用于衡量问题影响范围，status与assignee\_\allowbreak id则用于任务分派、处理和复检回收。该表将会话聚类结果转化为可运营、可跟踪的治理对象。
 
 \begin{table}[!htbp]
   \centering
@@ -1178,9 +1203,9 @@
 
 \FloatBarrier
 
-（9）数据洞察数仓表。数据洞察模块的指标计算与口径沉淀主要在数仓侧完成，平台侧通过查询接口对接数仓侧明细表与指标宽表。其数据组织可概括为“事件明细沉淀原始行为、指标宽表汇总页面/内容/聚类等统计结果、会话明细表保留分析与追溯所需的会话级信息”，从而共同支撑页面分析、内容分析、会话分析与会话聚类等能力。相关核心数据表字段设计如表\ref{tab:db_di_event_ods}至表\ref{tab:db_di_session_detail}所示。
+（9）数据洞察数仓表。数据洞察模块的指标计算与口径沉淀主要在数仓侧完成，平台侧通过查询接口对接数仓侧明细表与指标宽表。
 
-其中，事件明细表用于统一沉淀页面浏览、点击、检索提交与召回等原始行为，是后续统计计算与链路追踪的基础数据来源，其字段设计如表\ref{tab:db_di_event_ods}所示。
+事件明细表详情如表\ref{tab:db_di_event_ods}所示，用于统一沉淀页面浏览、点击、检索提交与召回等原始行为，是数据洞察链路的底层明细来源。表中event\_\allowbreak name用于标识事件类型，app\_\allowbreak id与space\_\allowbreak id用于标识业务作用域，user\_\allowbreak id与visitor\_\allowbreak id用于区分登录用户与匿名访客，session\_\allowbreak id与trace\_\allowbreak id用于建立会话和链路关联，ext用于承载事件特有扩展字段。通过该表，平台可以为后续聚合统计、链路还原和问题排查提供完整原始数据。
 
 \begin{table}[!htbp]
   \centering
@@ -1190,14 +1215,14 @@
   \begin{tabular}{>{\raggedright\arraybackslash}p{0.20\linewidth}|>{\raggedright\arraybackslash}p{0.16\linewidth}|>{\raggedright\arraybackslash}p{0.16\linewidth}|>{\raggedright\arraybackslash}p{0.32\linewidth}}
     \hline
     字段名 & 字段中文名 & 字段类型 & 说明 \\ \hline
-    \nolinkurl{event_name} & 事件名 & string & \nolinkurl{page_view}/\nolinkurl{click}/\nolinkurl{query_submit}/\nolinkurl{rag_recall}等 \\ \hline
-    \nolinkurl{app_id} & 应用ID & bigint & \\ \hline
-    \nolinkurl{space_id} & 空间ID & bigint & \\ \hline
-    \nolinkurl{user_id} & 用户ID & bigint & 可为空 \\ \hline
-    \nolinkurl{visitor_id} & 匿名访客ID & string & 可为空 \\ \hline
-    \nolinkurl{session_id} & 会话ID & string & \\ \hline
-    \nolinkurl{trace_id} & 链路标识 & string & \\ \hline
-    \nolinkurl{content_id} & 内容ID & bigint & 可为空 \\ \hline
+    event\_\allowbreak name & 事件名 & string & page\_\allowbreak view/click/query\_\allowbreak submit/rag\_\allowbreak recall等 \\ \hline
+    app\_\allowbreak id & 应用ID & bigint & \\ \hline
+    space\_\allowbreak id & 空间ID & bigint & \\ \hline
+    user\_\allowbreak id & 用户ID & bigint & 可为空 \\ \hline
+    visitor\_\allowbreak id & 匿名访客ID & string & 可为空 \\ \hline
+    session\_\allowbreak id & 会话ID & string & \\ \hline
+    trace\_\allowbreak id & 链路标识 & string & \\ \hline
+    content\_\allowbreak id & 内容ID & bigint & 可为空 \\ \hline
     timestamp & 时间戳 & datetime & \\ \hline
     channel & 渠道 & string & 可为空 \\ \hline
     device & 设备 & string & 可为空 \\ \hline
@@ -1205,9 +1230,7 @@
   \end{tabular}
 \end{table}
 
-\FloatBarrier
-
-在事件明细沉淀的基础上，页面指标宽表、内容指标宽表与会话聚类指标宽表分别面向页面运营效果、内容使用效果与问题聚类效果做日粒度汇总，用于支撑管理端的数据洞察与指标查询，其字段设计如表\ref{tab:db_di_page_metric_d}至表\ref{tab:db_di_session_cluster_d}所示。
+页面指标宽表详情如表\ref{tab:db_di_page_metric_d}所示，用于按日汇总页面访问与点击表现，是评估页面化内容应用效果的基础统计表。表中dt为统计日期分区字段，app\_\allowbreak id与space\_\allowbreak id用于限定统计范围，pv和uv分别衡量访问规模，click\_\allowbreak cnt与ctr用于评估交互表现。该表为页面访问趋势分析、应用运营评估和内容投放优化提供直接依据。
 
 \begin{table}[!htbp]
   \centering
@@ -1228,6 +1251,8 @@
   \end{tabular}
 \end{table}
 
+内容指标宽表详情如表\ref{tab:db_di_content_metric_d}所示，用于汇总内容在检索与问答链路中的使用效果，是从内容视角评估平台运行质量的重要宽表。表中content\_\allowbreak id与content\_\allowbreak type用于定位具体内容对象，recall\_\allowbreak session\_\allowbreak cnt与generate\_\allowbreak session\_\allowbreak cnt用于衡量内容被召回与被生成引用的会话规模；handoff\_\allowbreak intent\_\allowbreak session\_\allowbreak cnt与handoff\_\allowbreak session\_\allowbreak cnt用于衡量内容引发转人工的程度。该表可以直接支撑高价值内容识别、低效内容发现和治理优先级排序。
+
 \begin{table}[!htbp]
   \centering
   \caption{内容指标宽表（DWS：di\_content\_metric\_d）}
@@ -1237,17 +1262,19 @@
     \hline
     字段名 & 字段中文名 & 字段类型 & 说明 \\ \hline
     dt & 统计日期 & date & 分区字段 \\ \hline
-    \nolinkurl{app_id} & 应用ID & bigint & \\ \hline
-    \nolinkurl{space_id} & 空间ID & bigint & \\ \hline
-    \nolinkurl{content_id} & 内容ID & bigint & \\ \hline
-    \nolinkurl{content_type} & 内容类型 & string & knowledge / faq / course / case \\ \hline
-    \nolinkurl{category_id} & 类目ID & bigint & 可为空 \\ \hline
-    \nolinkurl{recall_session_cnt} & 被召回会话数 & bigint & \\ \hline
-    \nolinkurl{generate_session_cnt} & 被生成会话数 & bigint & \\ \hline
-    \nolinkurl{handoff_intent_session_cnt} & 意向转人工会话数 & bigint & \\ \hline
-    \nolinkurl{handoff_session_cnt} & 转人工会话数 & bigint & \\ \hline
+    app\_\allowbreak id & 应用ID & bigint & \\ \hline
+    space\_\allowbreak id & 空间ID & bigint & \\ \hline
+    content\_\allowbreak id & 内容ID & bigint & \\ \hline
+    content\_\allowbreak type & 内容类型 & string & knowledge / faq / course / case \\ \hline
+    category\_\allowbreak id & 类目ID & bigint & 可为空 \\ \hline
+    recall\_\allowbreak session\_\allowbreak cnt & 被召回会话数 & bigint & \\ \hline
+    generate\_\allowbreak session\_\allowbreak cnt & 被生成会话数 & bigint & \\ \hline
+    handoff\_\allowbreak intent\_\allowbreak session\_\allowbreak cnt & 意向转人工会话数 & bigint & \\ \hline
+    handoff\_\allowbreak session\_\allowbreak cnt & 转人工会话数 & bigint & \\ \hline
   \end{tabular}
 \end{table}
+
+会话聚类指标宽表详情如表\ref{tab:db_di_session_cluster_d}所示，用于汇总问题簇的热度和解决效果，是从主题簇视角观察高频问题的重要数据表。表中cluster\_\allowbreak id与cluster\_\allowbreak title用于标识聚类主题，session\_\allowbreak cnt与query\_\allowbreak cnt用于衡量簇规模，solve\_\allowbreak rate、handoff\_\allowbreak intent\_\allowbreak rate与handoff\_\allowbreak rate用于评估簇内问题的解决程度和转人工情况。该表能够帮助运营人员快速识别高频且待优化的问题簇。
 
 \begin{table}[!htbp]
   \centering
@@ -1265,14 +1292,12 @@
     session\_cnt & 会话数 & bigint & \\ \hline
     query\_cnt & Query数 & bigint & \\ \hline
     solve\_rate & 解决率 & decimal(10,4) & 模型识别解决率 \\ \hline
-    \nolinkurl{handoff_intent_rate} & 意向转人工率 & decimal(10,4) & \\ \hline
+    handoff\_\allowbreak intent\_\allowbreak rate & 意向转人工率 & decimal(10,4) & \\ \hline
     handoff\_rate & 实际转人工率 & decimal(10,4) & \\ \hline
   \end{tabular}
 \end{table}
 
-\FloatBarrier
-
-最后，会话明细表用于保留单次问答会话的检索、回答与转人工等关键信息，既支撑会话分析与聚类回溯，也为问题排查与效果复核提供明细依据，其字段设计如表\ref{tab:db_di_session_detail}所示。
+会话明细表详情如表\ref{tab:db_di_session_detail}所示，用于保留单次问答会话的检索、回答与转人工等关键信息，是问题排查和效果复核的重要明细表。表中session\_\allowbreak id用于标识单次会话，cluster\_\allowbreak id用于关联问题簇；raw\_\allowbreak query与rewritten\_\allowbreak query分别记录用户原始问题和改写结果；recalled\_\allowbreak contents用于记录召回证据，answer用于记录生成回复；handoff\_\allowbreak intent与handoff\_\allowbreak success用于记录转人工意向和结果；session\_\allowbreak time用于标识会话发生时间。该表为链路还原、问题定位和聚类回溯提供了最细粒度的数据支撑。
 
 \begin{table}[!htbp]
   \centering
@@ -1282,19 +1307,21 @@
   \begin{tabular}{>{\raggedright\arraybackslash}p{0.20\linewidth}|>{\raggedright\arraybackslash}p{0.16\linewidth}|>{\raggedright\arraybackslash}p{0.16\linewidth}|>{\raggedright\arraybackslash}p{0.32\linewidth}}
     \hline
     字段名 & 字段中文名 & 字段类型 & 说明 \\ \hline
-    \nolinkurl{session_id} & 会话ID & string & 主键之一 \\ \hline
-    \nolinkurl{cluster_id} & 聚类ID & string & 可为空 \\ \hline
-    \nolinkurl{raw_query} & 用户原声 & string & 可脱敏 \\ \hline
-    \nolinkurl{rewritten_query} & 改写Query & string & 可脱敏 \\ \hline
-    \nolinkurl{recalled_contents} & 召回内容 & json & 含\texttt{content\_id}\&title等 \\ \hline
+    session\_\allowbreak id & 会话ID & string & 主键之一 \\ \hline
+    cluster\_\allowbreak id & 聚类ID & string & 可为空 \\ \hline
+    raw\_\allowbreak query & 用户原声 & string & 可脱敏 \\ \hline
+    rewritten\_\allowbreak query & 改写Query & string & 可脱敏 \\ \hline
+    recalled\_\allowbreak contents & 召回内容 & json & 含content\_\allowbreak id\&title等 \\ \hline
     answer & 回复内容 & string & 可脱敏 \\ \hline
-    \nolinkurl{handoff_intent} & 意向转人工 & tinyint & 0/1 \\ \hline
-    \nolinkurl{handoff_success} & 是否转人工 & tinyint & 0/1 \\ \hline
-    \nolinkurl{user_id} & 用户ID & bigint & 可脱敏 \\ \hline
-    \nolinkurl{user_type} & 用户类型 & string & 内部 / 外部 / 匿名等 \\ \hline
-    \nolinkurl{session_time} & 会话时间 & datetime & \\ \hline
+    handoff\_\allowbreak intent & 意向转人工 & tinyint & 0/1 \\ \hline
+    handoff\_\allowbreak success & 是否转人工 & tinyint & 0/1 \\ \hline
+    user\_\allowbreak id & 用户ID & bigint & 可脱敏 \\ \hline
+    user\_\allowbreak type & 用户类型 & string & 内部 / 外部 / 匿名等 \\ \hline
+    session\_\allowbreak time & 会话时间 & datetime & \\ \hline
   \end{tabular}
 \end{table}
+
+\FloatBarrier
 
 \section{本章小结}
 本章围绕面向广告与商业化场景的内容应用与管理平台展开分析与设计。首先从业务与系统视角给出了平台的整体定位与关键链路，明确平台由内容管理、内容应用、内容治理与数据洞察四个核心域构成，并以统一内容模型、权限体系与事件机制实现协同。随后在需求分析中按照模块给出了核心用例与用例描述表，明确平台在页面展示、内容搜索与智能问答场景下的能力边界，以及治理闭环与效果评估的关键需求。在总体设计与模块设计部分，本章说明了内容发布后的事件驱动机制与索引构建策略，并给出内容切片、多通道召回与治理任务线上化等关键实现思路。最后在数据库设计部分对平台的权限相关核心数据对象与存储选型进行了说明，为后续系统实现与效果评估奠定基础。

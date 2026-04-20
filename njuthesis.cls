@@ -857,9 +857,9 @@
   \pdfbookmark[0]{\njut@cap@cover}{cover}
   \begin{center}
     \vskip 10mm
-    \includegraphics[width=1.6cm]{\njut@cap@institute@logo} \\
-    \vskip 5mm
-    \includegraphics[height=1.5cm]{\njut@cap@institute@name} \\
+    \ifdefempty{\njut@cap@institute@logo}{}{\includegraphics[width=1.6cm]{\njut@cap@institute@logo} \\
+    \vskip 5mm}
+    \ifdefempty{\njut@cap@institute@name}{}{\includegraphics[height=1.5cm]{\njut@cap@institute@name} \\}
     \vskip 3cm
     {\bf\kaishu\zihao{1}\makebox[10em][s]{\njut@cap@cover@thesis}}\\
     \vskip 5mm
@@ -906,7 +906,7 @@
     \vskip\stretch{1}
     \normalsize\rmfamily\njut@cap@cover@en@statement
     \vskip\stretch{2}
-    \includegraphics[width=2.5cm]{\njut@cap@institute@logo} \\
+    \ifdefempty{\njut@cap@institute@logo}{}{\includegraphics[width=2.5cm]{\njut@cap@institute@logo} \\}
     \vskip 3mm
     \normalfont\njut@value@en@department\\
     \njut@value@en@institute
@@ -1128,6 +1128,16 @@
 \englishauthor{}
 \englishsupervisor{}
 \englishmajor{}
+\institute{}
+\department{}
+\englishinstitute{}
+\englishdepartment{}
+\renewcommand*{\njut@cap@institute@logo}{}
+\renewcommand*{\njut@cap@institute@name}{}
+\renewenvironment{acknowledgement}{\setbox0=\vbox\bgroup}{\egroup}
+\renewenvironment{resume}{\setbox0=\vbox\bgroup}{\egroup}
+\renewcommand{\statement}{}
+\renewcommand{\makelicense}{}
 }
 \newcommand{\njuthesis}{\texttt{NJU-Thesis}}
 \newcommand{\zhdash}{\kern0.3ex\rule[0.8ex]{2em}{0.1ex}\kern0.3ex}

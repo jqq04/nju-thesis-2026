@@ -35,9 +35,9 @@
 
 （1）空间与应用隔离。平台以空间（Space）与应用（App）作为组织与管理边界：空间用于承载业务归属与成员管理，应用用于定义具体的内容消费场景与配置集合（如可用内容形态、默认权限策略与审批流模版）。在工程实现上，内容对象统一归属到特定空间与应用，使内容管理、权限控制与发布口径能够在明确范围内进行约束与治理。
 
-（2）类目树与标签体系。在应用内部，平台提供结构化与扁平化两种组织方式。类目树采用路径枚举（Path Enumeration）模型存储，每个节点维护\texttt{parent\_id}与\texttt{path}（如\texttt{0/10/105}），支持$O(1)$复杂度的子树查询与路径解析，为前端提供高性能的目录导航。标签体系则采用扁平集合管理，支持多值绑定与灵活聚合。
+（2）类目树与标签体系。在应用内部，平台提供结构化与扁平化两种组织方式。类目树采用路径枚举（Path Enumeration）模型存储，每个节点维护parent\_id与path（如0/10/105），支持$O(1)$复杂度的子树查询与路径解析，为前端提供高性能的目录导航。标签体系则采用扁平集合管理，支持多值绑定与灵活聚合。
 
-这一多维组织体系最终通过统一内容模型落地：每条内容记录均冗余存储\texttt{space\_id}、\texttt{app\_id}、\texttt{category\_id}与\texttt{tag\_ids}，确保了内容资产在存储层具备清晰的业务归属与属性特征，为后续的权限控制与高效分发奠定了数据基础。
+这一多维组织体系最终通过统一内容模型落地：每条内容记录均冗余存储space\_id、app\_id、category\_id与tag\_ids，确保了内容资产在存储层具备清晰的业务归属与属性特征，为后续的权限控制与高效分发奠定了数据基础。
 
 图\ref{fig:app_management_show}所示为应用管理的效果图。在页面的上半部分，可以通过关键词、空间名称、应用状态进行筛选应用。在页面的中间部分，则展示了筛选后的所有应用，并展示了应用名称、ID、发布状态、创建人、更新时间等信息，通过应用管理界面，可以快速地定位到用户所需的应用中。
 
@@ -120,13 +120,13 @@ public Long saveDraft(SaveDraftReq req) {
 
 （1）RBAC权限控制实现。RBAC以用户—角色—权限项映射为基础，角色在空间或应用维度生效，权限项覆盖空间/应用配置、内容创建编辑、删除、提审、审批、上下线与查看检索等后台操作。实现中，管理后台接口在处理请求时首先完成身份校验与RBAC权限校验，确保调用方具备对应操作能力，再进入后续对象级策略判断，避免越权调用对系统造成影响。对外消费链路以“内容可见性”为核心，主要依赖content\_auth进行对象级裁决，不引入RBAC模块/操作级校验。
 
-在鉴权决策上，平台将请求解析为\texttt{user\_id + scope\_type + scope\_id + permission\_code}四元组：scope用于表达授权生效范围（GLOBAL/SPACE/APP），permission\_code用于表达具体操作。鉴权时先根据请求携带的space\_id、app\_id解析出作用域，再判断用户在该作用域下是否绑定了包含目标权限码的角色，从而实现跨空间隔离与空间内精细授权。
+在鉴权决策上，平台将请求解析为由user\_\allowbreak id、scope\_\allowbreak type、scope\_\allowbreak id与permission\_\allowbreak code组成的四元组：scope\_\allowbreak type用于表达授权生效范围（GLOBAL/SPACE/APP），permission\_\allowbreak code用于表达具体操作。鉴权时先根据请求携带的space\_\allowbreak id、app\_\allowbreak id解析出作用域，再判断用户在该作用域下是否绑定了包含目标权限码的角色，从而实现跨空间隔离与空间内精细授权。
 
-为降低鉴权对管理后台高频访问的额外开销，平台在接入层对RBAC结果进行缓存：以\texttt{user\_id + scope\_type + scope\_id + permission\_code}作为缓存键，缓存值为鉴权是否通过及可选的角色信息。缓存更新遵循“写后失效”的原则：当空间负责人变更成员角色、或平台负责人调整角色-权限关系时，管理侧接口同步触发对应用户的缓存失效，保证权限变更能够在可接受延迟内生效。对于未命中缓存的请求，服务端从\texttt{user\_role\_binding}与\texttt{role\_permission}表加载关系并完成裁决，再回填缓存。
+为降低鉴权对管理后台高频访问的额外开销，平台在接入层对RBAC结果进行缓存：以user\_\allowbreak id、scope\_\allowbreak type、scope\_\allowbreak id与permission\_\allowbreak code的组合作为缓存键，缓存值为鉴权是否通过及可选的角色信息。缓存更新遵循“写后失效”的原则：当空间负责人变更成员角色、或平台负责人调整角色-权限关系时，管理侧接口同步触发对应用户的缓存失效，保证权限变更能够在可接受延迟内生效。对于未命中缓存的请求，服务端从user\_\allowbreak role\_\allowbreak binding与role\_\allowbreak permission表加载关系并完成裁决，再回填缓存。
 
 （2）content\_auth策略授权实现。针对内容可见性与细粒度动作控制，平台以“内容+策略+变量+权限码”的模型表达策略：策略通过auth\_tactic与auth\_variable描述可见范围或动作约束，auth\_code表达具体权限项。鉴权决策流程在实现上以“策略加载—变量解析—动作匹配—结果裁决”为主线，并在读链路对召回候选进行二次过滤，保证检索与问答场景下不会返回越权结果。
 
-在工程实现中，content\_auth的裁决遵循“动作优先”的原则：当请求为查看、编辑、删除、上下线等具体动作时，服务端先对目标内容加载其授权规则集合，并过滤出包含目标动作码的规则子集；随后按auth\_tactic执行策略匹配。根据项目口径，auth\_code以精简集合表达动作权限，例如\texttt{r/w/u}分别对应“读/写/上下线”等能力，单条规则可携带多个动作码以减少规则数量。动作码与典型业务动作的映射如表\ref{tab:cm_auth_code_map}所示。
+在工程实现中，content\_auth的裁决遵循“动作优先”的原则：当请求为查看、编辑、删除、上下线等具体动作时，服务端先对目标内容加载其授权规则集合，并过滤出包含目标动作码的规则子集；随后按auth\_tactic执行策略匹配。根据项目口径，auth\_code以精简集合表达动作权限，例如r/w/u分别对应“读/写/上下线”等能力，单条规则可携带多个动作码以减少规则数量。动作码与典型业务动作的映射如表\ref{tab:cm_auth_code_map}所示。
 
 \begin{table}[!htbp]
   \centering
@@ -266,9 +266,9 @@ public void approve(ApproveReq req) {
 
 此外，对于各种内容中存在的图片与表格类内容，在切片时需要特殊处理。针对图片内容，平台对比了“多模态Embedding”与“视觉大模型（VLM）理解”两种方案。实测发现，多模态Embedding虽然支持图文同空间检索，但对图片内的细粒度文本信息（如海报文字、截图数据）敏感度不足。因此，平台最终采用视觉大模型理解方案：利用大模型对图片进行OCR与语义理解，生成详细的文本描述，将描述文本与图片链接一起作为切片入库。这种方式将图片检索降维为文本检索，显著提升了对图内文字的召回能力。针对表格内容，避免直接按字符切断，而是按行保持语义完整并携带表头信息，将其转化为Markdown格式入库，以提升表格类知识在问答中的可用性\cite{ke2025large,yu2025mind}。
 
-在切片前的文本规范化阶段，系统会对原始HTML进行清洗：去除无意义的样式标签（如\texttt{style}、\texttt{span}）与乱码噪声，同时保留关键的结构化标记（如标题\texttt{h1-h6}、列表\texttt{li}、图片占位符）。保留这些结构信息有助于大模型理解上下文层级，并在生成答案时能够正确引用原文的结构。
+在切片前的文本规范化阶段，系统会对原始HTML进行清洗：去除无意义的样式标签（如style、span）与乱码噪声，同时保留关键的结构化标记（如标题h1-h6、列表li、图片占位符）。保留这些结构信息有助于大模型理解上下文层级，并在生成答案时能够正确引用原文的结构。
 
-在切片结构上，平台将每个切片建模为包含\texttt{slice\_id、content\_id、space\_id、app\_id、content\_type、text}等字段的最小证据单元，并可选携带\texttt{position}用于表示在正文中的定位信息（例如段落序号或课节序号）。该设计使得召回结果既能用于智能问答的证据输入，也能在输出侧映射为“内容标题+片段摘要+定位信息”的引用，降低用户在溯源时的跳转成本。
+在切片结构上，平台将每个切片建模为包含slice\_id、content\_id、space\_id、app\_id、content\_type、text等字段的最小证据单元，并可选携带position用于表示在正文中的定位信息（例如段落序号或课节序号）。该设计使得召回结果既能用于智能问答的证据输入，也能在输出侧映射为“内容标题+片段摘要+定位信息”的引用，降低用户在溯源时的跳转成本。
 
 切片生成的工程实现可以拆分为“内容提取$\rightarrow$文本规范化$\rightarrow$按类型切片$\rightarrow$补充元信息”四步。内容提取阶段按content\_type从对应子表或文档库加载正文或结构字段；文本规范化阶段对富文本标记、空白与不可见字符做清洗，并统一标点与换行以减少embedding噪声；按类型切片阶段根据不同形态选择不同的语义单元；最后补充元信息阶段将标题、摘要、类目、标签、权限等字段写入切片结构，便于召回与过滤。切片构建的关键实现片段如图\ref{fig:ca_slice_build_key_code}所示。
 
@@ -294,15 +294,15 @@ public List<Slice> buildSlices(Content c) {
   \label{fig:ca_slice_build_key_code}
 \end{figure}
 
-（2）索引同步与分发链路。索引构建服务作为MQ消费端，在收到变更消息后，首先回查数据库拉取最新的全量业务信息（含正文、权限规则、标签、类目等）。为保证切片与原文的一致性，系统采用“内容粒度的全量覆盖策略”。当内容发生变更并发布时，索引服务会触发该内容的完整重建流程：首先根据最新正文重新生成所有切片，随后在索引层执行“先删后写”操作，即清理该\texttt{content\_id}下的所有旧切片数据，并批量写入新生成的切片。这种策略避免了复杂的增量比对逻辑，确保了索引中的切片始终与最新发布版本保持完全一致。
+（2）索引同步与分发链路。索引构建服务作为MQ消费端，在收到变更消息后，首先回查数据库拉取最新的全量业务信息（含正文、权限规则、标签、类目等）。为保证切片与原文的一致性，系统采用“内容粒度的全量覆盖策略”。当内容发生变更并发布时，索引服务会触发该内容的完整重建流程：首先根据最新正文重新生成所有切片，随后在索引层执行“先删后写”操作，即清理该content\_id下的所有旧切片数据，并批量写入新生成的切片。这种策略避免了复杂的增量比对逻辑，确保了索引中的切片始终与最新发布版本保持完全一致。
 
 在完成切片生成后，系统基于“统一的切片策略”并行执行两条分发逻辑：
 \begin{itemize}
-\item \textbf{同步到ES（文本倒排索引）}：将切片文本及其元数据（如 \texttt{content\_id}, \texttt{auth}, \texttt{status} 等）写入Elasticsearch。此索引利用倒排机制，侧重“精确关键词匹配”，同时服务于页面化内容应用与RAG文本召回。
+\item \textbf{同步到ES（文本倒排索引）}：将切片文本及其元数据（如 content\_id, auth, status 等）写入Elasticsearch。此索引利用倒排机制，侧重“精确关键词匹配”，同时服务于页面化内容应用与RAG文本召回。
 \item \textbf{同步到向量库（语义向量索引）}：对切片文本进行Embedding向量化，将向量及其元数据写入向量数据库。此索引利用向量相似度，侧重“语义理解”，专门服务于RAG语义召回。
 \end{itemize}
 
-（3）全量元信息绑定与权限前置过滤。为实现高效的统一检索与权限控制，系统在构建索引时采用了“富切片（Rich Chunk）”模式：每个切片文档中不仅包含正文文本与向量，还全量冗余了所属内容的元数据，包括\texttt{app\_id}、\texttt{content\_id}、\texttt{status}、\texttt{category\_id}、\texttt{tag\_ids}以及用于权限控制的\texttt{content\_auth}规则集合。
+（3）全量元信息绑定与权限前置过滤。为实现高效的统一检索与权限控制，系统在构建索引时采用了“富切片（Rich Chunk）”模式：每个切片文档中不仅包含正文文本与向量，还全量冗余了所属内容的元数据，包括app\_id、content\_id、status、category\_id、tag\_ids以及用于权限控制的content\_auth规则集合。
 
 这一设计将复杂的关联查询转化为单文档的属性过滤，使得检索引擎能够独立承担所有筛选职责。在召回阶段，系统将过滤条件与查询词一同提交给检索引擎。这种前置过滤机制利用了搜索引擎的高效筛选能力，避免了传统“先召回后过滤”模式下因权限拦截导致的分页空洞与结果总数不准问题，显著提升了检索性能与用户体验。
 
@@ -427,7 +427,7 @@ public ContentDetailDTO getDetail(DetailReq req) {
 \item \textbf{向量召回通道}：基于Embedding模型将用户Query转化为向量，在向量数据库中检索TopK相似切片。此通道优势在于语义理解与跨词匹配（如“如何退款”匹配“退货流程”），且同样支持基于元数据（如权限、类目、标签）的Filter过滤，弥补了关键词匹配的不足。在工程实践中，稠密检索往往需与BM25插值以提升召回稳定性\cite{wang2021bert}。
 \end{itemize}
 
-（2）融合与重排。两路召回结果在服务层进行加权融合与去重，保留得分最高的切片版本。融合后的候选集进入重排阶段（可选Cross-Encoder精排或规则排序），综合相关性分数、发布时间与点击热度等特征输出最终TopN\cite{pradeep2022squeezing}。
+（2）融合与重排。两路召回结果在服务层进行倒数排名融合（RRF）与去重，保留得分最高的切片版本。融合后的候选集完成重排阶段，输出最终TopN证据\cite{pradeep2022squeezing}。
 
 （3）关键参数与实现。召回阶段的关键参数包括TopK与MinScore：TopK用于控制返回候选切片数量，MinScore用于设置最小相似度阈值以过滤低相关候选。表\ref{tab:rag_params}给出了关键参数的工程含义。
 
@@ -445,21 +445,23 @@ public ContentDetailDTO getDetail(DetailReq req) {
   \end{tabular}
 \end{table}
 
-重排实现采用“粗排+精排”的两阶段策略：粗排阶段以召回通道得分与轻量特征（标题命中、关键词覆盖）进行线性加权，快速裁剪候选集合；精排阶段对裁剪后的候选计算更细粒度特征，例如query与slice的语义相似度、与标题/摘要的覆盖度、以及同一content的多样性约束，并输出最终topN证据。重排的关键实现片段如图\ref{fig:rag_rerank_key_code}所示。
+重排实现采用倒数排名融合（Reciprocal Rank Fusion, RRF）策略\cite{bruch2023analysis}。RRF是一种无需模型训练即可有效评估多路召回（如全文搜索与向量搜索）分数的算法。其核心理念是：在多个独立检索列表中均排名靠前的候选片段，通常具有更高的相关性。实现中，系统为每个召回通道返回的结果分配一个倒数排名分数（$\frac{1}{\text{rank} + k}$，其中$k$为平滑常数），随后将同一片段在不同通道中的分数相加得到合并得分。按照合并得分降序排列后，结合同一内容的多样性约束输出最终TopN证据。重排的关键实现片段如图\ref{fig:rag_rerank_key_code}所示。
 
 \begin{figure}[!htbp]
   \centering
   \begin{minipage}{0.94\linewidth}
     \begin{lstlisting}[basicstyle=\ttfamily\small,numbers=left,numberstyle=\tiny,frame=single,breaklines=true]
-public List<SliceHit> rank(String query, List<SliceHit> hits, int topn) {
-  for (SliceHit h : hits) {
-    double score = 0;
-    score += 0.5 * h.recallScore;
-    score += 0.3 * h.keywordCover;
-    score += 0.2 * h.titleHit;
-    h.finalScore = score;
+public List<SliceHit> rank(List<List<SliceHit>> channelHits, int topn) {
+  Map<String, SliceHit> fused = new HashMap<>();
+  int k = 60; // RRF平滑常数
+  for (List<SliceHit> hits : channelHits) {
+    for (int i = 0; i < hits.size(); i++) {
+      SliceHit h = hits.get(i);
+      SliceHit merged = fused.computeIfAbsent(h.id, id -> h.clone());
+      merged.finalScore += 1.0 / (i + 1 + k);
+    }
   }
-  List<SliceHit> sorted = sortByScore(hits);
+  List<SliceHit> sorted = sortByScore(fused.values());
   return diversifyByContent(sorted, topn);
 }
     \end{lstlisting}
@@ -547,7 +549,7 @@ public EvidencePack retrieveEvidence(AskReq req) {
 （3）Prompt构造与上下文控制。系统将用户问题、业务约束与聚合后的证据集合拼装为提示词。提示词结构包含：
 \begin{itemize}
 \item \textbf{系统约束}：禁止编造、必须基于证据回答、禁止偏袒长文。
-\item \textbf{任务描述}：规定Markdown输出格式与引用标记样式（如\texttt{[引用]<key1,key2>}）。
+\item \textbf{任务描述}：规定Markdown输出格式与引用标记样式（如[引用]<key1,\allowbreak key2>）。
 \item \textbf{证据集合}：填入聚合后的标准格式证据（含Title、Text、Key）。
 \end{itemize}
 生成回答提示词模板如图\ref{fig:qa_prompt_tpl}所示。
@@ -603,6 +605,9 @@ public AskResp ask(AskReq req) {
   String prompt = promptBuilder.build(req.query, pack);
   String answer = llmClient.generate(prompt);
   List<Citation> cites = citationParser.parseOrFallback(answer, pack);
+  if (riskService.isRisk(answer)) {
+    return AskResp.risk("模型输出包含风险内容");
+  }
   return AskResp.ok(answer, cites);
 }
     \end{lstlisting}
@@ -643,9 +648,9 @@ public AskResp ask(AskReq req) {
   \begin{tabular}{>{\raggedright\arraybackslash}p{0.18\linewidth}|>{\raggedright\arraybackslash}p{0.26\linewidth}|>{\raggedright\arraybackslash}p{0.48\linewidth}}
     \hline
     表名 & 关键字段（示例） & 说明 \\ \hline
-    \nolinkurl{govern_main_task} & id, name, space\_id, session\_period, recall\_threshold, status & 治理主任务，承载会话周期、阈值等参数与计算状态。 \\ \hline
-    \nolinkurl{govern_dup_amb_task} & id, main\_task\_id, app\_id, task\_type, content\_id\_a, content\_id\_b, status, assignee\_id, result & 重复/歧义子任务，描述内容对、任务类型与处理结果。 \\ \hline
-    \nolinkurl{govern_coverage_task} & id, main\_task\_id, app\_id, cluster\_title, representative\_query, query\_count, status & 覆盖度子任务，描述缺失知识簇的主题、代表性问法与热度。 \\ \hline
+    govern\_\allowbreak main\_\allowbreak task & id, name, space\_\allowbreak id, session\_\allowbreak period, recall\_\allowbreak threshold, status & 治理主任务，承载会话周期、阈值等参数与计算状态。 \\ \hline
+    govern\_\allowbreak dup\_\allowbreak amb\_\allowbreak task & id, main\_\allowbreak task\_\allowbreak id, app\_\allowbreak id, task\_\allowbreak type, content\_\allowbreak id\_\allowbreak a, content\_\allowbreak id\_\allowbreak b, status, assignee\_\allowbreak id, result & 重复/歧义子任务，描述内容对、任务类型与处理结果。 \\ \hline
+    govern\_\allowbreak coverage\_\allowbreak task & id, main\_\allowbreak task\_\allowbreak id, app\_\allowbreak id, cluster\_\allowbreak title, representative\_\allowbreak query, query\_\allowbreak count, status & 覆盖度子任务，描述缺失知识簇的主题、代表性问法与热度。 \\ \hline
   \end{tabular}
 \end{table}
 
@@ -664,7 +669,7 @@ public AskResp ask(AskReq req) {
 \item \textbf{歧义度判别}：模型需识别两篇内容是否描述同一业务主体但存在事实冲突（如对同一活动的起止时间描述不一致）。若存在逻辑矛盾，判定为“歧义”，并提取冲突摘要。
 \end{itemize}
 
-这种算法利用向量检索解决了规模化问题，利用大模型的语义理解能力解决了传统基于关键词（如Jaccard相似度）无法识别语义重复或逻辑冲突的难题。判别流程的关键代码与提示词模板分别如图\ref{fig:cg_llm_judge_key_code}与图\ref{fig:cg_judge_prompt_tpl}所示。
+这种算法利用向量检索解决了规模化问题，利用大模型的语义理解能力解决了传统基于关键词（如Jaccard相似度）无法识别语义重复或逻辑冲突的难题。提示词模板如图\ref{fig:cg_judge_prompt_tpl}所示，在设计上，系统采用结构化的指令格式，首先通过 XML 标签隔离传入的内容变量，随后明确判别步骤与分级规则，并在末尾约束模型严格按照 JSON 格式输出结果，从而降低解析异常的风险。
 
 \begin{figure}[!htbp]
   \centering
@@ -713,7 +718,7 @@ public AskResp ask(AskReq req) {
   \label{fig:cg_judge_prompt_tpl}
 \end{figure}
 
-\noindent 重复度与歧义度判别的关键代码如图\ref{fig:cg_llm_judge_key_code}所示。该实现负责装载两条内容的纯文本表示，基于提示词模板拼装输入并调用大模型生成结构化判别结果，最后将返回的JSON解析为统一的判别对象，以便后续任务聚合与状态流转复用。
+判别流程的关键代码如图\ref{fig:cg_llm_judge_key_code}所示，系统利用提示词模板，将内容变量注入预设的规则框架中，进而调用大模型生成判定结论。最后，底层模块会将大模型返回的 JSON 字符串反序列化为系统内置的判别对象，以便为后续的治理任务生成、结果聚合与状态流转提供标准化的数据支撑。
 
 \begin{figure}[!htbp]
   \centering
@@ -732,7 +737,9 @@ public LlmJudgeResp dupAmbJudge(Long a, Long b) {
   \label{fig:cg_llm_judge_key_code}
 \end{figure}
 
-（3）结果聚合与任务生成。检测结果按内容对聚合，并与内容元信息、引用范围等字段拼装形成可流转的治理子任务。重复/歧义检测的关键实现片段如图\ref{fig:cg_dup_amb_key_code}所示。
+（3）结果聚合与任务生成。检测结果按内容对聚合，并与内容元信息、引用范围等字段拼装形成可流转的治理子任务。
+
+重复/歧义检测完整流程的关键实现片段如图\ref{fig:cg_dup_amb_key_code}所示，系统遍历空间内的所有内容，调用向量索引检索TopK相似邻居，对每个候选对进行判别，若为重复或歧义则生成子任务。
 
 \begin{figure}[!htbp]
   \centering
@@ -767,7 +774,7 @@ public void runDupAmb(MainTask task) {
     \item \textbf{召回粗筛}：执行标准RAG检索，若Top1相似度低于阈值（如0.6），直接判定为“召回缺失”。
     \item \textbf{LLM精判}：对于相似度尚可但内容存疑的情况，调用大模型进行精细化评估。模型接收代表性Query与召回证据，判断现有知识是否能充分回答该问题。
 \end{itemize}
-覆盖度判别提示词模板如图\ref{fig:cg_coverage_prompt_tpl}所示。
+覆盖度判别提示词模板如图\ref{fig:cg_coverage_prompt_tpl}所示，通过结构化的模版，将代表性Query、TopK证据与判断规则拼装为一个完整的Prompt，提交给大模型进行评估。
 
 \begin{figure}[!htbp]
   \centering
@@ -822,7 +829,7 @@ public void runDupAmb(MainTask task) {
   \label{fig:cg_task_online_show}
 \end{figure}
 
-（1）任务模型与生成。治理任务采用“主任务（Batch）—子任务（Item）”的双层结构：主任务定义了单次治理的执行上下文（如空间范围、时间窗口、算法版本）；子任务则是具体的待处理实体。对于重复/歧义治理，子任务对应一个“待判别的内容对”；对于覆盖度治理，子任务对应一个“待补充的缺知识簇”。任务生成过程通过异步Job批量写入数据库，并采用幂等策略防止重复生成：系统以\texttt{(TaskType, EntityID)}为唯一键，确保同一问题在未关闭前不会重复创建新任务。
+（1）任务模型与生成。治理任务采用“主任务（Batch）—子任务（Item）”的双层结构：主任务定义了单次治理的执行上下文（如空间范围、时间窗口、算法版本）；子任务则是具体的待处理实体。对于重复/歧义治理，子任务对应一个“待判别的内容对”；对于覆盖度治理，子任务对应一个“待补充的缺知识簇”。任务生成过程通过异步Job批量写入数据库，并采用幂等策略防止重复生成：系统以(TaskType, EntityID)为唯一键，确保同一问题在未关闭前不会重复创建新任务。
 
 （2）任务分发与状态流转。子任务分发支持“指派”与“认领”两种方式：指派模式由空间负责人按业务域将任务分配到具体责任人；认领模式允许运营人员从任务池领取处理。任务处理动作与内容管理链路深度集成：重复/歧义任务的处理（下线/合并）直接触发内容的下线或修订；覆盖任务的处理（补充内容）触发新内容的创建或已有内容的更新。
 
@@ -836,14 +843,12 @@ public void runDupAmb(MainTask task) {
   \begin{tabular}{>{\raggedright\arraybackslash}p{0.18\linewidth}|>{\raggedright\arraybackslash}p{0.20\linewidth}|>{\raggedright\arraybackslash}p{0.54\linewidth}}
     \hline
     任务类型 & 状态 & 含义 \\ \hline
-    主任务 & \nolinkurl{NEW/RUNNING/FINISHED} & 新建、计算中、计算完成 \\ \hline
-    子任务 & \nolinkurl{TODO/DOING/DONE/CLOSED} & 待处理、处理中、已完成、已关闭（复检确认问题消除） \\ \hline
+    主任务 & NEW / RUNNING / FINISHED & 新建、计算中、计算完成 \\ \hline
+    子任务 & TODO / DOING / DONE / CLOSED & 待处理、处理中、已完成、已关闭（复检确认问题消除） \\ \hline
   \end{tabular}
 \end{table}
 
-（3）系统复检与任务回收。为确保治理动作真实有效，平台设计了“系统复检”闭环机制。对于已处理的任务，系统每日定时执行算法复检，仅当重复/歧义消除或覆盖率达标时才自动关闭任务，防止无效修复；针对算法误判或特殊业务场景，支持用户发起审批流程，通过人工审核后强制关闭任务。
-
-复检回收的关键实现片段如图\ref{fig:cg_recheck_key_code}所示。
+（3）系统复检与任务回收。为确保治理动作真实有效，平台设计了“系统复检”闭环机制，关键实现片段如图\ref{fig:cg_recheck_key_code}所示。对于已处理的任务，系统每日定时执行算法复检，仅当重复/歧义消除或覆盖率达标时才自动关闭任务，防止无效修复；针对算法误判或特殊业务场景，支持用户发起审批流程，通过人工审核后强制关闭任务。
 
 \begin{figure}[!htbp]
   \centering
@@ -877,7 +882,7 @@ public void dailyRecheck(Date since) {
 
 数据洞察模块面向业务与运营提供“可观测+可分析+可追溯”的闭环能力。整体实现上采用“前端埋点与服务端事件采集$\rightarrow$数仓统一加工与指标口径沉淀$\rightarrow$洞察服务查询与权限控制$\rightarrow$前端可视化与下钻明细”的链路。数据加工与口径沉淀由数仓侧负责，本项目侧重点在事件规范、采集链路、与数仓的对接与查询服务建设。
 
-数据洞察模块的关键服务端接口定义如表\ref{tab:di_api}所示。
+数据洞察模块的关键服务端接口定义如表\ref{tab:di_api}所示，主要包括事件上报、指标查询、会话分析等接口。
 
 \begin{table}[!htbp]
   \centering
@@ -896,7 +901,7 @@ public void dailyRecheck(Date since) {
 \subsection{内容应用数据采集机制}
 \label{subsec:impl_di_collect}
 
-数据采集需要覆盖页面化消费链路与智能问答链路两类场景。在页面化链路中，采集曝光、点击、搜索输入与结果点击等行为数据；在问答链路中，采集问题输入、召回证据、生成结果与转人工等链路数据。平台对事件名与字段进行统一定义，例如\nolinkurl{page_view}、\nolinkurl{click}、\nolinkurl{query_submit}、\nolinkurl{rag_recall}、\nolinkurl{llm_generate}、\nolinkurl{handoff_intent}与\nolinkurl{handoff_success}等，并统一携带\nolinkurl{app_id}、\nolinkurl{space_id}、\nolinkurl{session_id}、\nolinkurl{trace_id}与\nolinkurl{content_id}等公共维度字段，便于端到端追踪与明细还原。
+数据采集需要覆盖页面化消费链路与智能问答链路两类场景。在页面化链路中，采集曝光、点击、搜索输入与结果点击等行为数据；在问答链路中，采集问题输入、召回证据、生成结果与转人工等链路数据。平台对事件名与字段进行统一定义，例如page\_\allowbreak view、click、query\_\allowbreak submit、rag\_\allowbreak recall、llm\_\allowbreak generate、handoff\_\allowbreak intent与handoff\_\allowbreak success等，并统一携带app\_\allowbreak id、space\_\allowbreak id、session\_\allowbreak id、trace\_\allowbreak id与content\_\allowbreak id等公共维度字段，便于端到端追踪与明细还原。
 
 为保证事件口径可复用且便于扩展，平台将每条事件抽象为“公共维度 + 事件特有扩展字段”的统一结构：公共维度用于跨事件关联与链路追踪，扩展字段用于承载不同事件的特有信息（例如检索关键词、召回通道、候选数量等）。事件明细的核心字段设计如表\ref{tab:di_event_schema}所示。
 
@@ -908,19 +913,19 @@ public void dailyRecheck(Date since) {
   \begin{tabular}{>{\raggedright\arraybackslash}p{0.26\linewidth}|>{\raggedright\arraybackslash}p{0.18\linewidth}|>{\raggedright\arraybackslash}p{0.46\linewidth}}
     \hline
     字段名 & 类型 & 说明 \\ \hline
-    event\_name & string & 事件名（\nolinkurl{page_view}/\nolinkurl{click}/\nolinkurl{query_submit}/\nolinkurl{rag_recall}/\nolinkurl{llm_generate}等） \\ \hline
-    app\_id / space\_id & bigint & 组织边界维度，用于范围过滤与聚合 \\ \hline
-    user\_id / visitor\_id & bigint/string & 用户标识（登录用户/匿名访客），用于UV与分群分析 \\ \hline
-    session\_id & string & 会话标识，用于多轮对话与漏斗分析 \\ \hline
-    trace\_id & string & 链路标识，用于端到端追踪与去重 \\ \hline
-    content\_id & bigint & 内容标识，可为空（例如曝光/点击未关联内容时为空） \\ \hline
+    event\_\allowbreak name & string & 事件名（page\_\allowbreak view / click / query\_\allowbreak submit / rag\_\allowbreak recall / llm\_\allowbreak generate等） \\ \hline
+    app\_\allowbreak id / space\_\allowbreak id & bigint & 组织边界维度，用于范围过滤与聚合 \\ \hline
+    user\_\allowbreak id / visitor\_\allowbreak id & bigint/string & 用户标识（登录用户/匿名访客），用于UV与分群分析 \\ \hline
+    session\_\allowbreak id & string & 会话标识，用于多轮对话与漏斗分析 \\ \hline
+    trace\_\allowbreak id & string & 链路标识，用于端到端追踪与去重 \\ \hline
+    content\_\allowbreak id & bigint & 内容标识，可为空（例如曝光/点击未关联内容时为空） \\ \hline
     timestamp & datetime & 事件发生时间 \\ \hline
     channel / device & string & 渠道与设备维度，可为空 \\ \hline
     ext & json & 扩展字段（query、召回通道、得分、引用列表等） \\ \hline
   \end{tabular}
 \end{table}
 
-扩展字段ext用于承载不同事件的特有信息。以智能问答链路为例，rag\_recall事件会携带召回通道、TopK、MinScore、候选数量与最终证据集合摘要；llm\_generate事件会携带prompt长度、生成耗时、引用数量、是否触发退化等信息。表\ref{tab:di_event_ext}给出了典型事件的ext字段示例，用于支撑后续“链路分析$\rightarrow$问题定位$\rightarrow$策略优化”的闭环。
+扩展字段ext用于承载不同事件的特有信息。以智能问答链路为例，rag\_\allowbreak recall事件会携带召回通道、TopK、MinScore、候选数量与最终证据集合摘要；llm\_\allowbreak generate事件会携带prompt长度、生成耗时、引用数量、是否触发退化等信息。表\ref{tab:di_event_ext}给出了典型事件的ext字段示例，用于支撑后续“链路分析$\rightarrow$问题定位$\rightarrow$策略优化”的闭环。
 
 \begin{table}[!htbp]
   \centering
@@ -930,9 +935,9 @@ public void dailyRecheck(Date since) {
   \begin{tabular}{>{\raggedright\arraybackslash}p{0.22\linewidth}|>{\raggedright\arraybackslash}p{0.68\linewidth}}
     \hline
     事件名 & ext字段示例 \\ \hline
-    \nolinkurl{rag_recall} & \nolinkurl{query}, \nolinkurl{rewritten_query}, \nolinkurl{channels}(es/vec), \nolinkurl{topk}, \nolinkurl{min_score}, \nolinkurl{hit_cnt}, \nolinkurl{evidence_ids} \\ \hline
-    \nolinkurl{llm_generate} & \nolinkurl{model}, \nolinkurl{prompt_len}, \nolinkurl{latency_ms}, \nolinkurl{token_out}, \nolinkurl{citation_cnt}, \nolinkurl{degraded}(bool) \\ \hline
-    \nolinkurl{handoff_intent} & \nolinkurl{reason}, \nolinkurl{confidence}, \nolinkurl{stage}(recall/generate) \\ \hline
+    rag\_\allowbreak recall & query, rewritten\_\allowbreak query, channels(es/vec), topk, min\_\allowbreak score, hit\_\allowbreak cnt, evidence\_\allowbreak ids \\ \hline
+    llm\_\allowbreak generate & model, prompt\_\allowbreak len, latency\_\allowbreak ms, token\_\allowbreak out, citation\_\allowbreak cnt, degraded(bool) \\ \hline
+    handoff\_\allowbreak intent & reason, confidence, stage(recall/generate) \\ \hline
   \end{tabular}
 \end{table}
 
@@ -943,7 +948,7 @@ public void dailyRecheck(Date since) {
 
 在指标体系设计上，平台从页面、会话与内容三个视角承接数仓侧产出的聚合指标：页面监控关注PV/UV/点击率；会话分析关注会话数量、模型识别解决率、意向转人工率与转人工率；内容分析关注内容被召回次数、被生成次数以及转人工相关指标。洞察服务提供按时间范围、空间/应用、渠道与页面等维度的只读查询接口，支持从聚合图表下钻到会话明细。
 
-会话分析在实现上以\texttt{session\_id}组织多轮交互，并以\texttt{trace\_id}贯穿单轮问答的召回、重排与生成等关键事件，从而支持在洞察侧还原一次问答的证据与决策链路。聚合视图同时提供“会话级”和“聚类级”两种口径：会话级用于观察整体趋势与转化漏斗，聚类级用于定位高频问题簇并下钻到原始Query与引用证据，形成“主题簇$\rightarrow$明细会话$\rightarrow$引用内容”的端到端分析路径。如图\ref{fig:di_session_analysis_show}所示，会话分析页面上部以图表汇总宏观指标，下部以列表呈现按聚类划分的会话指标，便于快速定位重点问题并进一步追溯证据来源。
+会话分析在实现上以session\_id组织多轮交互，并以trace\_id贯穿单轮问答的召回、重排与生成等关键事件，从而支持在洞察侧还原一次问答的证据与决策链路。聚合视图同时提供“会话级”和“聚类级”两种口径：会话级用于观察整体趋势与转化漏斗，聚类级用于定位高频问题簇并下钻到原始Query与引用证据，形成“主题簇$\rightarrow$明细会话$\rightarrow$引用内容”的端到端分析路径。如图\ref{fig:di_session_analysis_show}所示，会话分析页面上部以图表汇总宏观指标，下部以列表呈现按聚类划分的会话指标，便于快速定位重点问题并进一步追溯证据来源。
 
 \begin{figure}[!htbp]
   \centering
@@ -957,8 +962,7 @@ public void dailyRecheck(Date since) {
 
 会话聚类用于将大量零散的历史Query归并为有限的语义主题簇，其核心动机在于“从统计视角识别高频问题与薄弱点”。单纯的会话列表难以暴露共性问题，而聚类可以将语义相似的Query（如“怎么退款”、“退货流程”、“钱什么时候退回”）聚合为一个主题（如“售后退款咨询”），从而帮助运营快速发现高频诉求或未覆盖的知识盲区。
 
-（1）聚类构建机制。聚类构建采用基于语义相似图的连通分量方法：将每条Query向量化写入向量索引，设定最小相似度阈值\texttt{min\_score}，相似度$\ge$阈值的Query之间建立边；从未归类Query出发递归扩展其邻居集合，形成一个连通分量作为聚类。聚类构建的关键实现片段如图\ref{fig:di_cluster_key_code}所示。
-
+（1）聚类构建机制。如图\ref{fig:di_cluster_key_code}所示，聚类构建采用基于语义相似图的连通分量方法：将每条Query向量化写入向量索引，设定最小相似度阈值min\_score，相似度$\ge$阈值的Query之间建立边；从未归类Query出发递归扩展其邻居集合，形成一个连通分量作为聚类。
 \begin{figure}[!htbp]
   \centering
   \begin{minipage}{0.94\linewidth}
@@ -989,7 +993,7 @@ public List<Cluster> buildClusters(List<QueryItem> items, double minScore) {
   \label{fig:di_cluster_key_code}
 \end{figure}
 
-（2）主题总结。会话聚类完成后需要生成可读的主题标题与关键词，便于在洞察看板与治理覆盖任务中定位问题簇。平台在实现中使用大模型对同一聚类的代表性Query集合进行总结，输出摘要、关键词与代表Query列表，并将摘要作为cluster\_title写入聚类指标宽表。聚类主题总结提示词模板如图\ref{fig:di_cluster_prompt_tpl}所示。
+（2）主题总结。会话聚类完成后需要生成可读的主题标题与关键词，便于在洞察看板与治理覆盖任务中定位问题簇。平台在实现中使用大模型对同一聚类的代表性Query集合进行总结，输出摘要、关键词与代表Query列表，并将摘要作为cluster\_title写入聚类指标宽表。聚类主题总结提示词模板如图\ref{fig:di_cluster_prompt_tpl}所示，定义了大模型的输入输出结构以及所需执行的聚类任务目标。
 
 \begin{figure}[!htbp]
   \centering

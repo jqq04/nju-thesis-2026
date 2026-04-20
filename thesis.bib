@@ -29,11 +29,27 @@
 
 
 %%%%%%%%%%%%%%%%%%%%%%%% 内容管理 %%%%%%%%%%%%%%%%%%%%%%%%%%
-@book{rockley2003managing,
-  title={Managing enterprise content: A unified content strategy},
-  author={Rockley, Ann and Kostur, Pamela},
-  year={2003},
-  publisher={New Riders}
+
+% 探讨如何将传统的企业内容管理（ECM）系统转变为 “知识基础设施（Knowledge Infrastructure）”，并提出了基于 “知识基础观（Knowledge-Based View）” 的 KBCM（Knowledge-Based Content Management）框架
+@article{le2015enterprise,
+  title={Enterprise content management systems as a knowledge infrastructure: the knowledge-based content management framework},
+  author={Le Dinh, Thang and Rickenberg, Tim A and Fill, Hans-Georg and Breitner, Michael H},
+  journal={International Journal of e-Collaboration (IJeC)},
+  volume={11},
+  number={3},
+  pages={49--70},
+  year={2015},
+  publisher={IGI Global Scientific Publishing}
+}
+
+% 系统性回顾（综述）：资源基础观（Resource-Based View）和动态能力（Dynamic Capabilities）在企业内容管理中的研究。论证了基于资源的视角（Resource-based view）和基于知识的视角（Knowledge-based view）在今天依然是分析企业内容与竞争优势的核心框架
+@article{kero2023systematic,
+  title={A Systematic Review of Resource-Based View and Dynamic Capabilities of Firms and Future Research Avenues.},
+  author={Kero, Chalchissa Amentie and Bogale, Addisalem Tadesse},
+  journal={International Journal of Sustainable Development \& Planning},
+  volume={18},
+  number={10},
+  year={2023}
 }
 
 %% 微软 SharePoint 作为协作和项目知识共享的启用器
@@ -80,15 +96,6 @@
   publisher={Emerald Group Publishing Limited}
 }
 
-%% 企业内容管理：集成视角
-@inproceedings{paivarinta2005enterprise,
-  title={Enterprise content management: an integrated perspective on information management},
-  author={Paivarinta, Tero and Munkvold, Bj{\o}rn Erik},
-  booktitle={Proceedings of the 38th annual hawaii international conference on system sciences},
-  pages={96--96},
-  year={2005},
-  organization={IEEE}
-}
 
 %% Research problem: The widespread adoption of component content management in organizations calls for a comprehensive summary of the territory of this phenomenon. A summary provides stakeholders in component content management with a sense of how the practice has evolved and its implications to research, theory, and future practice. The last such review was published in 2003. This integrative literature review is intended to fill the gap in the literature by describing the current state of component content management as presented in the current publications. Research questions: How is “content” currently defined, described, and approached in the component content-management literature? What processes and tools are organizations adopting to achieve the goals of component content management? Literature review: The theoretical orientation of this review is Rhetorical Genre theory, which allows for classifying individual components as a genre characterized by granularity, reusability, and potentiality. Component content management gained recognition in the mid-1990s when early adopter organizations were looking for more efficient and effective approaches to reusing information between similar products or versions of the same product. Developments in the 2000s include a surge of publications focused on defining and describing component content management; new best practices for implementing a component content-management initiative; evolving processes and technologies for creating highly engineered, modular content that can automatically adjust to specific user requests and device capabilities; and collaborative efforts to integrate content creation and management strategies across organizational units. Scholarly and trade publications increasingly explore different concerns; whereas scholarly publications tend to offer critical perspectives on component content management, trade publications tend to describe processes and technologies and articulate best practices. Both...
 @article{andersen2016current,
@@ -114,29 +121,17 @@
   publisher={Elsevier}
 }
 
-%% 知识管理
-@article{grant1996toward,
-  title={Toward a knowledge-based theory of the firm},
-  author={Grant, Robert M},
-  journal={Strategic management journal},
-  volume={17},
-  number={S2},
-  pages={109--122},
-  year={1996},
-  publisher={Wiley Online Library}
+% 梳理了从传统静态存储检索型 KM 向 AI 驱动的高速流转与生成的现代化知识库迁移过程
+@article{gelashvili2025navigating,
+  title={Navigating the AI revolution: challenges and opportunities for integrating emerging technologies into knowledge management systems. Systematic literature review},
+  author={Gelashvili-Luik, Teona and Vihma, Peeter and Pappel, Ingrid},
+  journal={Frontiers in Artificial Intelligence},
+  volume={8},
+  pages={1595930},
+  year={2025},
+  publisher={Frontiers Media SA}
 }
 
-%% 知识管理系统
-@article{meso2000resource,
-  title={A resource-based view of organizational knowledge management systems},
-  author={Meso, Peter and Smith, Robert},
-  journal={Journal of knowledge management},
-  volume={4},
-  number={3},
-  pages={224--234},
-  year={2000},
-  publisher={MCB UP Ltd}
-}
 %%%%%%%%%%%%%%%%%%%%%%%% RAG %%%%%%%%%%%%%%%%%%%%%%%%%%
 % 评估了向量数据库在带有结构化条件过滤（混合检索）场景下的性能，直接对应电商 / 广告业务中 “多通道属性 + 向量” 的联合召回挑战。
 @article{amanbayev2026filtered,
@@ -425,29 +420,44 @@
   publisher={Taylor \& Francis}
 }
 
-%%%%%%%%%% 数据洞察 %%%%%%%%%%%%%%%%%%%%%%%%%%
-%% 聚类研究
-@article{jain1999data,
-  title={Data clustering: a review},
-  author={Jain, Anil K and Murty, M Narasimha and Flynn, Patrick J},
-  journal={ACM computing surveys (CSUR)},
-  volume={31},
-  number={3},
-  pages={264--323},
-  year={1999},
-  publisher={Acm New York, NY, USA}
+% 分析混合检索融合函数(rrf为其中之一），评估其在不同场景下的性能。
+@article{bruch2023analysis,
+  title={An analysis of fusion functions for hybrid retrieval},
+  author={Bruch, Sebastian and Gai, Siyu and Ingber, Amir},
+  journal={ACM Transactions on Information Systems},
+  volume={42},
+  number={1},
+  pages={1--35},
+  year={2023},
+  publisher={ACM New York, NY}
 }
 
-%% 聚类方法
-@incollection{rokach2005clustering,
-  title={Clustering methods},
-  author={Rokach, Lior and Maimon, Oded},
-  booktitle={Data mining and knowledge discovery handbook},
-  pages={321--352},
-  year={2005},
+%%%%%%%%%% 数据洞察 %%%%%%%%%%%%%%%%%%%%%%%%%%
+# 深度聚类综述
+@article{zhou2024comprehensive,
+  title={A comprehensive survey on deep clustering: Taxonomy, challenges, and future directions},
+  author={Zhou, Sheng and Xu, Hongjia and Zheng, Zhuonan and Chen, Jiawei and Li, Zhao and Bu, Jiajun and Wu, Jia and Wang, Xin and Zhu, Wenwu and Ester, Martin},
+  journal={ACM Computing Surveys},
+  volume={57},
+  number={3},
+  pages={1--38},
+  year={2024},
+  publisher={ACM New York, NY}
+}
+
+% 分层聚类综述
+@article{ran2023comprehensive,
+  title={Comprehensive survey on hierarchical clustering algorithms and the recent developments},
+  author={Ran, Xingcheng and Xi, Yue and Lu, Yonggang and Wang, Xiangwen and Lu, Zhenyu},
+  journal={Artificial Intelligence Review},
+  volume={56},
+  number={8},
+  pages={8219--8264},
+  year={2023},
   publisher={Springer}
 }
 
+% query聚类
 @inproceedings{10.1145/3308560.3316606,
 author = {Alonso, Omar and Kandylas, Vasileios and Tremblay, Serge-Eric},
 title = {Exploration of Product Search Intents via Clustering of Query Clusters},
