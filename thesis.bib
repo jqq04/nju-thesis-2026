@@ -133,12 +133,16 @@
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%% RAG %%%%%%%%%%%%%%%%%%%%%%%%%%
-% 评估了向量数据库在带有结构化条件过滤（混合检索）场景下的性能，直接对应电商 / 广告业务中 “多通道属性 + 向量” 的联合召回挑战。
-@article{amanbayev2026filtered,
-  title={Filtered Approximate Nearest Neighbor Search in Vector Databases: System Design and Performance Analysis},
-  author={Amanbayev, Abylay and Tsan, Brian and Dang, Tri and Rusu, Florin},
-  journal={arXiv preprint arXiv:2602.11443},
-  year={2026}
+% 解决了带结构化条件过滤的近似最近邻搜索（Filtered ANN / Hybrid Search）难题。ACORN 提出了一种对谓词无感的混合检索架构
+@article{patel2024acorn,
+  title={Acorn: Performant and predicate-agnostic search over vector embeddings and structured data},
+  author={Patel, Liana and Kraft, Peter and Guestrin, Carlos and Zaharia, Matei},
+  journal={Proceedings of the ACM on Management of Data},
+  volume={2},
+  number={3},
+  pages={1--27},
+  year={2024},
+  publisher={ACM New York, NY, USA}
 }
 
 %% 大模型幻觉研究
@@ -182,12 +186,13 @@
   year={2020}
 }
 
-%% rag技术综述
-@article{cheng2025survey,
-  title={A survey on knowledge-oriented retrieval-augmented generation},
-  author={Cheng, Mingyue and Luo, Yucong and Ouyang, Jie and Liu, Qi and Liu, Huijie and Li, Li and Yu, Shuo and Zhang, Bohou and Cao, Jiawei and Ma, Jie and others},
-  journal={arXiv preprint arXiv:2503.10677},
-  year={2025}
+%% rag综述
+@inproceedings{fan2024survey,
+  title={A survey on rag meeting llms: Towards retrieval-augmented large language models},
+  author={Fan, Wenqi and Ding, Yujuan and Ning, Liangbo and Wang, Shijie and Li, Hengyun and Yin, Dawei and Chua, Tat-Seng and Li, Qing},
+  booktitle={Proceedings of the 30th ACM SIGKDD conference on knowledge discovery and data mining},
+  pages={6491--6501},
+  year={2024}
 }
 
 
@@ -215,14 +220,21 @@
   year={2025}
 }
 
-%% 金融领域多模态rag，核心思想：
-%% 1. 多模态前置处理（图像&表格）
-%% 2. 不同模态使用不同相似度阈值，避免表格图像被淹没
-%% 3. 分层召回策略，先文本再多模态，减少浪费
-@article{gondhalekar2025multifinrag,
-  title={MultiFinRAG: An Optimized Multimodal Retrieval-Augmented Generation (RAG) Framework for Financial Question Answering},
-  author={Gondhalekar, Chinmay and Patel, Urjitkumar and Yeh, Fang-Chun},
-  journal={arXiv preprint arXiv:2506.20821},
+% 多模态rag
+@inproceedings{shen2025global,
+  title={Global Question-Aware Multimodal Retrieval-Augmented Generation for Multimedia Multi-Hop Question Answering},
+  author={Shen, Zhixiao and Yu, Jianfei and Wang, Wenya and Xia, Rui},
+  booktitle={Proceedings of the 7th ACM International Conference on Multimedia in Asia},
+  pages={1--8},
+  year={2025}
+}
+
+% 多模态rag，文本/图像/表格/视频态
+@inproceedings{drushchak2025multimodal,
+  title={Multimodal Retrieval-Augmented Generation: Unified Information Processing Across Text, Image, Table, and Video Modalities},
+  author={Drushchak, Nazarii and Polyakovska, Nataliya and Bautina, Maryna and Semenchenko, Taras and Koscielecki, Jakub and Sykala, Wojciech and Wegrzynowski, Michal},
+  booktitle={Proceedings of the 1st Workshop on Multimodal Augmented Generation via Multimodal Retrieval (MAGMaR 2025)},
+  pages={59--64},
   year={2025}
 }
 
@@ -308,10 +320,10 @@
 }
 
 %% 支撑“语义去重在大规模数据上是必要且有效的”，以及“仅靠传统去重难以发现语义重复”。
-@article{abbas2023semdedup,
-  title={Semdedup: Data-efficient learning at web-scale through semantic deduplication},
+@inproceedings{abbas2023semdedup,
+  title={SemDeDup: Data-efficient learning at web-scale through semantic deduplication},
   author={Abbas, Amro and Tirumala, Kushal and Simig, D{\'a}niel and Ganguli, Surya and Morcos, Ari S},
-  journal={arXiv preprint arXiv:2303.09540},
+  booktitle={ICLR 2023 Workshop on Multimodal Representation Learning},
   year={2023}
 }
 

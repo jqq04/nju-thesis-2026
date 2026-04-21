@@ -907,9 +907,13 @@
     \normalsize\rmfamily\njut@cap@cover@en@statement
     \vskip\stretch{2}
     \ifdefempty{\njut@cap@institute@logo}{}{\includegraphics[width=2.5cm]{\njut@cap@institute@logo} \\}
-    \vskip 3mm
-    \normalfont\njut@value@en@department\\
-    \njut@value@en@institute
+    \ifdefempty{\njut@value@en@department}{}{%
+      \vskip 3mm
+      \normalfont\njut@value@en@department\\
+    }
+    \ifdefempty{\njut@value@en@institute}{}{%
+      \normalfont\njut@value@en@institute
+    }
     \vskip 30pt
     \normalfont\normalsize\njut@value@en@date
   \end{center}
@@ -925,11 +929,13 @@
   \thispagestyle{empty}
   \phantomsection
   \addcontentsline{toc}{chapter}{\njut@cap@abstract}
-  \begin{center}
-    {\bf\kaishu\zihao{-2}%
-	 \uuline{\njut@cap@abstract@chaptername}}
-  \end{center}
-  \vspace{3mm}
+  \ifdefempty{\njut@cap@abstract@chaptername}{}{%
+    \begin{center}
+      {\bf\kaishu\zihao{-2}%
+	   \uuline{\njut@cap@abstract@chaptername}}
+    \end{center}
+    \vspace{3mm}
+  }
   {\kaishu\zihao{4}%
   \noindent\njut@cap@abstract@title{：}%
   \njutunderline[318pt]{\njut@value@abstract@titlea}\\
@@ -966,10 +972,12 @@
   \thispagestyle{empty}
   \phantomsection
   \addcontentsline{toc}{chapter}{\njut@cap@abstract@en}
-  \begin{center}
-    {\bf\kaishu\zihao{-2}%
-	 \uuline{\njut@cap@abstract@en@chaptername}}
-  \end{center}
+  \ifdefempty{\njut@cap@abstract@en@chaptername}{}{%
+    \begin{center}
+      {\bf\kaishu\zihao{-2}%
+	   \uuline{\njut@cap@abstract@en@chaptername}}
+    \end{center}
+  }
   {\zihao{4}%
    \njut@cap@abstract@en@title{:}~%
    \njutunderline[360pt]{\njut@value@abstract@en@titlea}\\
