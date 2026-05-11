@@ -1,0 +1,138 @@
+{
+  "chunks": [
+    {
+      "id": "cover-info",
+      "file": "cover-info.txt",
+      "chars": 130,
+      "title": "封面",
+      "pages": [
+        1
+      ]
+    },
+    {
+      "id": "abstract-cn",
+      "file": "abstract-cn.txt",
+      "chars": 917,
+      "title": "中文摘要"
+    },
+    {
+      "id": "abstract-en",
+      "file": "abstract-en.txt",
+      "chars": 2384,
+      "title": "英文摘要"
+    },
+    {
+      "id": "acknowledgement",
+      "file": "acknowledgement.txt",
+      "chars": 1073,
+      "title": "致谢",
+      "pages": [
+        127,
+        132
+      ]
+    },
+    {
+      "id": "references",
+      "file": "references.txt",
+      "chars": 9401,
+      "title": "参考文献",
+      "pages": [
+        121,
+        132
+      ]
+    },
+    {
+      "id": "ch1",
+      "file": "ch1.txt",
+      "chars": 4874,
+      "title": "第一章 引言",
+      "pages": [
+        19,
+        23
+      ]
+    },
+    {
+      "id": "ch2",
+      "file": "ch2.txt",
+      "chars": 431,
+      "title": "第三章为平台需求分析与总体设计。该章节结合广告与商业化业务场景，",
+      "pages": [
+        24,
+        24
+      ]
+    },
+    {
+      "id": "ch3",
+      "file": "ch3.txt",
+      "chars": 44700,
+      "title": "第二章 相关技术综述",
+      "pages": [
+        25,
+        76
+      ]
+    },
+    {
+      "id": "ch4",
+      "file": "ch4.txt",
+      "chars": 30400,
+      "title": "第四章 内容应用与管理平台的实",
+      "pages": [
+        77,
+        108
+      ]
+    },
+    {
+      "id": "ch5",
+      "file": "ch5.txt",
+      "chars": 6877,
+      "title": "第五章 内容应用与管理平台测试",
+      "pages": [
+        109,
+        118
+      ]
+    },
+    {
+      "id": "ch6",
+      "file": "ch6.txt",
+      "chars": 11117,
+      "title": "第六章 总结与展望",
+      "pages": [
+        119,
+        132
+      ]
+    }
+  ],
+  "range_map": {
+    "all-body": [
+      "ch1",
+      "ch2",
+      "ch3",
+      "ch4",
+      "ch5",
+      "ch6"
+    ],
+    "last-ch": [
+      "ch6"
+    ],
+    "ch3-end": [
+      "ch3",
+      "ch4",
+      "ch5",
+      "ch6"
+    ],
+    "design-impl": [
+      "ch2"
+    ],
+    "test-ch": [
+      "ch5"
+    ],
+    "methods-ch": [],
+    "experiment-ch": []
+  },
+  "stats": {
+    "total_chars": 112304,
+    "body_chars": 98399,
+    "chapter_count": 6,
+    "split_failed": false
+  }
+}

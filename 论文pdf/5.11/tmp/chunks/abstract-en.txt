@@ -1,0 +1,31 @@
+With the rapid growth of Internet advertising and commercialization businesses,
+product forms, business rules, and operational strategies continue to evolve. A large
+amountofprofessionalcontenthasbeenaccumulatedaroundaddelivery,productdocu-
+mentation,businessspecifications,andoperationalpractices,supportingscenariossuch
+as internal training, operational decision-making, and customer service. However, as
+businesslinesandcontentscaleup,existingcontentplatformsincreasinglysufferfrom
+fragmented content sources, limited cross-scenario reuse, high maintenance costs, and
+insufficient capability for quality evaluation and governance.
+To address these challenges, this thesis designs and implements a content appli-
+cationandmanagementplatformforadvertisingandcommercialscenariosinanenter-
+priseenvironment. Centeredonthecontentlifecycle,theplatformadoptsahierarchical
+organization model based on spaces and applications to achieve isolation and unified
+management across business lines, and supports multiple content types including arti-
+cles, FAQs, courses, and cases.
+For content consumption, the platform provides both page-based browsing and
+search, and introduces retrieval-augmented generation (RAG) for intelligent question
+answeringthroughcontentslicing,vectorindexing,multi-channelretrieval,andrerank-
+ing,enablingupstreamintelligentapplicationstoobtainhighlyrelevantcontentsupport
+and broadening the ways in which content assets can be utilized. For content quality
+assurance,theplatformestablishesanautomatedgovernancemechanismtargetingdu-
+plication,ambiguity,andcoverage-relatedissues,combiningvectorretrievalwithlarge
+languagemodelsandoperationalizingtheresultsasonlinegovernancetaskstoachieve
+closed-loop content governance. In addition, a data insight module aggregates usage
+and governance metrics to support iterative optimization of content and governance
+strategies.
+Thepracticalapplicationresultsdemonstratethattheplatformeffectivelyimproves
+content management efficiency and application performance in advertising and com-
+mercial scenarios, while reducing the labor costs associated with content governance.
+This work provides useful engineering insights and a practical reference for building
+content platforms tailored to advertising and commercial scenarios.
+keywords: advertising and commercial scenarios, unified content model, retrieval-

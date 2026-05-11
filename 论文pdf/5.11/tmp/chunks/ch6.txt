@@ -1,0 +1,250 @@
+第六章 总结与展望
+6 . 1 总结
+随着广告与商业化业务的快速发展，业务知识与运营规范等专业内容不断
+沉淀并快速演进，内容资产规模增长带来了内容分散、复用困难、维护成本高
+与质量不可控等问题。围绕上述问题，本文面向广告与商业化场景设计并实现
+了一套内容应用与管理平台，以内容全生命周期为主线，对内容建模、组织、
+应用与治理进行系统化建设，从而提升内容资产的统一管理能力、应用效果与
+质量可控性。
+本文工作的主要贡献可概括为以下四个方面。
+（1）构建了基于空间与应用分层的内容组织模型，并实现多形态内容的
+统一管理能力。平台将空间作为业务隔离边界，将应用作为消费场景与配置边
+界，支持文章、问答、课程与案例等多种内容形态的规范化管理；通过类目树
+与标签体系完成内容组织，并以审批发布流程约束对外口径，保证内容在不同
+消费入口下的一致性。
+（2）实现了面向内容应用的检索与智能问答能力，并以发布口径与权限
+过滤贯穿读链路。平台在页面化展示与内容检索的基础上，引入 RAG 智能问
+答能力：通过内容切片、全文索引与向量索引的双通道检索，提高召回的准确
+性与覆盖率；通过问题改写、多通道召回、重排与证据组织生成高相关证据集
+合，并在输出侧返回可映射引用，降低幻觉风险并支持后续治理。
+（3）构建了以重复度、歧义度与覆盖度为核心的内容治理机制，并实现
+治理任务线上化闭环。平台结合向量检索与大语言模型完成对重复与歧义问题
+的自动检测与结构化判别，并将结果转化为可流转的治理任务；覆盖度治理复
+用洞察侧会话聚类结果定位薄弱主题并生成覆盖任务，结合内容补充、发布与
+复检回收形成闭环机制，使治理从一次性离线分析转化为可持续运营。
+（4）实现了数据洞察能力为应用与治理提供数据支撑。平台定义统一事
+件模型与关键链路埋点规范，通过 session_id 与 trace_id 实现端到端追踪与明
+细还原；洞察侧提供会话聚类下钻与指标查询能力，用于定位高频问题与薄弱
+100 第六章 总结与展望
+点，并为覆盖度治理与策略优化提供依据。
+通过第五章的单元测试与功能测试验证，平台的组织与权限边界、审批发
+布口径、事件驱动索引更新、RAG 问答引用可追溯、治理任务线上化与复检回
+收等关键链路能够满足预期，为广告与商业化场景下的内容资产管理与应用提
+供了可落地的工程方案。
+6 . 2 展望
+虽然本文实现的平台能够覆盖内容管理、应用与治理的核心需求，但仍有
+进一步优化空间，主要体现在以下几个方面。
+（1）内容形态与结构化表达仍需增强。当前平台已支持文章、问答、课
+程与案例四类基础内容形态，并在切片阶段对图片与表格提供了特殊处理策
+略。后续可进一步引入多模态大模型（Multimodal LLM）对视频、音频内容
+进行深度理解与切片索引，并支持对更复杂的结构化知识（如规则流程图、
+指标定义表）的自动抽取与 Schema 化，使非文本内容也能被高质量地召回与
+问答。
+（2）索引与检索链路的成本与时延优化。平台采用事件驱动的增量索引
+构建机制，但在内容规模进一步增大时仍需更精细的分批、优先级与资源隔
+离策略。在 RAG 链路上，可探索基于强化学习（Reinforcement Learning）的
+Prompt 自动优化机制，根据用户反馈动态调整 Prompt 结构与证据组织方式；
+同时引入检索策略自适应（Adaptive Retrieval），根据问题复杂度动态选择单
+路或双路召回，在降低时延的同时保持高召回率。
+（3）治理自动化与可操作性提升。重复与歧义治理目前以任务化分发与
+人工处理为主，后续可探索“建议式治理”，例如利用大模型自动生成合并后的
+权威内容候选、下线建议与引用调整方案，并将治理建议与审批发布流程更紧
+密地联动。此外，覆盖度治理可进一步与知识图谱结合，通过图谱补全技术发
+现潜在的知识缺失点，使覆盖分析既反映真实用户需求，也能对齐业务知识体
+系结构。
+后续工作将围绕上述方向持续迭代平台能力，进一步提升内容资产的应用
+效率、问答体验与治理闭环效果，为广告与商业化业务提供更稳定、可控与可
+持续演进的内容基础设施。
+参考文献
+[1] KERO C A, BOGALE A T. A Systematic Review of Resource-Based View and
+Dynamic Capabilities of Firms and Future Research Avenues.[J]. International
+Journal of Sustainable Development & Planning, 2023, 18(10).
+[2] GELASHVILI-LUIK T, VIHMA P, PAPPEL I. Navigating the AI Revolution:
+ChallengesandOpportunitiesforIntegratingEmergingTechnologiesintoKnowl-
+edge Management Systems. Systematic Literature Review[J]. Frontiers in Artifi-
+cial Intelligence, 2025, 8: 1595930.
+[3] ALALWAN J A, WEISTROFFER H R. Enterprise Content Management Re-
+search: AComprehensiveReview[J].JournalofEnterpriseInformationManage-
+ment, 2012, 25(5): 441–461.
+[4] LE DINH T, RICKENBERG T A, FILL H-G, et al. Enterprise Content Man-
+agement Systems as a Knowledge Infrastructure: The Knowledge-Based Con-
+tent Management Framework[J]. International Journal of e-Collaboration (IJeC),
+2015, 11(3): 49–70.
+[5] ANDERSENR,BATOVAT.TheCurrentStateofComponentContentManage-
+ment: An Integrative Literature Review[J]. IEEE Transactions on Professional
+Communication, 2016, 58(3): 247–270.
+[6] LEWIS P, PEREZ E, PIKTUS A, et al. Retrieval-Augmented Generation for
+Knowledge-Intensive NLP Tasks[J]. Advances in neural information processing
+systems, 2020, 33: 9459–9474.
+[7] FAN W, DING Y, NING L, et al. A Survey on RAG Meeting LLMs: Towards
+Retrieval-AugmentedLargeLanguageModels[C]//Proceedingsofthe30thACM
+SIGKDD conference on knowledge discovery and data mining. 2024: 6491–
+6501.
+102 参考文献
+[8] MAICAN C, LIXANDROIU R. A System Architecture Based on Open Source
+Enterprise Content Management Systems for Supporting Educational Institu-
+tions[J]. International Journal of Information Management, 2016, 36(2): 207–
+214.
+[9] KHUMALO S, MEARNS M. SharePoint as Enabler for Collaboration and Effi-
+cient Project Knowledge Sharing[J]. South African Journal of Information Man-
+agement, 2019, 21(1): 1–9.
+[10] KALELIOĞLU E. Implementing Atlassian Confluence: Strategies, Tips, and In-
+sights to Enhance Distributed Team Collaboration Using Confluence[M]. [S.l.]:
+Packt Publishing Ltd, 2023.
+[11] HULLAVARADS,O’HARER,ROYAK.EnterpriseContentManagementSolu-
+tions—Roadmap Strategy and Implementation Challenges[J]. International Jour-
+nal of Information Management, 2015, 35(2): 260–265.
+[12] BIAŁECKI A, MUIR R, INGERSOLL G, et al. Apache Lucene 4[C] //SIGIR
+2012 workshop on open source information retrieval. 2012: 17.
+[13] WANGJ,YIX,GUOR,etal.Milvus: APurpose-BuiltVectorDataManagement
+System[C]//Proceedingsofthe2021internationalconferenceonmanagementof
+data. 2021: 2614–2627.
+[14] KEW,ZHENGY,LIY,etal.LargeLanguageModelsinDocumentIntelligence:
+A Comprehensive Survey, Recent Advances, Challenges, and Future Trends[J].
+ACM Transactions on Information Systems, 2025, 44(1): 1–64.
+[15] YU J, XIE Y, ZHANG G, et al. MIND-RAG: Multimodal Context-Aware and
+Intent-Aware Retrieval-Augmented Generation for Educational Publications[C]
+//Proceedings of the IEEE/CVF International Conference on Computer Vision.
+2025: 4157–4164.
+[16] SHEN Z, YU J, WANG W, et al. Global Question-Aware Multimodal Retrieval-
+Augmented Generation for Multimedia Multi-Hop Question Answering[C]
+//Proceedings of the 7th ACM International Conference on Multimedia in Asia.
+2025: 1–8.
+参考文献 103
+[17] DRUSHCHAK N, POLYAKOVSKA N, BAUTINA M, et al. Multimodal
+Retrieval-Augmented Generation: Unified Information Processing Across Text,
+Image, Table, and Video Modalities[C] //Proceedings of the 1st Workshop on
+MultimodalAugmentedGenerationviaMultimodalRetrieval(MAGMaR2025).
+2025: 59–64.
+[18] YU Y, PING W, LIU Z, et al. RankRAG: Unifying Context Ranking with
+Retrieval-Augmented Generation in LLMs[J]. Advances in Neural Information
+Processing Systems, 2024, 37: 121156–121184.
+[19] PRADEEP R, LIU Y, ZHANG X, et al. Squeezing Water from a Stone: A Bag
+of Tricks for Further Improving Cross-Encoder Effectiveness for Reranking[C]
+//European Conference on Information Retrieval. 2022: 655–670.
+[20] HUANG L, YU W, MA W, et al. A Survey on Hallucination in Large Language
+Models: Principles,Taxonomy,Challenges,andOpenQuestions[J].ACMTrans-
+actions on Information Systems, 2025, 43(2): 1–55.
+[21] SILLABER C, MUSSMANN A, BREU R. Experience: Data and Information
+Quality Challenges in Governance, Risk, and Compliance Management[J]. Jour-
+nal of Data and Information Quality (JDIQ), 2019, 11(2): 1–14.
+[22] MAHANTIR.DataQuality: Dimensions,Measurement,Strategy,Management,
+and Governance[M]. [S.l.]: Quality Press, 2019.
+[23] KUMAR V, CHANDRAPPA, HARINARAYANA N. Exploring Dimensions of
+Metadata Quality Assessment: A Scoping Review[J]. Journal of Librarianship
+and Information Science, 2025, 57(3): 661–673.
+[24] KULMUKHAMETOVA,RAUBERA,BECKERC.ImprovingDataQualityin
+Large-ScaleRepositoriesthroughConflictResolution[J].InternationalJournalon
+Digital Libraries, 2021, 22(4): 365–383.
+[25] GÄRTNER A E, GÖHLICH D. Automated Requirement Contradiction Detec-
+tionthroughFormalLogicandLLMs[J].AutomatedSoftwareEngineering,2024,
+31(2): 49.
+104 参考文献
+[26] WANG S, ZHUANG S, ZUCCON G. BERT-Based Dense Retrievers Require
+InterpolationwithBM25forEffectivePassageRetrieval[C]//Proceedingsofthe
+2021 ACM SIGIR international conference on theory of information retrieval.
+2021: 317–324.
+[27] PATEL L, KRAFT P, GUESTRIN C, et al. ACORN: Performant and Predicate-
+AgnosticSearchoverVectorEmbeddingsandStructuredData[J].Proceedingsof
+the ACM on Management of Data, 2024, 2(3): 1–27.
+[28] IZACARD G, GRAVE E. Leveraging Passage Retrieval with Generative Mod-
+elsforOpenDomainQuestionAnswering[C/OL]//MERLOP,TIEDEMANNJ,
+TSARFATY R. Proceedings of the 16th Conference of the European Chapter of
+the Association for Computational Linguistics: Main Volume. Online: Associa-
+tion for Computational Linguistics, 2021: 874–880.
+https://aclanthology.org/2021.eacl-main.74/.
+[29] RAVISHANKARS,VARALAKSHMIP.NovelHybridRetrievalandReranking
+withScoreFusionforAdvancedFinancialQuestionAnsweringUsingLargeLan-
+guageModels[C]//2025IEEESilcharSubsectionConference(SILCON).2025:
+1–6.
+[30] WANGX,CHIJ,TAIZ,etal.FinSage: AMulti-AspectRAGSystemforFinan-
+cialFilingsQuestionAnswering[C]//Proceedingsofthe34thACMInternational
+Conference on Information and Knowledge Management. 2025: 6144–6152.
+[31] STVILIA B, LEE D J. Data Quality Assurance in Research Data Repositories:
+A Theory-Guided Exploration and Model[J]. Journal of Documentation, 2024,
+80(4): 793–812.
+[32] KIM J, PARK Y. A Survey of Text Deduplication: From Syntactic Matching to
+Semantic Understanding[J]. IEEE Access, 2026.
+[33] ABBAS A, TIRUMALA K, SIMIG D, et al. SemDeDup: Data-Efficient Learn-
+ingatWeb-ScalethroughSemanticDeduplication[C]//ICLR2023Workshopon
+Multimodal Representation Learning. 2023.
+参考文献 105
+[34] PENGZ,WANGZ,DENGD.Near-DuplicateSequenceSearchatScaleforLarge
+LanguageModelMemorizationEvaluation[J].ProceedingsoftheACMonMan-
+agement of Data, 2023, 1(2): 1–18.
+[35] CHEUNGJCK,LIX.SequenceClusteringandLabelingforUnsupervisedQuery
+Intent Discovery[C] //Proceedings of the fifth ACM international conference on
+Web search and data mining. 2012: 383–392.
+[36] ALONSO O, KANDYLAS V, TREMBLAY S-E. Exploration of Product Search
+Intents via Clustering of Query Clusters[C/OL] //WWW ’19: Companion Pro-
+ceedings of The 2019 World Wide Web Conference. New York, NY, USA: As-
+sociation for Computing Machinery, 2019: 344–347.
+https://doi.org/10.1145/3308560.3316606.
+[37] ZHOU S, XU H, ZHENG Z, et al. A Comprehensive Survey on Deep Cluster-
+ing: Taxonomy,Challenges,andFutureDirections[J].ACMComputingSurveys,
+2024, 57(3): 1–38.
+[38] RANX,XIY,LUY,etal.ComprehensiveSurveyonHierarchicalClusteringAl-
+gorithms and the Recent Developments[J]. Artificial Intelligence Review, 2023,
+56(8): 8219–8264.
+[39] KHATRI V, BROWN C V. Designing Data Governance[J]. Communications of
+the ACM, 2010, 53(1): 148–152.
+[40] ALHASSAN I, SAMMON D, DALY M. Data Governance Activities: An Anal-
+ysis of the Literature[J]. Journal of decision systems, 2016, 25(sup1): 64–75.
+[41] XUY,HUANGF.E-CommercePlatformQuality,UserSatisfactionandContinu-
+ousUseIntentionunderData-DrivenMarketing[C]//Proceedingsofthe20239th
+International Conference on Industrial and Business Engineering. 2023: 56–62.
+[42] BRUCH S, GAI S, INGBER A. An Analysis of Fusion Functions for Hybrid
+Retrieval[J]. ACM Transactions on Information Systems, 2023, 42(1): 1–35.
+
+致 谢
+本论文的完成离不开多方的支持与帮助。在此，谨向所有关心与支持本论
+文的个人与单位致以诚挚谢意。
+首先，衷心感谢我的导师在论文选题、研究思路、系统设计与写作修改等
+方面给予的悉心指导。导师严谨的治学态度、务实的工程视角与耐心的学术训
+练，使我在研究方法与问题分析能力上受益良多，并为论文的顺利完成提供了
+关键保障。
+其次，感谢我实习所在企业及相关团队在课题来源、业务场景理解与工程
+实践等方面给予的支持。企业提供的真实需求与实践环境使本论文能够面向实
+际问题开展设计与验证，也使我在工程规范、协作流程与系统化思维方面获得
+了宝贵锻炼。
+最后，感谢我的家人以及朋友在学习与工作期间给予的理解、关心与鼓
+励。你们在我面对压力与困难时给予的支持与陪伴，是我坚持完成论文的重要
+动力。
+
+版权及论文原创性说明
+任何收存和保管本论文的单位和个人，未经作者本人授权，不得将本论文
+转借他人并复印、抄录、拍照或以任何方式传播，否则，引起有碍作者著作权
+益的问题，将可能承担法律责任。
+本人郑重声明：所呈交的学位论文，是本人在导师的指导下，独立进行研
+究工作所取得的成果。除文中已经注明引用的内容外，本论文不包含其他个人
+或集体已经发表或撰写的作品成果。本文所引用的重要文献，均已在文中以明
+确方式标明。本声明的法律结果由本人承担。
+作者签名：
+年 月 日
+
+《学位论文出版授权书》
+本人完全同意《中国优秀博硕士学位论文全文数据库出版章程》（以下简
+称“章程”），愿意将本人的学位论文提交“中国学术期刊（光盘版）电子杂志
+社”在《中国博士学位论文全文数据库》、《中国优秀硕士学位论文全文数据
+库》中全文发表。《中国博士学位论文全文数据库》、《中国优秀硕士学位论
+文全文数据库》可以以电子、网络及其他数字媒体形式公开出版，并同意编入
+《中国知识资源总库》，在《中国博硕士学位论文评价数据库》中使用和在互
+联网上传播，同意按“章程”规定享受相关权益。
+作者签名：
+年 月 日
+论文题名 面向广告与商业化场景的内容应用与管理平台的设计与实现
+研究生学号 所在院系 软件学院 学位年度 2026
+522024320076
+□ □
+学术学位硕士 专业学位硕士
+□ □
+论文级别 学术学位博士 专业学位博士
+（请在方框内画钩）
+作者Email 522024320076@smail.nju.edu.cn
+导师姓名 刘峰 高级工程师
+论文涉密情况：
+□
+不保密
+□
+保密，保密期( 年 月 日 至 年 月 日)
+注：请将该授权书填写后装订在学位论文最后一页（南大封面）。
