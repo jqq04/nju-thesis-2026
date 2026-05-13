@@ -710,6 +710,8 @@
   \renewcommand{\njut@value@nlc@reviewerc}{#1}}
 \newcommand*{\reviewerd}[1]{%
   \renewcommand{\njut@value@nlc@reviewerd}{#1}}
+\newcommand*{\reviewere}[1]{%
+  \renewcommand{\njut@value@nlc@reviewere}{#1}}
 \newcommand*{\nlcdate}[1]{%
   \renewcommand{\njut@value@nlc@date}{#1}}
 \renewcommand*{\title}[1]{%
@@ -762,6 +764,7 @@
   \renewcommand{\njut@value@en@institute}{#1}}
 \newcommand*{\englishdate}[1]{%
   \renewcommand{\njut@value@en@date}{#1}}
+\newlength{\njut@coverbacklabelwidth}
 \newcommand{\njut@underline}[2][\textwidth]%
            {\CJKunderline{\makebox[#1]{#2}}}
 \def\njutunderline{\@ifnextchar[\njut@underline\CJKunderline}
@@ -877,14 +880,26 @@
   \ifnjut@backinfo
     \clearpage
     \thispagestyle{empty}
-    \vspace*{\stretch{1}}
+    \vspace*{\stretch{2}}
     {\bf\kaishu\zihao{-3}
-    \noindent
-    \begin{tabular}{p{6.2em}l}
-    \makebox[6em][s]{\njut@cap@coverback@studentnum}： &\njut@value@studentnum\\
-    \makebox[6em][s]{\njut@cap@coverback@defenddate}： &\njut@value@defenddate\\
-    \makebox[6em][s]{\njut@cap@coverback@supervisor}： &\njut@cap@coverback@sign\\
-    \end{tabular}}
+    \settowidth{\njut@coverbacklabelwidth}{\njut@cap@coverback@chairman}
+    \begin{center}
+    \setlength{\tabcolsep}{0pt}
+    \renewcommand{\arraystretch}{1.9}
+    \begin{tabular}{@{}p{\njut@coverbacklabelwidth}@{}p{11em}@{}}
+    \makebox[\njut@coverbacklabelwidth][l]{\njut@cap@coverback@chairman} & \njutunderline[11em]{\njut@value@nlc@chairman}\\
+    \makebox[\njut@coverbacklabelwidth][s]{\njut@cap@coverback@reviewer} & \njutunderline[11em]{\njut@value@nlc@reviewera}\\
+     & \njutunderline[11em]{\njut@value@nlc@reviewerb}\\
+     & \njutunderline[11em]{\njut@value@nlc@reviewerc}\\
+     & \njutunderline[11em]{\njut@value@nlc@reviewerd}\\
+     & \njutunderline[11em]{\njut@value@nlc@reviewere}\\[1.2em]
+    \makebox[\njut@coverbacklabelwidth][s]{\njut@cap@coverback@defenddate} & \hspace{1.2em}\njut@value@defenddate\\
+    \end{tabular}
+    \end{center}
+    \vspace*{\stretch{2}}
+    \noindent\hspace*{1.2em}\makebox[7em][l]{\njut@cap@coverback@studentsign：}\par
+    \vspace{1.6em}
+    \noindent\hspace*{1.2em}\makebox[7em][l]{\njut@cap@coverback@supervisorsign：}\par}
     \clearpage
   \else
     \cleardoublepage
