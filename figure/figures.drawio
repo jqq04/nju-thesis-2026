@@ -1,4 +1,4 @@
-<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36" pages="20">
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36" pages="21">
   <diagram id="remXLEl2kWC0B1G6v7ud" name="RocketMQ架构图">
     <mxGraphModel dx="1550" dy="1030" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
@@ -2006,6 +2006,68 @@
           <mxGeometry height="60" width="120" x="330" y="150" as="geometry" />
         </mxCell>
         <mxCell id="N52dfQ6Zhqj5KEl415LA-6" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=16;" value="结束" vertex="1">
+          <mxGeometry height="60" width="120" x="1060" y="480" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram name="覆盖度检测流程图" id="UTNUiHrmhyy5whwp22Kf">
+    <mxGraphModel dx="1550" dy="1030" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="Pevu6F3l-6DThiinJwDO-0" />
+        <mxCell id="Pevu6F3l-6DThiinJwDO-1" parent="Pevu6F3l-6DThiinJwDO-0" />
+        <mxCell id="Pevu6F3l-6DThiinJwDO-2" parent="Pevu6F3l-6DThiinJwDO-1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=16;" value="线上用户Query" vertex="1">
+          <mxGeometry height="80" width="260" x="260" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="Pevu6F3l-6DThiinJwDO-3" parent="Pevu6F3l-6DThiinJwDO-1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=16;" value="过滤出&lt;div&gt;”知识问答”类Query&lt;/div&gt;" vertex="1">
+          <mxGeometry height="90" width="260" x="580" y="235" as="geometry" />
+        </mxCell>
+        <mxCell id="Pevu6F3l-6DThiinJwDO-4" edge="1" parent="Pevu6F3l-6DThiinJwDO-1" source="Pevu6F3l-6DThiinJwDO-5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;fontSize=16;" target="Pevu6F3l-6DThiinJwDO-6">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1030" y="345" />
+              <mxPoint x="414" y="345" />
+            </Array>
+            <mxPoint x="1010" y="330" as="sourcePoint" />
+            <mxPoint x="413.99703703703693" y="375" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Pevu6F3l-6DThiinJwDO-5" parent="Pevu6F3l-6DThiinJwDO-1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=16;" value="聚类相似Query&lt;div&gt;选取代表性Query&lt;/div&gt;" vertex="1">
+          <mxGeometry height="90" width="280" x="890" y="235" as="geometry" />
+        </mxCell>
+        <mxCell id="Pevu6F3l-6DThiinJwDO-6" parent="Pevu6F3l-6DThiinJwDO-1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=16;" value="召回粗筛" vertex="1">
+          <mxGeometry height="90" width="320" x="254" y="370" as="geometry" />
+        </mxCell>
+        <mxCell id="Pevu6F3l-6DThiinJwDO-7" parent="Pevu6F3l-6DThiinJwDO-1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=16;" value="大模型精判" vertex="1">
+          <mxGeometry height="80" width="260" x="660" y="375" as="geometry" />
+        </mxCell>
+        <mxCell id="Pevu6F3l-6DThiinJwDO-8" edge="1" parent="Pevu6F3l-6DThiinJwDO-1" source="Pevu6F3l-6DThiinJwDO-9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=16;" target="Pevu6F3l-6DThiinJwDO-16" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Pevu6F3l-6DThiinJwDO-9" parent="Pevu6F3l-6DThiinJwDO-1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=16;" value="生成治理任务&lt;br&gt;（覆盖度子任务）" vertex="1">
+          <mxGeometry height="80" width="280" x="980" y="375" as="geometry" />
+        </mxCell>
+        <mxCell id="Pevu6F3l-6DThiinJwDO-10" edge="1" parent="Pevu6F3l-6DThiinJwDO-1" source="Pevu6F3l-6DThiinJwDO-2" style="endArrow=block;html=1;rounded=0;strokeWidth=1;fontSize=16;" target="Pevu6F3l-6DThiinJwDO-3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Pevu6F3l-6DThiinJwDO-11" edge="1" parent="Pevu6F3l-6DThiinJwDO-1" source="Pevu6F3l-6DThiinJwDO-3" style="endArrow=block;html=1;rounded=0;strokeWidth=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontSize=16;" target="Pevu6F3l-6DThiinJwDO-5">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="860" y="280" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Pevu6F3l-6DThiinJwDO-12" edge="1" parent="Pevu6F3l-6DThiinJwDO-1" source="Pevu6F3l-6DThiinJwDO-6" style="endArrow=block;html=1;rounded=0;strokeWidth=1;fontSize=16;" target="Pevu6F3l-6DThiinJwDO-7">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Pevu6F3l-6DThiinJwDO-13" edge="1" parent="Pevu6F3l-6DThiinJwDO-1" source="Pevu6F3l-6DThiinJwDO-7" style="endArrow=block;html=1;rounded=0;strokeWidth=1;fontSize=16;" target="Pevu6F3l-6DThiinJwDO-9">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Pevu6F3l-6DThiinJwDO-14" edge="1" parent="Pevu6F3l-6DThiinJwDO-1" source="Pevu6F3l-6DThiinJwDO-15" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=16;" target="Pevu6F3l-6DThiinJwDO-2" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Pevu6F3l-6DThiinJwDO-15" parent="Pevu6F3l-6DThiinJwDO-1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=16;" value="开始" vertex="1">
+          <mxGeometry height="60" width="120" x="330" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="Pevu6F3l-6DThiinJwDO-16" parent="Pevu6F3l-6DThiinJwDO-1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=16;" value="结束" vertex="1">
           <mxGeometry height="60" width="120" x="1060" y="480" as="geometry" />
         </mxCell>
       </root>
