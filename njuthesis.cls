@@ -865,8 +865,6 @@
     \ifdefempty{\njut@cap@institute@name}{}{\includegraphics[height=1.5cm]{\njut@cap@institute@name} \\}
     \vskip 3cm
     {\bf\kaishu\zihao{1}\makebox[10em][s]{\njut@cap@cover@thesis}}\\
-    \vskip 5mm
-    {\bf\kaishu\zihao{1}（\makebox[7em][s]{\njut@cap@cover@apply}）}\\
     \vskip\stretch{1}
     {\bgroup
     \kaishu\zihao{3} %中文封面字号

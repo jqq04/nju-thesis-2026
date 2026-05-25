@@ -1,5 +1,5 @@
 
-\chapter{内容应用与管理平台的实现}
+\chapter{内容资产管理平台的实现}
 \section{内容管理模块的实现}
 \label{sec:impl_cm}
 
@@ -489,7 +489,7 @@ public List<SliceHit> rank(List<List<SliceHit>> channelHits, int topn) {
   \begin{minipage}{0.98\linewidth}
     \begin{lstlisting}[basicstyle=\ttfamily\footnotesize,numbers=left,numberstyle=\tiny,frame=single,breaklines=true,breakatwhitespace=false,columns=fullflexible,keepspaces=true]
 # 角色
-你是商业化业务知识助手，负责将用户问题改写为更易检索的表达。
+你是广告业务知识助手，负责将用户问题改写为更易检索的表达。
 
 # 输入
 <context>
@@ -559,7 +559,7 @@ public EvidencePack retrieveEvidence(AskReq req) {
   \begin{minipage}{0.98\linewidth}
     \begin{lstlisting}[basicstyle=\ttfamily\footnotesize,numbers=left,numberstyle=\tiny,frame=single,breaklines=true,breakatwhitespace=false,columns=fullflexible,keepspaces=true]
 # system prompt (excerpt)
-你是商业化业务知识问答专家，擅长解答广告/电商/商业化相关问题。
+你是广告业务知识问答专家，擅长解答广告业务相关问题。
 回答必须遵守：
 1) 必须基于参考资料作答，禁止编造数据、结论与规则，禁止出现矛盾结论
 2) 禁止偏袒篇幅较长或位置靠前的资料，需要综合判断相关性
